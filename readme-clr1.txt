@@ -18,7 +18,7 @@ To create the AppWebApi
 2. From Azure Data Studio you can now connect to the database
    Use connection string from user secrets:
    connection string corresponding to Tag
-   "sql-creditcards.<db_type>.docker.root"
+   "sql-attractions.<db_type>.docker.root"
 
 3. Run AppWebApi with or without debugger
 

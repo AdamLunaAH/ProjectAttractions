@@ -36,7 +36,7 @@ if [[ $2 != "docker" && $2 != "azure" ]]; then
 fi
 
 #set UseDataSetWithTag to "<db_name>.<db_type>.<env>" in appsettings.json
-sed -i '' 's/"UseDataSetWithTag":[[:space:]]*"[^"]*"/"UseDataSetWithTag": "sql-creditcards.'$1'.'$2'"/g' ../AppWebApi/appsettings.json
+sed -i '' 's/"UseDataSetWithTag":[[:space:]]*"[^"]*"/"UseDataSetWithTag": "sql-attractions.'$1'.'$2'"/g' ../AppWebApi/appsettings.json
 
 #set DefaultDataUser to "root"
 sed -i '' 's/"DefaultDataUser":[[:space:]]*"[^"]*"/"DefaultDataUser": "root"/g' ../AppWebApi/appsettings.json

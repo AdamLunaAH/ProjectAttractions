@@ -30,7 +30,7 @@ switch ($DatabaseType) {
 #set UseDataSetWithTag to "<db_name>.<db_type>.<env>" in appsettings.json
 $AppSettingsPath = "..\AppWebApi\appsettings.json"
 $pattern = '"UseDataSetWithTag"\s*:\s*"[^"]*"'
-$replacement = '"UseDataSetWithTag": "sql-creditcards.' + $DatabaseType + '.' + $DeploymentTarget + '"'
+$replacement = '"UseDataSetWithTag": "sql-attractions.' + $DatabaseType + '.' + $DeploymentTarget + '"'
 (Get-Content -Path $AppSettingsPath) -replace $pattern, $replacement | Set-Content -Path $AppSettingsPath
 
 #set default data user to root in appsettings.json so Users can be seeded

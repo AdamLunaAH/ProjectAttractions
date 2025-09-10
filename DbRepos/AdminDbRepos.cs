@@ -26,8 +26,14 @@ public class AdminDbRepos
         // _dbContext.CreditCards.RemoveRange(_dbContext.CreditCards);
 
         //Seeding new creditcards into the database
-        var creditcards = seeder.ItemsToList<CreditCardDbM>(1000);
+        var creditcards = seeder.ItemsToList<CreditCardDbM>(10);
         _dbContext.CreditCards.AddRange(creditcards);
+
+        var attractions = seeder.ItemsToList<AttractionsDbM>(10);
+        _dbContext.Attractions.AddRange(attractions);
+
+        var attractionAddresses = seeder.ItemsToList<AttractionAddressesDbM>(10);
+        _dbContext.AttractionAddresses.AddRange(attractionAddresses);
 
         //Save changes to the database
         await _dbContext.SaveChangesAsync();
