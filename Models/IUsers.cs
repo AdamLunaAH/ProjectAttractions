@@ -7,5 +7,7 @@ public interface IUsers
     public string LastName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    
+
+    public List<IReviews> Reviews { get; set; }
+
 }

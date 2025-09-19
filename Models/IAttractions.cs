@@ -10,4 +10,6 @@ public interface IAttractions
     public string AttractionDescription { get; set; }
     // public string AttractionPlace { get; set; }
     public IAttractionAddresses AttractionAddresses { get; set; }
+    public List<ICategories> Categories { get; set; }
+    public List<IReviews> Reviews { get; set; }
 }

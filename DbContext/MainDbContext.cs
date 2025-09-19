@@ -6,6 +6,7 @@ using Configuration;
 using DbModels;
 using Microsoft.Extensions.Hosting.Internal;
 using DbContext.Extensions;
+using Models;
 
 namespace DbContext;
 
@@ -13,7 +14,7 @@ namespace DbContext;
 //used for all Database connection as well as for EFC CodeFirst migration and database updates
 public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
-        DatabaseConnections _databaseConnections;
+    DatabaseConnections _databaseConnections;
 
 #if DEBUG
     // remove password from connection string in debug mode
@@ -24,9 +25,16 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 #endif
 
     #region C# model of database tables
-    public DbSet<CreditCardDbM> CreditCards { get; set; }
+    // public DbSet<CreditCardDbM> CreditCards { get; set; }
     public DbSet<AttractionsDbM> Attractions { get; set; }
-    public DbSet<AttractionAddressesDbM> AttractionAddresses { get; set; }
+    public DbSet<AttractionAddressDbM> AttractionAddresses { get; set; }
+    public DbSet<CategoriesDbM> Categories
+    {
+        get; set;
+    }
+    // public DbSet<AttractionCategoriesDbM> AttractionCategories { get; set; }
+    public DbSet<UsersDbM> Users { get; set; }
+    public DbSet<ReviewsDbM> Reviews { get; set; }
     #endregion
 
     #region constructors
@@ -38,13 +46,112 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     #endregion
 
     //Here we can modify the migration building
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         #region override modelbuilder
-        #endregion
+        // Users
+        modelBuilder.Entity<UsersDbM>(entity =>
+        {
+            entity.ToTable("UsersDb", schema: "supusr");
+
+            entity.HasKey(e => e.UserId);
+
+            entity.HasIndex(e => new { e.FirstName, e.LastName });
+            entity.HasIndex(e => new { e.LastName, e.FirstName });
+
+            // One User -> Many Reviews
+            entity.HasMany(u => u.ReviewsDbM)
+                    .WithOne(r => r.UsersDbM)
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Categories
+        modelBuilder.Entity<CategoriesDbM>(entity =>
+        {
+            entity.ToTable("CategoriesDb", schema: "supusr");
+
+            entity.HasKey(e => e.CategoryId);
+
+            entity.HasIndex(e => e.CategoryName).IsUnique();
+        });
+
+        // AttractionAddresses
+        modelBuilder.Entity<AttractionAddressDbM>(entity =>
+        {
+            entity.ToTable("AttractionAddressesDb", schema: "supusr");
+
+            entity.HasKey(e => e.AddressId);
+
+            entity.HasIndex(e => new { e.StreetAddress, e.ZipCode, e.CityPlace, e.Country });
+        });
+
+        // Attractions
+        modelBuilder.Entity<AttractionsDbM>(entity =>
+        {
+            entity.ToTable("AttractionsDb", schema: "supusr");
+
+            entity.HasKey(e => e.AttractionId);
+
+            entity.HasIndex(e => new { e.AttractionName, e.AttractionDescription, e.AddressId })
+                    .IsUnique();
+
+            // One Address -> Many Attractions
+            entity.HasOne(a => a.AttractionAddressDbM)
+                    .WithMany()
+                    .HasForeignKey(a => a.AddressId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+            // Many Attractions <-> Many Categories (join table)
+            entity.HasMany(a => a.CategoriesDbM)
+                    .WithMany(c => c.AttractionsDbM)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "AttractionCategories",
+                        j => j.HasOne<CategoriesDbM>()
+                            .WithMany()
+                            .HasForeignKey("CategoryId")
+                            .OnDelete(DeleteBehavior.Cascade),
+                        j => j.HasOne<AttractionsDbM>()
+                            .WithMany()
+                            .HasForeignKey("AttractionId")
+                            .OnDelete(DeleteBehavior.Cascade),
+                        j =>
+                        {
+                            j.ToTable("AttractionCategories", schema: "supusr");
+                            j.HasKey("AttractionId", "CategoryId");
+                        });
+
+            // One Attraction -> Many Reviews
+            entity.HasMany(a => a.ReviewsDbM)
+                    .WithOne(r => r.AttractionsDbM)
+                    .HasForeignKey(r => r.AttractionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Reviews
+        modelBuilder.Entity<ReviewsDbM>(entity =>
+        {
+            entity.ToTable("ReviewsDb", schema: "supusr");
+
+            entity.HasKey(e => e.ReviewId);
+
+            entity.HasIndex(e => new { e.ReviewScore, e.ReviewText });
+            entity.HasIndex(e => new { e.AttractionId, e.UserId }).IsUnique();
+
+
+            // Foreign keys configured in Users & Attractions
+        });
 
         base.OnModelCreating(modelBuilder);
+        #endregion
     }
+
+
+
+
+
 
     #region DbContext for some popular databases
     public class SqlServerDbContext : MainDbContext
@@ -113,7 +220,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     public class PostgresDbContext : MainDbContext
     {
         public PostgresDbContext() { }
-        public PostgresDbContext(DbContextOptions options) : base(options, null){ }
+        public PostgresDbContext(DbContextOptions options) : base(options, null) { }
 
 
         //Used only for CodeFirst Database Migration

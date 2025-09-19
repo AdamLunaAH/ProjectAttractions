@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 namespace AppWebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/[action]")]   
+    [Route("api/[controller]/[action]")]
     public class AdminController : Controller
     {
         readonly DatabaseConnections _dbConnections;
@@ -39,7 +39,7 @@ namespace AppWebApi.Controllers
                 _logger.LogError($"{nameof(Environment)}: {ex.Message}");
                 return BadRequest(ex.Message);
             }
-         }
+        }
 
         [HttpGet()]
         [ActionName("Version")]

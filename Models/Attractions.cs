@@ -10,11 +10,31 @@ public class Attractions : IAttractions, ISeed<Attractions>
     // public virtual string AttractionPlace { get; set; }
     public virtual IAttractionAddresses AttractionAddresses { get; set; } = null;
 
-    public bool Seeded { get; set; } = false;
+    public virtual List<ICategories> Categories { get; set; } = null;
+    public virtual List<IReviews> Reviews { get; set; } = null;
+
+
 
     #region constructors
     public Attractions() { }
-    public Attractions Seed(SeedGenerator seeder)
+
+    public Attractions(Attractions org)
+    {
+        this.Seeded = org.Seeded;
+
+        this.AttractionId = org.AttractionId;
+        this.AttractionName = org.AttractionName;
+        this.AttractionDescription = org.AttractionDescription;
+        this.AttractionAddresses = (org.AttractionAddresses != null) ? new AttractionAddresses((AttractionAddresses)org.AttractionAddresses) : null;
+        this.Categories = (org.Categories != null) ? org.Categories.Select(p => new Categories((Categories)p)).ToList<ICategories>() : null;
+        this.Reviews = (org.Reviews != null) ? org.Reviews.Select(p => new Reviews((Reviews)p)).ToList<IReviews>() : null;
+
+    }
+    #endregion
+
+    #region randomly seed this instance
+    public bool Seeded { get; set; } = false;
+    public virtual Attractions Seed(SeedGenerator seeder)
     {
         Seeded = true;
         AttractionId = Guid.NewGuid();
@@ -27,7 +47,9 @@ public class Attractions : IAttractions, ISeed<Attractions>
         // currently set a random full name from seeder
         AttractionDescription = seeder.FullName;
 
-        this.AttractionAddresses = new AttractionAddresses();
+        AttractionAddresses = new AttractionAddresses();
+
+        // Categories = new List<ICategories>();
 
         // this.AttractionAddresses = (seeder.Address != null) ? new AttractionAddresses().Seed(seeder) : null;
 

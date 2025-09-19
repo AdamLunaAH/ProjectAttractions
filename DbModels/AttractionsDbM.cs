@@ -8,7 +8,10 @@ using Models;
 
 namespace DbModels;
 
-public class AttractionsDbM : Attractions, ISeed<AttractionsDbM>
+[Table("AttractionsDb", Schema = "supusr")]
+// change to true later
+[Index(nameof(AttractionName), nameof(AttractionDescription), nameof(AddressId), IsUnique = true)]
+sealed public class AttractionsDbM : Attractions, ISeed<AttractionsDbM>
 {
     [Key]
     public override Guid AttractionId { get; set; }
@@ -18,31 +21,52 @@ public class AttractionsDbM : Attractions, ISeed<AttractionsDbM>
     // public virtual string AttractionPlace { get; set; }
 
     // public Guid? AddressId { get; set; }
-    [NotMapped]
-        public override IAttractionAddresses AttractionAddresses { get; set; }
+    [JsonIgnore]
+    public Guid? AddressId { get; set; }
 
     #region correcting the Navigation properties migration error caused by using interfaces
-    // [NotMapped]
-    // public override IAttractionAddresses AttractionAddresses { get => AttractionAddressesDbM; set => new NotImplementedException(); }
+    [NotMapped]
+    public override IAttractionAddresses AttractionAddresses { get => AttractionAddressDbM; set => new NotImplementedException(); }
 
     [JsonIgnore]
-    //[ForeignKey("AddressId")]
-    [NotMapped]
-    public AttractionAddressesDbM AttractionAddressesDbM { get; set; } = null;    //This is implemented in the database table
+    // [ForeignKey("AddressId")]
+    public AttractionAddressDbM AttractionAddressDbM { get; set; } = null;    //This is implemented in the database table
+    #endregion
 
+    #region implementing entity Navigation properties when model is using interfaces in the relationships between models
+    [NotMapped]
+    public override List<ICategories> Categories { get => CategoriesDbM?.ToList<ICategories>(); set => new NotImplementedException(); }
+    [JsonIgnore]
+    public List<CategoriesDbM> CategoriesDbM { get; set; } = null;
+    #endregion
+
+    #region implementing entity Navigation properties when model is using interfaces in the relationships between models
+    [NotMapped]
+    public override List<IReviews> Reviews { get => ReviewsDbM?.ToList<IReviews>(); set => new NotImplementedException(); }
+    [JsonIgnore]
+    public List<ReviewsDbM> ReviewsDbM { get; set; } = null;
+    #endregion
+
+    #region implementing IEquatable
+    public bool Equals(AttractionsDbM other) => (other != null) && ((AttractionName, AttractionAddresses) ==
+        (other.AttractionName, other.AttractionAddresses));
+
+    public override bool Equals(object obj) => Equals(obj as AttractionsDbM);
+    public override int GetHashCode() => (AttractionName, AttractionAddresses).GetHashCode();
+    #endregion
+
+    #region randomly seed this instance
+    public override AttractionsDbM Seed(SeedGenerator seeder)
+    {
+        base.Seed(seeder);
+        return this;
+    }
     #endregion
 
     #region constructors
     public AttractionsDbM() { }
     #endregion
 
-
-
-    public new AttractionsDbM Seed(SeedGenerator seeder)
-    {
-        base.Seed(seeder);
-        return this;
-    }
 }
 
 // using Seido.Utilities.SeedGenerator;

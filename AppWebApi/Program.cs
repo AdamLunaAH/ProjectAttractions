@@ -2,7 +2,7 @@
 using Configuration.Extensions;
 using DbContext.Extensions;
 using DbRepos;
-
+using Models;
 using Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,8 +59,22 @@ builder.Services.AddInMemoryLogger();
 
 //Inject DbRepos and Services
 builder.Services.AddScoped<AdminDbRepos>();
+builder.Services.AddScoped<AttractionAddressesDbRepos>();
+builder.Services.AddScoped<AttractionsDbRepos>();
+builder.Services.AddScoped<CategoriesDbRepos>();
+builder.Services.AddScoped<UsersDbRepos>();
+builder.Services.AddScoped<ReviewsDbRepos>();
+
+
 
 builder.Services.AddScoped<IAdminService, AdminServiceDb>();
+builder.Services.AddScoped<IAttractionAddressesService, AttractionAddressesServiceDb>();
+builder.Services.AddScoped<IAttractionsService, AttractionsServiceDb>();
+builder.Services.AddScoped<ICategoriesService, CategoriesServiceDb>();
+builder.Services.AddScoped<IUsersService, UsersServiceDb>();
+builder.Services.AddScoped<IReviewsService, ReviewsServiceDb>();
+
+
 
 var app = builder.Build();
 
@@ -76,7 +90,7 @@ var app = builder.Build();
 }
 
 app.UseHttpsRedirection();
-app.UseCors(); 
+app.UseCors();
 
 app.UseAuthorization();
 app.MapControllers();

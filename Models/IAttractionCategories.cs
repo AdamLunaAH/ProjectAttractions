@@ -5,6 +5,6 @@ namespace Models;
 public interface IAttractionCategories
 {
     public Guid AttractionCategoryId { get; set; }
-    public Guid AttractionId { get; set; }
-    public Guid CategoryId { get; set; }
+    public IAttractions Attractions { get; set; }
+    public ICategories Categories { get; set; }
 }

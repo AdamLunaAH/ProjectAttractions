@@ -12,13 +12,37 @@ public class AttractionAddresses : IAttractionAddresses, ISeed<AttractionAddress
 
     public override string ToString() => $"{StreetAddress}, {ZipCode} {CityPlace}, {Country}";
 
-    #region Seeder
+    public virtual IAttractions Attractions { get; set; } = null;
+
+
+
+    #region implementing IEquatable
+    public bool Equals(AttractionAddresses other) => (other != null) && ((this.StreetAddress, this.ZipCode, this.CityPlace, this.Country) ==
+        (other.StreetAddress, other.ZipCode, other.CityPlace, other.Country));
+
+    public override bool Equals(object obj) => Equals(obj as AttractionAddresses);
+    public override int GetHashCode() => (StreetAddress, ZipCode, CityPlace, Country).GetHashCode();
+    #endregion
+
+    #region randomly seed this instance
     public bool Seeded { get; set; } = false;
 
-    #endregion
+    #region constructor
     public AttractionAddresses() { }
 
-    public AttractionAddresses Seed(SeedGenerator seeder)
+    public AttractionAddresses(AttractionAddresses org)
+    {
+        this.Seeded = org.Seeded;
+        this.AddressId = org.AddressId;
+        this.StreetAddress = org.StreetAddress;
+        this.ZipCode = org.ZipCode;
+        this.CityPlace = org.CityPlace;
+        this.Country = org.Country;
+    }
+
+    #endregion
+
+    public virtual AttractionAddresses Seed(SeedGenerator seeder)
     {
         Seeded = true;
         AddressId = Guid.NewGuid();
@@ -29,14 +53,9 @@ public class AttractionAddresses : IAttractionAddresses, ISeed<AttractionAddress
 
         return this;
     }
-
-    #region implementing IEquatable
-    public bool Equals(AttractionAddresses other) => (other != null) && ((this.StreetAddress, this.ZipCode, this.CityPlace, this.Country) ==
-        (other.StreetAddress, other.ZipCode, other.CityPlace, other.Country));
-
-    public override bool Equals(object obj) => Equals(obj as AttractionAddresses);
-    public override int GetHashCode() => (StreetAddress, ZipCode, CityPlace, Country).GetHashCode();
     #endregion
+
+
 }
 
 
