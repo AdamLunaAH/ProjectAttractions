@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 using Seido.Utilities.SeedGenerator;
 using Models;
+using Models.DTO;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DbModels;
@@ -47,7 +48,7 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
     public override string ReviewText { get; set; }
 
     public override DateTime CreatedAt { get; set; }
-    public override DateTime UpdatedAt { get; set; }
+    // public override DateTime UpdatedaAt { get; set; }
 
 
 
@@ -58,14 +59,32 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
     public override int GetHashCode() => (Users, Attractions, ReviewScore, CreatedAt).GetHashCode();
     #endregion
 
-    #region constructors
-    public ReviewsDbM() { }
-    #endregion
+
 
     public override ReviewsDbM Seed(SeedGenerator seeder)
     {
         base.Seed(seeder);
         return this;
     }
+
+    #region Update from DTO
+    public ReviewsDbM UpdateFromDTO(ReviewsCuDto org)
+    {
+        ReviewScore = org.ReviewScore;
+        ReviewText = org.ReviewText;
+
+        return this;
+    }
+    #endregion
+
+    #region constructors
+    public ReviewsDbM() { }
+    public ReviewsDbM(ReviewsCuDto org)
+    {
+        ReviewId = Guid.NewGuid();
+        UpdateFromDTO(org);
+    }
+
+    #endregion
 
 }

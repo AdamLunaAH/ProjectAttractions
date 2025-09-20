@@ -8,6 +8,5 @@ public interface IReviews
     public int ReviewScore { get; set; }
     public string ReviewText { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
 
 }

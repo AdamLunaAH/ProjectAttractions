@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 using Seido.Utilities.SeedGenerator;
 using Models;
-// using Models.DTO;
+using Models.DTO;
 
 namespace DbModels;
 
@@ -13,7 +13,7 @@ namespace DbModels;
 [Index(nameof(StreetAddress), nameof(ZipCode), nameof(CityPlace), nameof(Country), IsUnique = false)]
 
 
-sealed public class AttractionAddressDbM : AttractionAddresses, ISeed<AttractionAddressDbM>, IEquatable<AttractionAddressDbM>
+sealed public class AttractionAddressesDbM : AttractionAddresses, ISeed<AttractionAddressesDbM>, IEquatable<AttractionAddressesDbM>
 {
     [Key]
     public override Guid AddressId { get; set; }
@@ -28,10 +28,10 @@ sealed public class AttractionAddressDbM : AttractionAddresses, ISeed<Attraction
     public override string Country { get; set; }
 
     #region implementing IEquatable
-    public bool Equals(AttractionAddressDbM other) => (other != null) && ((StreetAddress, ZipCode, CityPlace, Country) ==
+    public bool Equals(AttractionAddressesDbM other) => (other != null) && ((StreetAddress, ZipCode, CityPlace, Country) ==
         (other.StreetAddress, other.ZipCode, other.CityPlace, other.Country));
 
-    public override bool Equals(object obj) => Equals(obj as AttractionAddressDbM);
+    public override bool Equals(object obj) => Equals(obj as AttractionAddressesDbM);
     public override int GetHashCode() => (StreetAddress, ZipCode, CityPlace, Country).GetHashCode();
     #endregion
 
@@ -42,24 +42,48 @@ sealed public class AttractionAddressDbM : AttractionAddresses, ISeed<Attraction
     // [ForeignKey(nameof(AddressId))]
     // public Guid AttractionDbMId { get; set; }
     [NotMapped] //removed from EFC
-    public override IAttractions Attractions { get => AttractionsDbM; set => new NotImplementedException(); }
+    public override List<IAttractions> Attractions
+{
+    get => AttractionsDbM?.Cast<IAttractions>().ToList();
+    set => throw new NotImplementedException();
+}
+    // public override IAttractions Attractions { get => AttractionsDbM; set => new NotImplementedException(); }
     // public override List<IAttractions> Attractions { get => AttractionsDbM?.ToList<IAttractions>(); set => new NotImplementedException(); }
 
     [JsonIgnore] //do not include in any json response from the WebApi
-    public AttractionsDbM AttractionsDbM { get; set; } = null;
+    public List<AttractionsDbM> AttractionsDbM { get; set; } = new();
+    // public AttractionsDbM AttractionsDbM { get; set; } = null;
     // public List<AttractionsDbM> AttractionsDbM { get; set; } = null;
     #endregion
 
     #region randomly seed this instance
-    public override AttractionAddressDbM Seed(SeedGenerator seeder)
+    public override AttractionAddressesDbM Seed(SeedGenerator seeder)
     {
         base.Seed(seeder);
         return this;
     }
     #endregion
 
+    #region Update from DTO
+    public AttractionAddressesDbM UpdateFromDTO(AttractionAddressesCuDto org)
+    {
+        if (org == null) return null;
+        StreetAddress = org.StreetAddress;
+        ZipCode = org.ZipCode;
+        CityPlace = org.CityPlace;
+        Country = org.Country;
+
+        return this;
+    }
+    #endregion
+
     #region constructors
-    public AttractionAddressDbM() { }
+    public AttractionAddressesDbM() { }
+    public AttractionAddressesDbM(AttractionAddressesCuDto org)
+    {
+        AddressId = Guid.NewGuid();
+        UpdateFromDTO(org);
+    }
     #endregion
 
 }

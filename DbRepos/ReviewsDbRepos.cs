@@ -65,4 +65,179 @@ public class ReviewsDbRepos
         };
         return ret;
     }
+
+    public async Task<ResponseItemDto<IReviews>> ReadReviewAsync(Guid id, bool flat)
+    {
+        if (!flat)
+        {
+            //make sure the model is fully populated, try without include.
+            //remove tracking for all read operations for performance and to avoid recursion/circular access
+            var query = _dbContext.Reviews.AsNoTracking()
+                .Include(i => i.UsersDbM)
+                .Include(i => i.AttractionsDbM)
+                .Where(i => i.ReviewId == id);
+
+            return new ResponseItemDto<IReviews>()
+            {
+#if DEBUG
+                ConnectionString = _dbContext.dbConnection,
+#endif
+
+                Item = await query.FirstOrDefaultAsync<IReviews>()
+            };
+        }
+        else
+        {
+            //Not fully populated, compare the SQL Statements generated
+            //remove tracking for all read operations for performance and to avoid recursion/circular access
+            var query = _dbContext.Reviews.AsNoTracking()
+                .Include(i => i.UsersDbM)
+                .Include(i => i.AttractionsDbM);
+
+            return new ResponseItemDto<IReviews>()
+            {
+#if DEBUG
+                ConnectionString = _dbContext.dbConnection,
+#endif
+
+                Item = await query.FirstOrDefaultAsync<IReviews>()
+            };
+        }
+    }
+
+
+    public async Task<ResponseItemDto<IReviews>> DeleteReviewAsync(Guid id)
+    {
+        var query1 = _dbContext.Reviews
+            .Where(i => i.ReviewId == id);
+
+        var item = await query1.FirstOrDefaultAsync<ReviewsDbM>();
+
+        //If the item does not exists
+        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+
+        //delete in the database model
+        _dbContext.Reviews.Remove(item);
+
+        //write to database in a UoW
+        await _dbContext.SaveChangesAsync();
+        return new ResponseItemDto<IReviews>()
+        {
+#if DEBUG
+            ConnectionString = _dbContext.dbConnection,
+#endif
+
+            Item = item
+        };
+    }
+
+    public async Task<ResponseItemDto<IReviews>> UpdateReviewAsync(ReviewsCuDto itemDto)
+    {
+        var query1 = _dbContext.Reviews
+            .Where(i => i.ReviewId == itemDto.ReviewId);
+        var item = await query1
+                // .Include(i => i.ReviewsDbM)
+                .FirstOrDefaultAsync<ReviewsDbM>();
+
+        //If the item does not exists
+        if (item == null) throw new ArgumentException($"Item {itemDto.ReviewId} is not existing");
+
+        //I cannot have duplicates in the Reviews table, so check that
+        var exists = await _dbContext.Reviews
+        .AnyAsync(r => r.UserId == itemDto.UserId &&
+                        r.AttractionId == itemDto.AttractionId &&
+                        r.ReviewId != itemDto.ReviewId);
+
+        if (exists)
+            throw new ArgumentException(
+                $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
+
+
+        //transfer any changes from DTO to database objects
+        //Update individual properties
+        item.UpdateFromDTO(itemDto);
+
+        //Update navigation properties
+        await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
+
+        //write to database model
+        _dbContext.Reviews.Update(item);
+
+        //write to database in a UoW
+        await _dbContext.SaveChangesAsync();
+
+        //return the updated item in non-flat mode
+        return await ReadReviewAsync(item.ReviewId, false);
+    }
+
+    public async Task<ResponseItemDto<IReviews>> CreateReviewAsync(ReviewsCuDto itemDto)
+    {
+        if (itemDto.ReviewId != Guid.Empty)
+            throw new ArgumentException($"{nameof(itemDto.ReviewId)} must be empty when creating a new object");
+
+        if (itemDto.UserId == null || itemDto.AttractionId == null)
+            throw new ArgumentException("UserId and AttractionId must be provided");
+
+        //I cannot have duplicates in the Reviews table, so check that
+        var exists = await _dbContext.Reviews
+            .AnyAsync(r => r.UserId == itemDto.UserId &&
+                            r.AttractionId == itemDto.AttractionId);
+
+        if (exists)
+            throw new ArgumentException(
+                $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
+
+
+        //transfer any changes from DTO to database objects
+        //Update individual properties
+        var item = new ReviewsDbM(itemDto);
+
+        //Update navigation properties
+        await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
+
+        //write to database model
+        _dbContext.Reviews.Add(item);
+
+        //write to database in a UoW
+        await _dbContext.SaveChangesAsync();
+
+        //return the updated item in non-flat mode
+        return await ReadReviewAsync(item.ReviewId, false);
+    }
+
+    private async Task navProp_ReviewsCUdto_to_ReviewsDbM(ReviewsCuDto itemDtoSrc, ReviewsDbM itemDst)
+    {
+        //update FriendsDbM from itemDto.FriendId
+        if (itemDtoSrc.UserId.HasValue)
+        {
+            var user = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.UserId == itemDtoSrc.UserId.Value);
+
+            if (user == null)
+                throw new ArgumentException(
+                    $"User id {itemDtoSrc.UserId} does not exist");
+
+            itemDst.UsersDbM = user;
+        }
+        else
+        {
+            itemDst.UsersDbM = null;
+        }
+
+        if (itemDtoSrc.AttractionId.HasValue)
+        {
+            var attraction = await _dbContext.Attractions
+                .FirstOrDefaultAsync(a => a.AttractionId == itemDtoSrc.AttractionId.Value);
+
+            if (attraction == null)
+                throw new ArgumentException(
+                    $"Attraction id {itemDtoSrc.AttractionId} does not exist");
+
+            itemDst.AttractionsDbM = attraction;
+        }
+        else
+        {
+            itemDst.AttractionsDbM = null;
+        }
+    }
 }

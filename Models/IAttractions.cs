@@ -12,4 +12,6 @@ public interface IAttractions
     public IAttractionAddresses AttractionAddresses { get; set; }
     public List<ICategories> Categories { get; set; }
     public List<IReviews> Reviews { get; set; }
+
+    
 }

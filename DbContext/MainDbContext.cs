@@ -27,7 +27,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     #region C# model of database tables
     // public DbSet<CreditCardDbM> CreditCards { get; set; }
     public DbSet<AttractionsDbM> Attractions { get; set; }
-    public DbSet<AttractionAddressDbM> AttractionAddresses { get; set; }
+    public DbSet<AttractionAddressesDbM> AttractionAddresses { get; set; }
     public DbSet<CategoriesDbM> Categories
     {
         get; set;
@@ -79,7 +79,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
         });
 
         // AttractionAddresses
-        modelBuilder.Entity<AttractionAddressDbM>(entity =>
+        modelBuilder.Entity<AttractionAddressesDbM>(entity =>
         {
             entity.ToTable("AttractionAddressesDb", schema: "supusr");
 
@@ -99,7 +99,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
                     .IsUnique();
 
             // One Address -> Many Attractions
-            entity.HasOne(a => a.AttractionAddressDbM)
+            entity.HasOne(a => a.AttractionAddressesDbM)
                     .WithMany()
                     .HasForeignKey(a => a.AddressId)
                     .OnDelete(DeleteBehavior.Restrict);

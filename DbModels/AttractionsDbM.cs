@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 using Seido.Utilities.SeedGenerator;
 using Models;
+using Models.DTO;
 
 namespace DbModels;
 
@@ -26,11 +27,11 @@ sealed public class AttractionsDbM : Attractions, ISeed<AttractionsDbM>
 
     #region correcting the Navigation properties migration error caused by using interfaces
     [NotMapped]
-    public override IAttractionAddresses AttractionAddresses { get => AttractionAddressDbM; set => new NotImplementedException(); }
+    public override IAttractionAddresses AttractionAddresses { get => AttractionAddressesDbM; set => new NotImplementedException(); }
 
     [JsonIgnore]
     // [ForeignKey("AddressId")]
-    public AttractionAddressDbM AttractionAddressDbM { get; set; } = null;    //This is implemented in the database table
+    public AttractionAddressesDbM AttractionAddressesDbM { get; set; } = null;    //This is implemented in the database table
     #endregion
 
     #region implementing entity Navigation properties when model is using interfaces in the relationships between models
@@ -63,8 +64,27 @@ sealed public class AttractionsDbM : Attractions, ISeed<AttractionsDbM>
     }
     #endregion
 
+    #region Update from DTO
+    public AttractionsDbM UpdateFromDTO(AttractionsCuDto org)
+    {
+        if (org == null) return null;
+
+        AttractionName = org.AttractionName;
+        AttractionDescription = org.AttractionDescription;
+        AddressId = org.AddressId;
+
+        return this;
+    }
+    #endregion
+
     #region constructors
     public AttractionsDbM() { }
+
+    public AttractionsDbM(AttractionsCuDto org)
+    {
+        AttractionId = Guid.NewGuid();
+        UpdateFromDTO(org);
+    }
     #endregion
 
 }

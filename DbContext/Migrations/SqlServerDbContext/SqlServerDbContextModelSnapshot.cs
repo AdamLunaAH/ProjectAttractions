@@ -146,9 +146,6 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -174,6 +171,9 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("varchar(200)");
+
                     b.Property<string>("FirstName")
                         .HasColumnType("varchar(200)");
 
@@ -182,9 +182,6 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("UserId");
 

@@ -8,5 +8,6 @@ public interface IAttractionAddresses
     public string CityPlace { get; set; }
     public string Country { get; set; }
 
-    public IAttractions Attractions { get; set; }
+    // public IAttractions Attractions { get; set; }
+    List<IAttractions> Attractions { get; set; }
 }

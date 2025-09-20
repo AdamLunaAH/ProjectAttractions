@@ -12,7 +12,8 @@ public class AttractionAddresses : IAttractionAddresses, ISeed<AttractionAddress
 
     public override string ToString() => $"{StreetAddress}, {ZipCode} {CityPlace}, {Country}";
 
-    public virtual IAttractions Attractions { get; set; } = null;
+    // public virtual IAttractions Attractions { get; set; } = null;
+    public virtual List<IAttractions> Attractions { get; set; } = null;
 
 
 

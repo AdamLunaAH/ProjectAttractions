@@ -37,7 +37,7 @@ namespace DbContext.Migrations.SqlServerDbContext
                     FirstName = table.Column<string>(type: "varchar(200)", nullable: true),
                     LastName = table.Column<string>(type: "varchar(200)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Email = table.Column<string>(type: "varchar(200)", nullable: true),
                     Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -124,7 +124,6 @@ namespace DbContext.Migrations.SqlServerDbContext
                     ReviewScore = table.Column<int>(type: "int", nullable: false),
                     ReviewText = table.Column<string>(type: "varchar(200)", maxLength: 250, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>

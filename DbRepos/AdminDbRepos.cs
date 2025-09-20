@@ -65,7 +65,7 @@ public class AdminDbRepos
 
 
 
-    public async Task SeedAsync()
+    public async Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAsync()
     {
         //Create a seeder
         var fn = Path.GetFullPath(_seedSource); var seeder = new SeedGenerator(fn);
@@ -118,7 +118,7 @@ public class AdminDbRepos
         _dbContext.Users.AddRange(users);
 
         // Addresses
-        var addresses = seeder.ItemsToList<AttractionAddressDbM>(10);
+        var addresses = seeder.ItemsToList<AttractionAddressesDbM>(10);
         _dbContext.AttractionAddresses.AddRange(addresses);
 
         // Categories
@@ -127,9 +127,9 @@ public class AdminDbRepos
         foreach (var attraction in attractions)
         {
             // Address
-            attraction.AttractionAddressDbM = seeder.FromList(addresses);
+            attraction.AttractionAddressesDbM = (seeder.Bool) ? seeder.FromList(addresses) : null;
 
-            //         attraction.AttractionAddressDbM =
+            //         attraction.AttractionAddressesDbM =
             // seeder.UniqueItemsPickedFromList(1, addresses);
 
 
@@ -181,7 +181,7 @@ public class AdminDbRepos
 
         // foreach (var attraction in attractions)
         // {
-        //     // attraction.AttractionAddressDbM = seeder.AttractionAddressDbM;
+        //     // attraction.AttractionAddressesDbM = seeder.AttractionAddressesDbM;
         //     attraction.CategoriesDbM = seeder.ItemsToList<CategoriesDbM>(seeder.Next(0, 3));
 
         // }
@@ -225,7 +225,7 @@ public class AdminDbRepos
             var id = e.Entity switch
             {
                 AttractionsDbM attractionsDbM => attractionsDbM.AttractionId,
-                AttractionAddressDbM attractionAddresses => attractionAddresses.AddressId,
+                AttractionAddressesDbM attractionAddresses => attractionAddresses.AddressId,
                 CategoriesDbM categoriesDbM => categoriesDbM.CategoryId,
                 UsersDbM usersDbM => usersDbM.UserId,
                 ReviewsDbM reviewsDbM => reviewsDbM.ReviewId,

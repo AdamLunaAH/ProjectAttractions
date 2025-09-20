@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 
 using Seido.Utilities.SeedGenerator;
 using Models;
+using Models.DTO;
+
 
 namespace DbModels;
 
@@ -32,14 +34,34 @@ public class CategoriesDbM : Categories, ISeed<CategoriesDbM>, IEquatable<Catego
     public override int GetHashCode() => (CategoryName, CategoryId).GetHashCode();
     #endregion
 
-    #region constructor
-    public CategoriesDbM() { }
-    #endregion
 
+    #region seeder
     public override CategoriesDbM Seed(SeedGenerator seeder)
     {
         base.Seed(seeder);
         return this;
     }
+    #endregion
 
+    #region Update from DTO
+    public CategoriesDbM UpdateFromDTO(CategoriesCuDto org)
+    {
+        if (org == null) return null;
+
+        CategoryName = org.CategoryName;
+
+        return this;
+    }
+    #endregion
+
+    #region constructor
+    public CategoriesDbM() { }
+
+    public CategoriesDbM(CategoriesCuDto org)
+    {
+        CategoryId = Guid.NewGuid();
+        UpdateFromDTO(org);
+    }
+
+    #endregion
 }
