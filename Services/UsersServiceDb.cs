@@ -30,6 +30,6 @@ public class UsersServiceDb : IUsersService
 
     public Task<ResponseItemDto<IUsers>> DeleteUserAsync(Guid id) => _repo.DeleteUserAsync(id);
     public Task<ResponseItemDto<IUsers>> UpdateUserAsync(UsersCuDto item) => _repo.UpdateUserAsync(item);
-    public Task<ResponseItemDto<IUsers>> CreateUserAsync(UsersCuDto item) => _repo.CreateUserAsync(item);
+    public Task<ResponseItemDto<IUsers>> CreateUserAsync(UserCreateDto item) => _repo.CreateUserAsync(item);
 }
 

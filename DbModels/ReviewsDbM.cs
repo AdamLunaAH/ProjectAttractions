@@ -19,8 +19,9 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
     [Key]
     public override Guid ReviewId { get; set; }
 
+    [Required]
     [JsonIgnore]
-    public Guid? UserId { get; set; }
+    public Guid UserId { get; set; }
 
     #region implementing entity Navigation properties when model is using interfaces in the relationships between models
     [NotMapped]
@@ -30,7 +31,8 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
     public UsersDbM UsersDbM { get; set; } = null;    //This is implemented in the database table
     #endregion
 
-    public Guid? AttractionId { get; set; }
+    [Required]
+    public Guid AttractionId { get; set; }
 
     #region implementing entity Navigation properties when model is using interfaces in the relationships between models
     [NotMapped]
@@ -70,6 +72,8 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
     #region Update from DTO
     public ReviewsDbM UpdateFromDTO(ReviewsCuDto org)
     {
+        if (org == null) return null;
+        
         ReviewScore = org.ReviewScore;
         ReviewText = org.ReviewText;
 
@@ -81,7 +85,7 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
     public ReviewsDbM() { }
     public ReviewsDbM(ReviewsCuDto org)
     {
-        ReviewId = Guid.NewGuid();
+        ReviewId = org.ReviewId == Guid.Empty ? Guid.NewGuid() : org.ReviewId;
         UpdateFromDTO(org);
     }
 

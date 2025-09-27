@@ -16,6 +16,7 @@ public class CategoriesDbM : Categories, ISeed<CategoriesDbM>, IEquatable<Catego
 {
     [Key]
     public override Guid CategoryId { get; set; }
+    [Required]
     public override string CategoryName { get; set; }
 
     #region implementing entity Navigation properties when model is using interfaces in the relationships between models

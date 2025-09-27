@@ -77,7 +77,7 @@ namespace AppWebApi.Controllers
         [ProducesResponseType(200, Type = typeof(IUsers))]
         [ProducesResponseType(400, Type = typeof(string))]
         [ProducesResponseType(404, Type = typeof(string))]
-        public async Task<IActionResult> ReadItem(string id = null, string flat = "false")
+        public async Task<IActionResult> ReadItem(string id = null, string flat = "true")
         {
             try
             {
@@ -192,7 +192,7 @@ namespace AppWebApi.Controllers
         [ActionName("CreateItem")]
         [ProducesResponseType(200, Type = typeof(IUsers))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> CreateItem([FromBody] UsersCuDto item)
+        public async Task<IActionResult> CreateItem([FromBody] UserCreateDto item)
         {
             try
             {

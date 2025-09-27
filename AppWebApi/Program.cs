@@ -40,13 +40,13 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new()
     {
-        Title = "Seido Friends API",
+        Title = "Tourist Attractions API",
 #if DEBUG
-        Version = "v2.0 DEBUG",
+        Version = "v1.0 DEBUG",
 #else
-        Version = "v2.0",
+        Version = "v1.0",
 #endif
-        Description = "This is an API used in Seido's various software developer training courses."
+        Description = "This is an API used for the Tourist Attractions project."
         + $"<br>DataSet: {builder.Configuration["DatabaseConnections:UseDataSetWithTag"]}"
         + $"<br>DefaultDataUser: {builder.Configuration["DatabaseConnections:DefaultDataUser"]}"
     });

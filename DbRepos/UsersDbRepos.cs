@@ -205,24 +205,34 @@ public class UsersDbRepos
         await _dbContext.SaveChangesAsync();
 
         //return the updated item in non-flat mode
-        return await ReadUserAsync(item.UserId, false);
+        return await ReadUserAsync(item.UserId, true);
     }
 
-    public async Task<ResponseItemDto<IUsers>> CreateUserAsync(UsersCuDto itemDto)
+    public async Task<ResponseItemDto<IUsers>> CreateUserAsync(UserCreateDto itemDto)
     {
-        if (itemDto.UserId != null)
-            throw new ArgumentException($"{nameof(itemDto.UserId)} must be null when creating a new object");
+        // if (itemDto.UserId != null)
+        //     throw new ArgumentException($"{nameof(itemDto.UserId)} must be null when creating a new object");
 
         //I cannot have duplicates in the Users table, so check that
         var query2 = _dbContext.Users
             .Where(i => i.Email == itemDto.Email);
         var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.UserId != itemDto.UserId)
-            throw new ArgumentException($"Item already exist with id {existingItem.UserId}");
+        // if (existingItem != null && existingItem.UserId != itemDto.UserId)
+        //     throw new ArgumentException($"User already exist with email {existingItem.Email}");
+
+        if (existingItem != null)
+            throw new ArgumentException($"User already exist with email {existingItem.Email}");
 
         //transfer any changes from DTO to database objects
         //Update individual properties
-        var item = new UsersDbM(itemDto);
+        var item = new UsersDbM
+        {
+            UserId = Guid.NewGuid(),
+            FirstName = itemDto.FirstName,
+            LastName = itemDto.LastName,
+            Email = itemDto.Email,
+            CreatedAt = itemDto.CreatedAt ?? DateTime.UtcNow
+        };
 
         //Update navigation properties
         await navProp_UsersCUdto_to_UsersDbM(itemDto, item);
@@ -235,6 +245,25 @@ public class UsersDbRepos
 
         //return the updated item in non-flat mode
         return await ReadUserAsync(item.UserId, false);
+    }
+
+    private async Task navProp_UsersCUdto_to_UsersDbM(UserCreateDto itemDtoSrc, UsersDbM itemDst)
+    {
+        //update FriendsDbM from itemDto.FriendId
+        List<ReviewsDbM> reviews = null;
+        if (itemDtoSrc.ReviewId != null)
+        {
+            reviews = new List<ReviewsDbM>();
+            foreach (var id in itemDtoSrc.ReviewId)
+            {
+                var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
+                if (f == null)
+                    throw new ArgumentException($"Item id {id} not existing");
+
+                reviews.Add(f);
+            }
+        }
+        itemDst.ReviewsDbM = reviews;
     }
 
     private async Task navProp_UsersCUdto_to_UsersDbM(UsersCuDto itemDtoSrc, UsersDbM itemDst)

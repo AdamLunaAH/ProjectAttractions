@@ -15,12 +15,29 @@ namespace DbContext.Migrations.SqlServerDbContext
                 name: "supusr");
 
             migrationBuilder.CreateTable(
+                name: "AttractionAddressesDb",
+                schema: "supusr",
+                columns: table => new
+                {
+                    AddressId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StreetAddress = table.Column<string>(type: "varchar(200)", nullable: false),
+                    ZipCode = table.Column<string>(type: "varchar(200)", nullable: false),
+                    CityPlace = table.Column<string>(type: "varchar(200)", nullable: false),
+                    Country = table.Column<string>(type: "varchar(200)", nullable: false),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttractionAddressesDb", x => x.AddressId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CategoriesDb",
                 schema: "supusr",
                 columns: table => new
                 {
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CategoryName = table.Column<string>(type: "varchar(200)", nullable: true),
+                    CategoryName = table.Column<string>(type: "varchar(200)", nullable: false),
                     Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -34,10 +51,10 @@ namespace DbContext.Migrations.SqlServerDbContext
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "varchar(200)", nullable: true),
-                    LastName = table.Column<string>(type: "varchar(200)", nullable: true),
+                    FirstName = table.Column<string>(type: "varchar(200)", nullable: false),
+                    LastName = table.Column<string>(type: "varchar(200)", nullable: false),
+                    Email = table.Column<string>(type: "varchar(200)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Email = table.Column<string>(type: "varchar(200)", nullable: true),
                     Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -46,30 +63,12 @@ namespace DbContext.Migrations.SqlServerDbContext
                 });
 
             migrationBuilder.CreateTable(
-                name: "AttractionAddressesDb",
-                schema: "supusr",
-                columns: table => new
-                {
-                    AddressId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StreetAddress = table.Column<string>(type: "varchar(200)", nullable: false),
-                    ZipCode = table.Column<string>(type: "varchar(200)", nullable: false),
-                    CityPlace = table.Column<string>(type: "varchar(200)", nullable: false),
-                    Country = table.Column<string>(type: "varchar(200)", nullable: false),
-                    AttractionsDbMAttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Seeded = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AttractionAddressesDb", x => x.AddressId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AttractionsDb",
                 schema: "supusr",
                 columns: table => new
                 {
                     AttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AttractionName = table.Column<string>(type: "varchar(200)", nullable: true),
+                    AttractionName = table.Column<string>(type: "varchar(200)", nullable: false),
                     AttractionDescription = table.Column<string>(type: "varchar(200)", nullable: true),
                     AddressId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Seeded = table.Column<bool>(type: "bit", nullable: false)
@@ -119,8 +118,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                 columns: table => new
                 {
                     ReviewId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    AttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ReviewScore = table.Column<int>(type: "int", nullable: false),
                     ReviewText = table.Column<string>(type: "varchar(200)", maxLength: 250, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -146,12 +145,6 @@ namespace DbContext.Migrations.SqlServerDbContext
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AttractionAddressesDb_AttractionsDbMAttractionId",
-                schema: "supusr",
-                table: "AttractionAddressesDb",
-                column: "AttractionsDbMAttractionId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AttractionAddressesDb_StreetAddress_ZipCode_CityPlace_Country",
                 schema: "supusr",
                 table: "AttractionAddressesDb",
@@ -175,23 +168,21 @@ namespace DbContext.Migrations.SqlServerDbContext
                 table: "AttractionsDb",
                 columns: new[] { "AttractionName", "AttractionDescription", "AddressId" },
                 unique: true,
-                filter: "[AttractionName] IS NOT NULL AND [AttractionDescription] IS NOT NULL AND [AddressId] IS NOT NULL");
+                filter: "[AttractionDescription] IS NOT NULL AND [AddressId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CategoriesDb_CategoryName",
                 schema: "supusr",
                 table: "CategoriesDb",
                 column: "CategoryName",
-                unique: true,
-                filter: "[CategoryName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReviewsDb_AttractionId_UserId",
                 schema: "supusr",
                 table: "ReviewsDb",
                 columns: new[] { "AttractionId", "UserId" },
-                unique: true,
-                filter: "[AttractionId] IS NOT NULL AND [UserId] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReviewsDb_ReviewScore_ReviewText",
@@ -206,6 +197,13 @@ namespace DbContext.Migrations.SqlServerDbContext
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UsersDb_Email",
+                schema: "supusr",
+                table: "UsersDb",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UsersDb_FirstName_LastName",
                 schema: "supusr",
                 table: "UsersDb",
@@ -216,25 +214,11 @@ namespace DbContext.Migrations.SqlServerDbContext
                 schema: "supusr",
                 table: "UsersDb",
                 columns: new[] { "LastName", "FirstName" });
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_AttractionAddressesDb_AttractionsDb_AttractionsDbMAttractionId",
-                schema: "supusr",
-                table: "AttractionAddressesDb",
-                column: "AttractionsDbMAttractionId",
-                principalSchema: "supusr",
-                principalTable: "AttractionsDb",
-                principalColumn: "AttractionId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_AttractionAddressesDb_AttractionsDb_AttractionsDbMAttractionId",
-                schema: "supusr",
-                table: "AttractionAddressesDb");
-
             migrationBuilder.DropTable(
                 name: "AttractionCategories",
                 schema: "supusr");
@@ -248,11 +232,11 @@ namespace DbContext.Migrations.SqlServerDbContext
                 schema: "supusr");
 
             migrationBuilder.DropTable(
-                name: "UsersDb",
+                name: "AttractionsDb",
                 schema: "supusr");
 
             migrationBuilder.DropTable(
-                name: "AttractionsDb",
+                name: "UsersDb",
                 schema: "supusr");
 
             migrationBuilder.DropTable(

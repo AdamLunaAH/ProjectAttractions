@@ -1,10 +1,22 @@
 namespace Models.DTO;
 
+using Swashbuckle.AspNetCore.Annotations;
 //DTO is a DataTransferObject, can be instanstiated by the controller logic
 //and represents a, fully instantiable, subset of the Database models
 //for a specific purpose.
 
 //These DTO are simplistic and used to Update and Create objects
+
+public class UserCreateDto
+{
+    // public Guid? UserId { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public List<Guid> ReviewId { get; set; } = null;
+
+}
 public class UsersCuDto
 {
     public virtual Guid? UserId { get; set; }
@@ -17,9 +29,11 @@ public class UsersCuDto
     public DateTime? CreatedAt { get; set; } = null;
     // public DateTime? UpdatedaAt { get; set; } = null;
 
+    [SwaggerSchema(Description = "Optional list of review IDs (empty when creating a new user).",
+                   Example = typeof(EmptyGuidListExample))]
+    public List<Guid> ReviewId { get; set; } = new();
 
-
-    public virtual List<Guid> ReviewId { get; set; } = null;
+    // public virtual List<Guid> ReviewId { get; set; } = null;
 
     // public virtual List<Guid> QuotesId { get; set; } = null;
 
@@ -33,7 +47,7 @@ public class UsersCuDto
         CreatedAt = org.CreatedAt;
 
         // UpdatedaAt = org.UpdatedaAt;
-        ReviewId = org.Reviews?.Select(i => i.ReviewId).ToList();
+        // ReviewId = org.Reviews?.Select(i => i.ReviewId).ToList();
         // QuotesId = org.Quotes?.Select(i => i.QuoteId).ToList();
     }
 }
@@ -108,11 +122,20 @@ public class CategoriesCuDto
 }
 
 
+public class ReviewCreateDto
+{
+    public Guid? UserId { get; set; }
+    public Guid? AttractionId { get; set; }
+    public int ReviewScore { get; set; }
+    public string ReviewText { get; set; }
+    public DateTime? CreatedAt { get; set; }
+}
+
+
 public class ReviewsCuDto
 {
     //cannot be nullable as a Pets has to have an owner even when created
     public virtual Guid ReviewId { get; set; }
-
 
     public virtual Guid? UserId { get; set; }
     public virtual Guid? AttractionId { get; set; }

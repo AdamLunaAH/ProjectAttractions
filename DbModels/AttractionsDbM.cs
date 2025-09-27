@@ -16,6 +16,7 @@ sealed public class AttractionsDbM : Attractions, ISeed<AttractionsDbM>
 {
     [Key]
     public override Guid AttractionId { get; set; }
+    [Required]
     public override string AttractionName { get; set; }
     // public override AttractionCategories Category { get; set; }
     public override string AttractionDescription { get; set; }
