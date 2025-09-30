@@ -33,7 +33,7 @@ public class UsersCuDto
         CreatedAt = org.CreatedAt;
 
         // UpdatedaAt = org.UpdatedaAt;
-        ReviewId = org.Reviews?.Select(i => i.ReviewId).ToList();
+        // ReviewId = org.Reviews?.Select(i => i.ReviewId).ToList();
         // QuotesId = org.Quotes?.Select(i => i.QuoteId).ToList();
     }
 }
@@ -108,11 +108,20 @@ public class CategoriesCuDto
 }
 
 
+public class ReviewCreateDto
+{
+    public Guid? UserId { get; set; }
+    public Guid? AttractionId { get; set; }
+    public int ReviewScore { get; set; }
+    public string ReviewText { get; set; }
+    public DateTime? CreatedAt { get; set; }
+}
+
+
 public class ReviewsCuDto
 {
     //cannot be nullable as a Pets has to have an owner even when created
     public virtual Guid ReviewId { get; set; }
-
 
     public virtual Guid? UserId { get; set; }
     public virtual Guid? AttractionId { get; set; }

@@ -164,8 +164,12 @@ public class CategoriesDbRepos
 
     public async Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoriesCuDto itemDto)
     {
-        if (itemDto.CategoryId != null)
-            throw new ArgumentException($"{nameof(itemDto.CategoryId)} must be null when creating a new object");
+        // if (itemDto.CategoryId != null)
+        //     throw new ArgumentException($"{nameof(itemDto.CategoryId)} must be null when creating a new object");
+
+        if (itemDto.CategoryId != Guid.Empty)
+            throw new ArgumentException("CategoryId must be empty when creating a new category.");
+
 
         //I cannot have duplicates in the Categories table, so check that
         var query2 = _dbContext.Categories

@@ -10,7 +10,7 @@ public class Users : IUsers, ISeed<Users>
     public virtual DateTime CreatedAt { get; set; }
     // public virtual DateTime UpdatedaAt { get; set; }
 
-    public virtual List<IReviews> Reviews { get; set; } = null;
+    public virtual List<IReviews> Reviews { get; set; }
 
 
     #region constructors

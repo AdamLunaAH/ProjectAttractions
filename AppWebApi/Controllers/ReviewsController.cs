@@ -165,7 +165,7 @@ namespace AppWebApi.Controllers
         [ActionName("CreateItem")]
         [ProducesResponseType(200, Type = typeof(IReviews))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> CreateItem([FromBody] ReviewsCuDto item)
+        public async Task<IActionResult> CreateItem([FromBody] ReviewCreateDto item)
         {
             try
             {

@@ -61,6 +61,8 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
             entity.HasIndex(e => new { e.FirstName, e.LastName });
             entity.HasIndex(e => new { e.LastName, e.FirstName });
 
+            entity.HasIndex(e => e.Email).IsUnique();
+
             // One User -> Many Reviews
             entity.HasMany(u => u.ReviewsDbM)
                     .WithOne(r => r.UsersDbM)

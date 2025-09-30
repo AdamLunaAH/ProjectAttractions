@@ -227,6 +227,7 @@ public class AttractionsDbRepos
             //remove tracking for all read operations for performance and to avoid recursion/circular access
             var query = _dbContext.Attractions.AsNoTracking()
                 .Include(i => i.ReviewsDbM)
+                .Include(i => i.CategoriesDbM)
                 .Where(i => i.AttractionId == id);
 
             return new ResponseItemDto<IAttractions>()
@@ -319,8 +320,12 @@ public class AttractionsDbRepos
 
     public async Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionsCuDto itemDto)
     {
-        if (itemDto.AttractionId != null)
-            throw new ArgumentException($"{nameof(itemDto.AttractionId)} must be null when creating a new object");
+        // if (itemDto.AttractionId != null)
+        //     throw new ArgumentException($"{nameof(itemDto.AttractionId)} must be null when creating a new object");
+
+        if (itemDto.AttractionId != Guid.Empty)
+            throw new ArgumentException("AttractionId must be empty when creating a new attraction.");
+
 
         //I cannot have duplicates in the Attractions table, so check that
         var query2 = _dbContext.Attractions
@@ -343,7 +348,7 @@ public class AttractionsDbRepos
         await _dbContext.SaveChangesAsync();
 
         //return the updated item in non-flat mode
-        return await ReadAttractionAsync(item.AttractionId, false);
+        return await ReadAttractionAsync(item.AttractionId, true);
     }
 
     private async Task navProp_AttractionsCUdto_to_AttractionsDbM(AttractionsCuDto itemDtoSrc, AttractionsDbM itemDst)

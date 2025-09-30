@@ -41,16 +41,15 @@ sealed public class AttractionAddressesDbM : AttractionAddresses, ISeed<Attracti
     // public AttractionDbM AttractionDbM { get; set; }
     // [ForeignKey(nameof(AddressId))]
     // public Guid AttractionDbMId { get; set; }
-    [NotMapped] //removed from EFC
-    public override List<IAttractions> Attractions
-{
-    get => AttractionsDbM?.Cast<IAttractions>().ToList();
-    set => throw new NotImplementedException();
-}
+
+    //removed from EFC
+    [NotMapped]
+    public override List<IAttractions> Attractions { get => AttractionsDbM?.Cast<IAttractions>().ToList(); set => throw new NotImplementedException(); }
     // public override IAttractions Attractions { get => AttractionsDbM; set => new NotImplementedException(); }
     // public override List<IAttractions> Attractions { get => AttractionsDbM?.ToList<IAttractions>(); set => new NotImplementedException(); }
-
-    [JsonIgnore] //do not include in any json response from the WebApi
+    //do not include in any json response from the WebApi
+    [JsonIgnore]
+    [NotMapped]
     public List<AttractionsDbM> AttractionsDbM { get; set; } = new();
     // public AttractionsDbM AttractionsDbM { get; set; } = null;
     // public List<AttractionsDbM> AttractionsDbM { get; set; } = null;

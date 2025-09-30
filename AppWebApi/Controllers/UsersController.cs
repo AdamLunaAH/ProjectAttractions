@@ -21,12 +21,20 @@ namespace AppWebApi.Controllers
         [ActionName("Read")]
         [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttractions>))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> Read(string seeded = "true", string flat = "true",
+        public async Task<IActionResult> Read(string seeded = "both", string flat = "true",
             string filter = null, string pageNr = "0", string pageSize = "10")
         {
             try
             {
-                bool seededArg = bool.Parse(seeded);
+                bool? seededArg = seeded.ToLower() switch
+                {
+                    "true" => true,
+                    "false" => false,
+                    "both" => null,
+                    "null" => null,
+                    _ => throw new ArgumentException("Invalid seeded value")
+                };
+                // bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
@@ -48,12 +56,20 @@ namespace AppWebApi.Controllers
         [ActionName("User Reviews")]
         [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttractions>))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> UserReviews(string seeded = "true", string flat = "false",
+        public async Task<IActionResult> UserReviews(string seeded = "both", string flat = "false",
             string filter = null, string pageNr = "0", string pageSize = "10")
         {
             try
             {
-                bool seededArg = bool.Parse(seeded);
+                bool? seededArg = seeded.ToLower() switch
+                {
+                    "true" => true,
+                    "false" => false,
+                    "both" => null,
+                    "null" => null,
+                    _ => throw new ArgumentException("Invalid seeded value")
+                };
+                // bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
@@ -77,7 +93,7 @@ namespace AppWebApi.Controllers
         [ProducesResponseType(200, Type = typeof(IUsers))]
         [ProducesResponseType(400, Type = typeof(string))]
         [ProducesResponseType(404, Type = typeof(string))]
-        public async Task<IActionResult> ReadItem(string id = null, string flat = "false")
+        public async Task<IActionResult> ReadItem(string id = null, string flat = "true")
         {
             try
             {
@@ -192,7 +208,7 @@ namespace AppWebApi.Controllers
         [ActionName("CreateItem")]
         [ProducesResponseType(200, Type = typeof(IUsers))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> CreateItem([FromBody] UsersCuDto item)
+        public async Task<IActionResult> CreateItem([FromBody] UserCreateDto item)
         {
             try
             {

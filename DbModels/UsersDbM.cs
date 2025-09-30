@@ -18,8 +18,11 @@ sealed public class UsersDbM : Users, ISeed<UsersDbM>, IEquatable<UsersDbM>
     // public override Guid UserId { get => base.UserId; set => base.UserId = value; }
     [Key]
     public override Guid UserId { get; set; }
+    [Required]
     public override string FirstName { get; set; }
+    [Required]
     public override string LastName { get; set; }
+    [Required]
     public override string Email { get; set; }
     public override DateTime CreatedAt { get; set; }
     // public override DateTime UpdatedaAt { get; set; }

@@ -10,8 +10,8 @@ public class Attractions : IAttractions, ISeed<Attractions>
     // public virtual string AttractionPlace { get; set; }
     public virtual IAttractionAddresses AttractionAddresses { get; set; } = null;
 
-    public virtual List<ICategories> Categories { get; set; } = null;
-    public virtual List<IReviews> Reviews { get; set; } = null;
+    public virtual List<ICategories> Categories { get; set; }
+    public virtual List<IReviews> Reviews { get; set; }
 
 
 

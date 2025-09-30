@@ -205,7 +205,7 @@ public class UsersDbRepos
         await _dbContext.SaveChangesAsync();
 
         //return the updated item in non-flat mode
-        return await ReadUserAsync(item.UserId, false);
+        return await ReadUserAsync(item.UserId, true);
     }
 
     public async Task<ResponseItemDto<IUsers>> CreateUserAsync(UsersCuDto itemDto)
@@ -218,7 +218,7 @@ public class UsersDbRepos
             .Where(i => i.Email == itemDto.Email);
         var existingItem = await query2.FirstOrDefaultAsync();
         if (existingItem != null && existingItem.UserId != itemDto.UserId)
-            throw new ArgumentException($"Item already exist with id {existingItem.UserId}");
+            throw new ArgumentException($"User already exist with email {existingItem.Email}");
 
         //transfer any changes from DTO to database objects
         //Update individual properties
