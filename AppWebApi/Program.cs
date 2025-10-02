@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// builder.Services.AddSwaggerGen();
 
 //adding support for several secret sources and database sources
 //to use either user secrets or azure key vault depending on UseAzureKeyVault tag in appsettings.json
@@ -50,8 +50,12 @@ builder.Services.AddSwaggerGen(c =>
         + $"<br>DataSet: {builder.Configuration["DatabaseConnections:UseDataSetWithTag"]}"
         + $"<br>DefaultDataUser: {builder.Configuration["DatabaseConnections:DefaultDataUser"]}"
     });
+
+    // Register custom schema filter
+    c.SchemaFilter<Swagger.Filters.UserCreateDtoSchemaFilter>();
 });
 
+builder.Services.AddSwaggerGenNewtonsoftSupport();
 
 
 //Add InMemoryLoggerProvider logger
@@ -85,7 +89,7 @@ var app = builder.Build();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Seido Friends API v2.0");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tourist Attractions API v1.0");
     });
 }
 

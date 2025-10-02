@@ -20,7 +20,7 @@ public class UsersDbRepos
         _dbContext = context;
     }
 
-    public async Task<ResponsePageDto<IUsers>> ReadUsersAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+    public async Task<ResponsePageDto<IUsers>> ReadUsersAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
         IQueryable<UsersDbM> query;
@@ -42,16 +42,17 @@ public class UsersDbRepos
             DbItemsCount = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
-                        (i.FirstName.ToLower().Contains(filter) ||
-                            i.LastName.ToLower().Contains(filter))).CountAsync(),
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
+                (i.FirstName.ToLower().Contains(filter) ||
+                i.LastName.ToLower().Contains(filter)))
+                .CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
-                        (i.FirstName.ToLower().Contains(filter) ||
-                            i.LastName.ToLower().Contains(filter)))
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
+                (i.FirstName.ToLower().Contains(filter) ||
+                i.LastName.ToLower().Contains(filter)))
 
             //Adding paging
             .Skip(pageNumber * pageSize)
@@ -65,7 +66,7 @@ public class UsersDbRepos
         return ret;
     }
 
-    public async Task<ResponsePageDto<IUsers>> ReadUsersReviewsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+    public async Task<ResponsePageDto<IUsers>> ReadUsersReviewsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
         IQueryable<UsersDbM> query;
@@ -87,14 +88,14 @@ public class UsersDbRepos
             DbItemsCount = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.FirstName.ToLower().Contains(filter) ||
                             i.LastName.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.FirstName.ToLower().Contains(filter) ||
                             i.LastName.ToLower().Contains(filter)))
 

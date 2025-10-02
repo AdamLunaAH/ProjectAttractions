@@ -1,5 +1,6 @@
 namespace Models.DTO;
 
+using Swashbuckle.AspNetCore;
 using Swashbuckle.AspNetCore.Annotations;
 //DTO is a DataTransferObject, can be instanstiated by the controller logic
 //and represents a, fully instantiable, subset of the Database models
@@ -14,7 +15,11 @@ public class UserCreateDto
     public string LastName { get; set; }
     public string Email { get; set; }
     public DateTime? CreatedAt { get; set; }
-    public List<Guid> ReviewId { get; set; } = null;
+    // [SwaggerSchema(
+    //     Description = "Optional list of review IDs (leave empty when creating a new user).",
+    //     Example = new string[0])]
+    public List<Guid> ReviewId { get; set; } = new();
+    // public List<Guid> ReviewId { get; set; } = null;
 
 }
 public class UsersCuDto
@@ -27,15 +32,9 @@ public class UsersCuDto
     public virtual string Email { get; set; }
 
     public DateTime? CreatedAt { get; set; } = null;
-    // public DateTime? UpdatedaAt { get; set; } = null;
 
-    [SwaggerSchema(Description = "Optional list of review IDs (empty when creating a new user).",
-                   Example = typeof(EmptyGuidListExample))]
-    public List<Guid> ReviewId { get; set; } = new();
+    public virtual List<Guid> ReviewId { get; set; } = null;
 
-    // public virtual List<Guid> ReviewId { get; set; } = null;
-
-    // public virtual List<Guid> QuotesId { get; set; } = null;
 
     public UsersCuDto() { }
     public UsersCuDto(IUsers org)
@@ -51,6 +50,8 @@ public class UsersCuDto
         // QuotesId = org.Quotes?.Select(i => i.QuoteId).ToList();
     }
 }
+
+
 
 public class AttractionAddressesCuDto
 {

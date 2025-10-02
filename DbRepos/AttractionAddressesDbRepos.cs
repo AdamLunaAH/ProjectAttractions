@@ -20,7 +20,7 @@ public class AttractionAddressesDbRepos
         _dbContext = context;
     }
 
-    public async Task<ResponsePageDto<IAttractionAddresses>> ReadAttractionAddressesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+    public async Task<ResponsePageDto<IAttractionAddresses>> ReadAttractionAddressesAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
         IQueryable<AttractionAddressesDbM> query;
@@ -42,7 +42,7 @@ public class AttractionAddressesDbRepos
             DbItemsCount = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.Country.ToLower().Contains(filter) ||
                             i.CityPlace.ToLower().Contains(filter) ||
                             i.ZipCode.ToLower().Contains(filter) ||
@@ -52,7 +52,7 @@ public class AttractionAddressesDbRepos
             PageItems = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         i.Country.ToLower().Contains(filter) ||
                             i.CityPlace.ToLower().Contains(filter) ||
                             i.ZipCode.ToLower().Contains(filter) ||

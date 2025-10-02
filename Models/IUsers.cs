@@ -1,3 +1,5 @@
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace Models;
 
 public interface IUsers
@@ -8,7 +10,6 @@ public interface IUsers
     public string Email { get; set; }
     public DateTime CreatedAt { get; set; }
     // public DateTime UpdatedaAt { get; set; }
-
     public List<IReviews> Reviews { get; set; }
 
 }

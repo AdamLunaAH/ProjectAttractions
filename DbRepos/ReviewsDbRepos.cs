@@ -20,7 +20,7 @@ public class ReviewsDbRepos
         _dbContext = context;
     }
 
-    public async Task<ResponsePageDto<IReviews>> ReadReviewsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+    public async Task<ResponsePageDto<IReviews>> ReadReviewsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
         IQueryable<ReviewsDbM> query;
@@ -43,14 +43,14 @@ public class ReviewsDbRepos
             DbItemsCount = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.ReviewScore.ToString().Contains(filter) ||
                             i.ReviewText.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.ReviewScore.ToString().Contains(filter) ||
                             i.ReviewText.ToLower().Contains(filter)))
 

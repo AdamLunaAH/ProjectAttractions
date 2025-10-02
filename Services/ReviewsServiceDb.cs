@@ -22,7 +22,7 @@ public class ReviewsServiceDb : IReviewsService
     }
 
     //Simple 1:1 calls in this case, but as Services expands, this will no longer need to be the case
-    public Task<ResponsePageDto<IReviews>> ReadReviewsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadReviewsAsync(seeded, flat, filter, pageNumber, pageSize);
+    public Task<ResponsePageDto<IReviews>> ReadReviewsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadReviewsAsync(seeded, flat, filter, pageNumber, pageSize);
 
     public Task<ResponseItemDto<IReviews>> ReadReviewAsync(Guid id, bool flat) => _repo.ReadReviewAsync(id, flat);
 

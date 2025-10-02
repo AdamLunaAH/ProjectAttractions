@@ -20,7 +20,7 @@ public class CategoriesDbRepos
         _dbContext = context;
     }
 
-    public async Task<ResponsePageDto<ICategories>> ReadCategoriesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+    public async Task<ResponsePageDto<ICategories>> ReadCategoriesAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
         IQueryable<CategoriesDbM> query;
@@ -42,14 +42,14 @@ public class CategoriesDbRepos
             DbItemsCount = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         i.CategoryName.ToLower().Contains(filter))
                         .CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         i.CategoryName.ToLower().Contains(filter))
 
             //Adding paging

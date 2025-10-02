@@ -56,7 +56,7 @@ public class AttractionsDbRepos
 
 
 
-    public async Task<ResponsePageDto<IAttractions>> ReadAttractionsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+    public async Task<ResponsePageDto<IAttractions>> ReadAttractionsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
         IQueryable<AttractionsDbM> query;
@@ -80,14 +80,14 @@ public class AttractionsDbRepos
             DbItemsCount = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
                             i.AttractionDescription.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
                             i.AttractionDescription.ToLower().Contains(filter)))
 
@@ -103,7 +103,7 @@ public class AttractionsDbRepos
         return ret;
     }
 
-    public async Task<ResponsePageDto<IAttractions>> ReadAttractionsNoAddressAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize, bool noAddress)
+    public async Task<ResponsePageDto<IAttractions>> ReadAttractionsNoAddressAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize, bool noAddress)
     {
         filter ??= "";
         IQueryable<AttractionsDbM> query;
@@ -120,7 +120,7 @@ public class AttractionsDbRepos
         }
 
         var addressQuery = query
-        .Where(i => i.Seeded == seeded &&
+        .Where(i => (!seeded.HasValue || i.Seeded == seeded.Value) &&
                     (i.AttractionName.ToLower().Contains(filter) ||
                     i.AttractionDescription.ToLower().Contains(filter)));
 
@@ -138,14 +138,14 @@ public class AttractionsDbRepos
             DbItemsCount = await addressQuery
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
                             i.AttractionDescription.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await addressQuery
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
                             i.AttractionDescription.ToLower().Contains(filter)))
 
@@ -162,7 +162,7 @@ public class AttractionsDbRepos
     }
 
 
-    public async Task<ResponsePageDto<IAttractions>> ReadAttractionsNoReviewsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize, bool noReview)
+    public async Task<ResponsePageDto<IAttractions>> ReadAttractionsNoReviewsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize, bool noReview)
     {
         filter ??= "";
         IQueryable<AttractionsDbM> query;
@@ -179,7 +179,7 @@ public class AttractionsDbRepos
         }
 
         var reviewQuery = query
-        .Where(i => i.Seeded == seeded &&
+        .Where(i => (!seeded.HasValue || i.Seeded == seeded.Value) &&
                     (i.AttractionName.ToLower().Contains(filter) ||
                     i.AttractionDescription.ToLower().Contains(filter)));
 
@@ -196,14 +196,14 @@ public class AttractionsDbRepos
             DbItemsCount = await reviewQuery
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
                             i.AttractionDescription.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await reviewQuery
 
             //Adding filter functionality
-            .Where(i => (i.Seeded == seeded) &&
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
                             i.AttractionDescription.ToLower().Contains(filter)))
 
