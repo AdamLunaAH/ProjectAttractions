@@ -218,11 +218,8 @@ public class UsersDbRepos
         var query2 = _dbContext.Users
             .Where(i => i.Email == itemDto.Email);
         var existingItem = await query2.FirstOrDefaultAsync();
-        // if (existingItem != null && existingItem.UserId != itemDto.UserId)
-        //     throw new ArgumentException($"User already exist with email {existingItem.Email}");
-
-        if (existingItem != null)
-            throw new ArgumentException($"User already exist with email {existingItem.Email}");
+        if (existingItem != null && existingItem.UserId != itemDto.UserId)
+            throw new ArgumentException($"Item already exist with id {existingItem.UserId}");
 
         //transfer any changes from DTO to database objects
         //Update individual properties
