@@ -173,7 +173,7 @@ namespace AppWebApi.Controllers
         [ActionName("CreateItem")]
         [ProducesResponseType(200, Type = typeof(ICategories))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> CreateItem([FromBody] CategoriesCuDto item)
+        public async Task<IActionResult> CreateItem([FromBody] CategoryCreateDto item)
         {
             try
             {

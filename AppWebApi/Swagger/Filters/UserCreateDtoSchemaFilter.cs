@@ -162,6 +162,7 @@ namespace Swagger.Filters
                     _logger.LogInformation(" - Found property: {Key}", key);
                 }
 
+
                 // FirstName
                 var firstNameKey = schema.Properties.Keys
                     .FirstOrDefault(k => string.Equals(k, "firstName", StringComparison.OrdinalIgnoreCase));
@@ -187,20 +188,20 @@ namespace Swagger.Filters
                 }
 
                 // ReviewId
-                var reviewsKey = schema.Properties.Keys
-                    .FirstOrDefault(k => string.Equals(k, "reviewId", StringComparison.OrdinalIgnoreCase));
-                if (reviewsKey != null)
-                {
-                    var emptyString = new OpenApiString("[]");
-                    schema.Properties[reviewsKey].Example = emptyString;
-                    schema.Properties[reviewsKey].Default = emptyString;
+                // var reviewsKey = schema.Properties.Keys
+                //     .FirstOrDefault(k => string.Equals(k, "reviewId", StringComparison.OrdinalIgnoreCase));
+                // if (reviewsKey != null)
+                // {
+                //     var emptyString = new OpenApiString("[]");
+                //     schema.Properties[reviewsKey].Example = emptyString;
+                //     schema.Properties[reviewsKey].Default = emptyString;
 
-                    _logger.LogInformation("Set example for property {Key} to empty array", reviewsKey);
-                }
-                else
-                {
-                    _logger.LogWarning("reviewId property not found in UserCreateDto schema");
-                }
+                //     _logger.LogInformation("Set example for property {Key} to empty array", reviewsKey);
+                // }
+                // else
+                // {
+                //     _logger.LogWarning("reviewId property not found in UserCreateDto schema");
+                // }
             }
         }
     }

@@ -10,15 +10,15 @@ using Swashbuckle.AspNetCore.Annotations;
 
 public class UserCreateDto
 {
-    public Guid? UserId { get; set; }
+    // public Guid? UserId { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Email { get; set; }
-    public DateTime? CreatedAt { get; set; }
+    // public DateTime? CreatedAt { get; set; }
     // [SwaggerSchema(
     //     Description = "Optional list of review IDs (leave empty when creating a new user).",
     //     Example = new string[0])]
-    public List<Guid> ReviewId { get; set; } = new();
+    // public List<Guid> ReviewId { get; set; } = new();
     // public List<Guid> ReviewId { get; set; } = null;
 
 }
@@ -52,6 +52,14 @@ public class UsersCuDto
 }
 
 
+public class AttractionAddressCreateDto
+{
+
+    public virtual string StreetAddress { get; set; }
+    public virtual string ZipCode { get; set; }
+    public virtual string CityPlace { get; set; }
+    public virtual string Country { get; set; }
+}
 
 public class AttractionAddressesCuDto
 {
@@ -75,6 +83,19 @@ public class AttractionAddressesCuDto
         Country = org.Country;
         AttractionId = org.Attractions?.Select(i => i.AttractionId).ToList();
     }
+}
+
+public class AttractionCreateDto
+{
+    public virtual string AttractionName { get; set; }
+
+    public virtual string AttractionDescription { get; set; }
+    public virtual Guid? AddressId { get; set; }
+
+    public virtual List<Guid> CategoryId { get; set; } = null;
+
+    public virtual List<Guid> ReviewId { get; set; } = null;
+
 }
 
 public class AttractionsCuDto
@@ -104,11 +125,18 @@ public class AttractionsCuDto
     }
 }
 
+public class CategoryCreateDto
+{
+    public virtual string CategoryName { get; set; }
+
+    // public virtual List<Guid> AttractionId { get; set; } = null;
+
+}
+
 public class CategoriesCuDto
 {
     public virtual Guid CategoryId { get; set; }
     public virtual string CategoryName { get; set; }
-    public virtual string Author { get; set; }
 
     public virtual List<Guid> AttractionId { get; set; } = null;
 
@@ -167,3 +195,19 @@ public class ReviewsCuDto
 
     }
 }
+
+public class AttractionFullCreateDto
+{
+    public string AttractionName { get; set; }
+    public string AttractionDescription { get; set; }
+
+    // Inline Address info
+    public AttractionAddressCreateDto Address { get; set; }
+
+    // Inline Categories (list of new categories)
+    public List<CategoryCreateDto> Categories { get; set; } = new();
+
+    // Optionally: existing category IDs if you don’t want to create new ones each time
+    public List<Guid> ExistingCategoryIds { get; set; } = new();
+}
+

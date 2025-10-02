@@ -168,10 +168,10 @@ public class AttractionAddressesDbRepos
         return await ReadAttractionAddressAsync(item.AddressId, false);
     }
 
-    public async Task<ResponseItemDto<IAttractionAddresses>> CreateAttractionAddressAsync(AttractionAddressesCuDto itemDto)
+    public async Task<ResponseItemDto<IAttractionAddresses>> CreateAttractionAddressAsync(AttractionAddressCreateDto itemDto)
     {
-        if (itemDto.AddressId != null)
-            throw new ArgumentException($"{nameof(itemDto.AddressId)} must be null when creating a new object");
+        // if (itemDto.AddressId != null)
+        //     throw new ArgumentException($"{nameof(itemDto.AddressId)} must be null when creating a new object");
 
         //I cannot have duplicates in the AttractionAddresses table, so check that
         // var query2 = _dbContext.AttractionAddresses
@@ -182,10 +182,22 @@ public class AttractionAddressesDbRepos
 
         //transfer any changes from DTO to database objects
         //Update individual properties
-        var item = new AttractionAddressesDbM(itemDto);
+        // var item = new AttractionAddressesDbM(itemDto);
+        var item = new AttractionAddressesDbM
+        {
+            AddressId = Guid.NewGuid(),
+            StreetAddress = itemDto.StreetAddress,
+            ZipCode = itemDto.ZipCode,
+            CityPlace = itemDto.CityPlace,
+            Country = itemDto.Country
+
+        };
+
+
+
 
         //Update navigation properties
-        await navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(itemDto, item);
+        // await navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(itemDto, item);
 
         //write to database model
         _dbContext.AttractionAddresses.Add(item);

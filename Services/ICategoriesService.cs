@@ -9,5 +9,5 @@ public interface ICategoriesService
     public Task<ResponseItemDto<ICategories>> ReadCategoryAsync(Guid id, bool flat);
     public Task<ResponseItemDto<ICategories>> DeleteCategoryAsync(Guid id);
     public Task<ResponseItemDto<ICategories>> UpdateCategoryAsync(CategoriesCuDto item);
-    public Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoriesCuDto item);
+    public Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoryCreateDto item);
 }

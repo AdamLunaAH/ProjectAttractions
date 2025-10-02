@@ -14,7 +14,10 @@ public interface IAttractionsService
     public Task<ResponseItemDto<IAttractions>> ReadAttractionAsync(Guid id, bool flat);
     public Task<ResponseItemDto<IAttractions>> DeleteAttractionAsync(Guid id);
     public Task<ResponseItemDto<IAttractions>> UpdateAttractionAsync(AttractionsCuDto item);
-    public Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionsCuDto item);
+    public Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionCreateDto item);
+    Task<ResponseItemDto<IAttractions>> CreateFullAttractionAsync(AttractionFullCreateDto item);
+
+
 }
 
 

@@ -218,8 +218,8 @@ public class UsersDbRepos
         var query2 = _dbContext.Users
             .Where(i => i.Email == itemDto.Email);
         var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.UserId != itemDto.UserId)
-            throw new ArgumentException($"Item already exist with id {existingItem.UserId}");
+        if (existingItem != null && existingItem.Email != itemDto.Email)
+            throw new ArgumentException($"User already exist with the Email: {existingItem.Email}");
 
         //transfer any changes from DTO to database objects
         //Update individual properties
@@ -228,8 +228,9 @@ public class UsersDbRepos
             UserId = Guid.NewGuid(),
             FirstName = itemDto.FirstName,
             LastName = itemDto.LastName,
-            Email = itemDto.Email,
-            CreatedAt = itemDto.CreatedAt ?? DateTime.UtcNow
+            Email = itemDto.Email
+            ,
+            CreatedAt = DateTime.UtcNow
         };
 
         //Update navigation properties
@@ -249,18 +250,18 @@ public class UsersDbRepos
     {
         //update FriendsDbM from itemDto.FriendId
         List<ReviewsDbM> reviews = null;
-        if (itemDtoSrc.ReviewId != null)
-        {
-            reviews = new List<ReviewsDbM>();
-            foreach (var id in itemDtoSrc.ReviewId)
-            {
-                var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
-                if (f == null)
-                    throw new ArgumentException($"Item id {id} not existing");
+        // if (itemDtoSrc.ReviewId != null)
+        // {
+        //     reviews = new List<ReviewsDbM>();
+        //     foreach (var id in itemDtoSrc.ReviewId)
+        //     {
+        //         var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
+        //         if (f == null)
+        //             throw new ArgumentException($"Item id {id} not existing");
 
-                reviews.Add(f);
-            }
-        }
+        //         reviews.Add(f);
+        //     }
+        // }
         itemDst.ReviewsDbM = reviews;
     }
 

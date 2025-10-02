@@ -22,40 +22,6 @@ public class AttractionsDbRepos
         _dbContext = context;
     }
 
-    //     public async Task<ResponseItemDto<SupUsrInfoAttractionsDtoInfo>> InfoAsync() => await DbInfo();
-
-    //     private async Task<ResponseItemDto<SupUsrInfoAttractionsDtoInfo>> DbInfo()
-    //     {
-    //         var info = new SupUsrInfoAttractionsDtoInfo();
-    //         info.Db = new SupUsrInfoAttractionsDtoInfo
-    //         {
-    //             NrSeededFriends = await _dbContext.Friends.Where(f => f.Seeded).CountAsync(),
-    //             NrUnseededFriends = await _dbContext.Friends.Where(f => !f.Seeded).CountAsync(),
-    //             NrFriendsWithAddress = await _dbContext.Friends.Where(f => f.AddressId != null).CountAsync(),
-
-    //             NrSeededAddresses = await _dbContext.Addresses.Where(f => f.Seeded).CountAsync(),
-    //             NrUnseededAddresses = await _dbContext.Addresses.Where(f => !f.Seeded).CountAsync(),
-
-    //             NrSeededPets = await _dbContext.Pets.Where(f => f.Seeded).CountAsync(),
-    //             NrUnseededPets = await _dbContext.Pets.Where(f => !f.Seeded).CountAsync(),
-
-    //             NrSeededQuotes = await _dbContext.Quotes.Where(f => f.Seeded).CountAsync(),
-    //             NrUnseededQuotes = await _dbContext.Quotes.Where(f => !f.Seeded).CountAsync(),
-    //         };
-
-    //         return new ResponseItemDto<SupUsrInfoAttractionsDtoInfo>
-    //         {
-    // #if DEBUG
-    //             ConnectionString = _dbContext.dbConnection,
-    // #endif
-
-    //             Item = info
-    //         };
-    //     }
-
-
-
-
     public async Task<ResponsePageDto<IAttractions>> ReadAttractionsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
@@ -220,42 +186,38 @@ public class AttractionsDbRepos
     }
 
     public async Task<ResponseItemDto<IAttractions>> ReadAttractionAsync(Guid id, bool flat)
+{
+    if (!flat)
     {
-        if (!flat)
+        var query = _dbContext.Attractions.AsNoTracking()
+            .Include(i => i.AttractionAddressesDbM)   
+            .Include(i => i.ReviewsDbM)
+            .Include(i => i.CategoriesDbM)
+            .Where(i => i.AttractionId == id);
+
+        return new ResponseItemDto<IAttractions>()
         {
-            //make sure the model is fully populated, try without include.
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.Attractions.AsNoTracking()
-                .Include(i => i.ReviewsDbM)
-                .Include(i => i.CategoriesDbM)
-                .Where(i => i.AttractionId == id);
-
-            return new ResponseItemDto<IAttractions>()
-            {
 #if DEBUG
-                ConnectionString = _dbContext.dbConnection,
+            ConnectionString = _dbContext.dbConnection,
 #endif
-
-                Item = await query.FirstOrDefaultAsync<IAttractions>()
-            };
-        }
-        else
-        {
-            //Not fully populated, compare the SQL Statements generated
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.Attractions.AsNoTracking()
-                .Where(i => i.AttractionId == id);
-
-            return new ResponseItemDto<IAttractions>()
-            {
-#if DEBUG
-                ConnectionString = _dbContext.dbConnection,
-#endif
-
-                Item = await query.FirstOrDefaultAsync<IAttractions>()
-            };
-        }
+            Item = await query.FirstOrDefaultAsync<IAttractions>()
+        };
     }
+    else
+    {
+        var query = _dbContext.Attractions.AsNoTracking()
+            .Where(i => i.AttractionId == id);
+
+        return new ResponseItemDto<IAttractions>()
+        {
+#if DEBUG
+            ConnectionString = _dbContext.dbConnection,
+#endif
+            Item = await query.FirstOrDefaultAsync<IAttractions>()
+        };
+    }
+}
+
 
 
     public async Task<ResponseItemDto<IAttractions>> DeleteAttractionAsync(Guid id)
@@ -318,25 +280,34 @@ public class AttractionsDbRepos
         return await ReadAttractionAsync(item.AttractionId, false);
     }
 
-    public async Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionsCuDto itemDto)
+    public async Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionCreateDto itemDto)
     {
         // if (itemDto.AttractionId != null)
         //     throw new ArgumentException($"{nameof(itemDto.AttractionId)} must be null when creating a new object");
 
-        if (itemDto.AttractionId != Guid.Empty)
-            throw new ArgumentException("AttractionId must be empty when creating a new attraction.");
+        // if (itemDto.AttractionId != Guid.Empty)
+        //     throw new ArgumentException("AttractionId must be empty when creating a new attraction.");
 
 
         //I cannot have duplicates in the Attractions table, so check that
         var query2 = _dbContext.Attractions
             .Where(i => i.AttractionName == itemDto.AttractionName);
         var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.AttractionId != itemDto.AttractionId)
-            throw new ArgumentException($"Item already exist with id {existingItem.AttractionId}");
+        // if (existingItem != null && existingItem.AttractionId != itemDto.AttractionId)
+        //     throw new ArgumentException($"Item already exist with id {existingItem.AttractionId}");
 
         //transfer any changes from DTO to database objects
         //Update individual properties
-        var item = new AttractionsDbM(itemDto);
+        // var item = new AttractionsDbM(itemDto);
+
+        var item = new AttractionsDbM
+        {
+            AttractionId = Guid.NewGuid(),
+            AttractionName = itemDto.AttractionName,
+            AttractionDescription = itemDto.AttractionDescription,
+            AddressId = itemDto.AddressId
+        };
+
 
         //Update navigation properties
         await navProp_AttractionsCUdto_to_AttractionsDbM(itemDto, item);
@@ -350,6 +321,133 @@ public class AttractionsDbRepos
         //return the updated item in non-flat mode
         return await ReadAttractionAsync(item.AttractionId, true);
     }
+
+
+    public async Task<ResponseItemDto<IAttractions>> CreateFullAttractionAsync(AttractionFullCreateDto dto)
+    {
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+        return await strategy.ExecuteAsync(async () =>
+        {
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                // 1. Create Address
+                var address = new AttractionAddressesDbM
+                {
+                    AddressId = Guid.NewGuid(),
+                    StreetAddress = dto.Address.StreetAddress,
+                    ZipCode = dto.Address.ZipCode,
+                    CityPlace = dto.Address.CityPlace,
+                    Country = dto.Address.Country
+                };
+                _dbContext.AttractionAddresses.Add(address);
+                await _dbContext.SaveChangesAsync();
+
+                // 2. Categories
+                var categories = new List<CategoriesDbM>();
+                foreach (var catDto in dto.Categories)
+                {
+                    var category = new CategoriesDbM
+                    {
+                        CategoryId = Guid.NewGuid(),
+                        CategoryName = catDto.CategoryName
+                    };
+                    _dbContext.Categories.Add(category);
+                    categories.Add(category);
+                }
+
+                if (dto.ExistingCategoryIds?.Any() == true)
+                {
+                    var existing = await _dbContext.Categories
+                        .Where(c => dto.ExistingCategoryIds.Contains(c.CategoryId))
+                        .ToListAsync();
+                    categories.AddRange(existing);
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                // 3. Attraction
+                var attraction = new AttractionsDbM
+                {
+                    AttractionId = Guid.NewGuid(),
+                    AttractionName = dto.AttractionName,
+                    AttractionDescription = dto.AttractionDescription,
+                    AddressId = address.AddressId,
+                    CategoriesDbM = categories
+                };
+                _dbContext.Attractions.Add(attraction);
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return await ReadAttractionAsync(attraction.AttractionId, false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        });
+    }
+
+
+
+    private async Task navProp_AttractionsCUdto_to_AttractionsDbM(AttractionCreateDto itemDtoSrc, AttractionsDbM itemDst)
+    {
+        //update FriendsDbM from itemDto.FriendId
+        List<ReviewsDbM> reviews = null;
+        if (itemDtoSrc.ReviewId != null)
+        {
+            reviews = new List<ReviewsDbM>();
+            foreach (var id in itemDtoSrc.ReviewId)
+            {
+                var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
+                if (f == null)
+                    throw new ArgumentException($"Item id {id} not existing");
+
+                reviews.Add(f);
+            }
+        }
+        itemDst.ReviewsDbM = reviews;
+
+
+        List<CategoriesDbM> categories = null;
+        if (itemDtoSrc.CategoryId != null)
+        {
+            categories = new List<CategoriesDbM>();
+            foreach (var id in itemDtoSrc.CategoryId)
+            {
+                var f = await _dbContext.Categories.FirstOrDefaultAsync(i => i.CategoryId == id);
+                if (f == null)
+                    throw new ArgumentException($"Item id {id} not existing");
+
+                categories.Add(f);
+            }
+        }
+        itemDst.CategoriesDbM = categories;
+
+
+        if (itemDtoSrc.AddressId.HasValue)
+        {
+            var attractionAddresses = await _dbContext.AttractionAddresses
+                .FirstOrDefaultAsync(a => a.AddressId == itemDtoSrc.AddressId.Value);
+
+            if (attractionAddresses == null)
+                throw new ArgumentException(
+                    $"Attraction id {itemDtoSrc.AddressId} does not exist");
+
+            itemDst.AttractionAddressesDbM = attractionAddresses;
+        }
+        else
+        {
+            itemDst.AttractionAddressesDbM = null;
+        }
+
+    }
+
+
 
     private async Task navProp_AttractionsCUdto_to_AttractionsDbM(AttractionsCuDto itemDtoSrc, AttractionsDbM itemDst)
     {
@@ -403,4 +501,6 @@ public class AttractionsDbRepos
         }
 
     }
+
+
 }

@@ -52,7 +52,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 
     // Register custom schema filter
+    // c.SchemaFilter<Swagger.Filters.GenericCreateDtoSchemaFilter>();
     c.SchemaFilter<Swagger.Filters.UserCreateDtoSchemaFilter>();
+    c.SchemaFilter<Swagger.Filters.UserCreateDtoSchemaFilter>();
+    c.SchemaFilter<Swagger.Filters.AttractionAddressCreateDtoSchemaFilter>();
+    c.SchemaFilter<Swagger.Filters.AttractionCreateDtoSchemaFilter>();
+    c.SchemaFilter<Swagger.Filters.CategoryCreateDtoSchemaFilter>();
+    c.SchemaFilter<Swagger.Filters.ReviewCreateDtoSchemaFilter>();
 });
 
 builder.Services.AddSwaggerGenNewtonsoftSupport();

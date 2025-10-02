@@ -10,5 +10,5 @@ public interface IAttractionAddressesService
     public Task<ResponseItemDto<IAttractionAddresses>> ReadAttractionAddressAsync(Guid id, bool flat);
     public Task<ResponseItemDto<IAttractionAddresses>> DeleteAttractionAddressAsync(Guid id);
     public Task<ResponseItemDto<IAttractionAddresses>> UpdateAttractionAddressAsync(AttractionAddressesCuDto item);
-    public Task<ResponseItemDto<IAttractionAddresses>> CreateAttractionAddressAsync(AttractionAddressesCuDto item);
+    public Task<ResponseItemDto<IAttractionAddresses>> CreateAttractionAddressAsync(AttractionAddressCreateDto item);
 }

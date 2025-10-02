@@ -31,6 +31,12 @@ public class AttractionsServiceDb : IAttractionsService
 
     public Task<ResponseItemDto<IAttractions>> DeleteAttractionAsync(Guid id) => _repo.DeleteAttractionAsync(id);
     public Task<ResponseItemDto<IAttractions>> UpdateAttractionAsync(AttractionsCuDto item) => _repo.UpdateAttractionAsync(item);
-    public Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionsCuDto item) => _repo.CreateAttractionAsync(item);
+    public Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionCreateDto item) => _repo.CreateAttractionAsync(item);
+    public async Task<ResponseItemDto<IAttractions>> CreateFullAttractionAsync(AttractionFullCreateDto dto)
+    {
+        return await _repo.CreateFullAttractionAsync(dto);
+    }
+
+
 }
 

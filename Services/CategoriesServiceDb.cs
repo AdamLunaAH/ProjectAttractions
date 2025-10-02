@@ -27,6 +27,6 @@ public class CategoriesServiceDb : ICategoriesService
 
     public Task<ResponseItemDto<ICategories>> DeleteCategoryAsync(Guid id) => _repo.DeleteCategoryAsync(id);
     public Task<ResponseItemDto<ICategories>> UpdateCategoryAsync(CategoriesCuDto item) => _repo.UpdateCategoryAsync(item);
-    public Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoriesCuDto item) => _repo.CreateCategoryAsync(item);
+    public Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoryCreateDto item) => _repo.CreateCategoryAsync(item);
 }
 

@@ -162,28 +162,34 @@ public class CategoriesDbRepos
         return await ReadCategoryAsync(item.CategoryId, false);
     }
 
-    public async Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoriesCuDto itemDto)
+    public async Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoryCreateDto itemDto)
     {
         // if (itemDto.CategoryId != null)
         //     throw new ArgumentException($"{nameof(itemDto.CategoryId)} must be null when creating a new object");
 
-        if (itemDto.CategoryId != Guid.Empty)
-            throw new ArgumentException("CategoryId must be empty when creating a new category.");
+        // if (itemDto.CategoryId != Guid.Empty)
+        //     throw new ArgumentException("CategoryId must be empty when creating a new category.");
 
 
         //I cannot have duplicates in the Categories table, so check that
         var query2 = _dbContext.Categories
             .Where(i => i.CategoryName == itemDto.CategoryName);
         var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.CategoryId != itemDto.CategoryId)
-            throw new ArgumentException($"Item already exist with id {existingItem.CategoryId}");
+        if (existingItem != null && existingItem.CategoryName != itemDto.CategoryName)
+            throw new ArgumentException($"Category already exist with name: {existingItem.CategoryName}");
 
         //transfer any changes from DTO to database objects
         //Update individual properties
-        var item = new CategoriesDbM(itemDto);
+        // var item = new CategoriesDbM(itemDto);
+        var item = new CategoriesDbM
+        {
+            CategoryId = Guid.NewGuid(),
+            CategoryName = itemDto.CategoryName
+        };
+
 
         //Update navigation properties
-        await navProp_CategoriesCUdto_to_CategoriesDbM(itemDto, item);
+        // await navProp_CategoriesCUdto_to_CategoriesDbM(itemDto, item);
 
         //write to database model
         _dbContext.Categories.Add(item);
@@ -194,6 +200,7 @@ public class CategoriesDbRepos
         //return the updated item in non-flat mode
         return await ReadCategoryAsync(item.CategoryId, false);
     }
+
 
     private async Task navProp_CategoriesCUdto_to_CategoriesDbM(CategoriesCuDto itemDtoSrc, CategoriesDbM itemDst)
     {

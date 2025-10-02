@@ -27,6 +27,6 @@ public class AttractionAddressesServiceDb : IAttractionAddressesService
 
     public Task<ResponseItemDto<IAttractionAddresses>> DeleteAttractionAddressAsync(Guid id) => _repo.DeleteAttractionAddressAsync(id);
     public Task<ResponseItemDto<IAttractionAddresses>> UpdateAttractionAddressAsync(AttractionAddressesCuDto item) => _repo.UpdateAttractionAddressAsync(item);
-    public Task<ResponseItemDto<IAttractionAddresses>> CreateAttractionAddressAsync(AttractionAddressesCuDto item) => _repo.CreateAttractionAddressAsync(item);
+    public Task<ResponseItemDto<IAttractionAddresses>> CreateAttractionAddressAsync(AttractionAddressCreateDto item) => _repo.CreateAttractionAddressAsync(item);
 }
 

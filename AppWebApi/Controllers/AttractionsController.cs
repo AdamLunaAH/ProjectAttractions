@@ -245,7 +245,7 @@ namespace AppWebApi.Controllers
         [ActionName("CreateItem")]
         [ProducesResponseType(200, Type = typeof(IAttractions))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> CreateItem([FromBody] AttractionsCuDto item)
+        public async Task<IActionResult> CreateItem([FromBody] AttractionCreateDto item)
         {
             try
             {
@@ -262,6 +262,29 @@ namespace AppWebApi.Controllers
                 return BadRequest($"Could not create. Error {ex.Message}");
             }
         }
+
+        [HttpPost]
+        [ActionName("CreateFullAttraction")]
+        [ProducesResponseType(200, Type = typeof(IAttractions))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> CreateFullAttraction([FromBody] AttractionFullCreateDto dto)
+        {
+            try
+            {
+                _logger.LogInformation("Creating full attraction with address + categories");
+
+                var model = await _service.CreateFullAttractionAsync(dto);
+
+                return Ok(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"CreateFullAttraction: {ex.Message}");
+                return BadRequest($"Could not create. Error: {ex.Message}");
+            }
+        }
+
+
 
         public AttractionsController(IAttractionsService service, ILogger<AttractionsController> logger)
         {
