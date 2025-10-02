@@ -190,7 +190,7 @@ public class AttractionsDbRepos
     if (!flat)
     {
         var query = _dbContext.Attractions.AsNoTracking()
-            .Include(i => i.AttractionAddressesDbM)   
+            .Include(i => i.AttractionAddressesDbM)
             .Include(i => i.ReviewsDbM)
             .Include(i => i.CategoriesDbM)
             .Where(i => i.AttractionId == id);
