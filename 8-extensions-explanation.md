@@ -148,6 +148,127 @@ var roomDbModels = roomDtos.Select(dto => new RoomDbM
 _dbContext.Rooms.AddRange(roomDbModels);
 _dbContext.SaveChanges();
 
+public interface IRoomImportService
+{
+    Task ImportRoomsFromJsonAsync(string json);
+}
+
+public class RoomImportService : IRoomImportService
+{
+    private readonly MyDbContext _dbContext;
+
+    public RoomImportService(MyDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task ImportRoomsFromJsonAsync(string json)
+    {
+        // 1. Deserialize incoming JSON
+        var roomJsonDtos = JsonConvert.DeserializeObject<List<RoomJsonDto>>(json)
+                           ?? new List<RoomJsonDto>();
+
+        // 2. Prepare DTO maps
+        var buildingDict = new Dictionary<string, BuildingCuDto>();
+        var roomDtos = new List<RoomCuDto>();
+
+        foreach (var jsonDto in roomJsonDtos)
+        {
+            // --- Split "streetAddress" into address + name ---
+            string address = jsonDto.StreetAddress;
+            string? buildingName = null;
+
+            if (address.Contains("(") && address.Contains(")"))
+            {
+                int start = address.IndexOf("(");
+                int end = address.IndexOf(")", start);
+                buildingName = address.Substring(start + 1, end - start - 1).Trim();
+                address = address.Substring(0, start).Trim();
+            }
+
+            string buildingKey = $"{address}|{buildingName}";
+
+            // --- Ensure building entry exists ---
+            if (!buildingDict.TryGetValue(buildingKey, out var buildingDto))
+            {
+                buildingDto = new BuildingCuDto
+                {
+                    BuildingId = null,
+                    BuildingName = buildingName,
+                    BuildingAddress = address
+                };
+                buildingDict[buildingKey] = buildingDto;
+            }
+
+            // --- Build Room DTO ---
+            var roomDto = new RoomCuDto
+            {
+                RoomId = null,
+                RoomName = jsonDto.RoomName,
+                Floor = jsonDto.Floor,
+                Capacity = jsonDto.Capacity,
+                RoomGuid = jsonDto.RoomGuid,
+                BuildingId = buildingDto.BuildingId
+            };
+
+            roomDtos.Add(roomDto);
+            buildingDto.RoomsId.Add(roomDto.RoomId ?? 0);
+        }
+
+        // 3. Check for existing buildings in DB
+        var existingBuildings = await _dbContext.Buildings
+            .ToListAsync();
+
+        var existingLookup = existingBuildings.ToDictionary(
+            b => $"{b.StreetAddress}|{b.BuildingName}",
+            b => b);
+
+        foreach (var kvp in buildingDict)
+        {
+            var key = kvp.Key;
+            var dto = kvp.Value;
+
+            if (existingLookup.TryGetValue(key, out var existingBuilding))
+            {
+                dto.BuildingId = existingBuilding.Id;
+            }
+            else
+            {
+                var building = new BuildingDbM
+                {
+                    BuildingName = dto.BuildingName,
+                    StreetAddress = dto.BuildingAddress
+                };
+                await _dbContext.Buildings.AddAsync(building);
+                await _dbContext.SaveChangesAsync(); // Save to get Id
+
+                dto.BuildingId = building.Id;
+            }
+        }
+
+        // 4. Convert Room DTOs into EF entities
+        var roomDbModels = roomDtos.Select(dto => new RoomDbM
+        {
+            RoomName = dto.RoomName,
+            Floor = dto.Floor,
+            Capacity = dto.Capacity,
+            RoomGuid = dto.RoomGuid,
+            BuildingId = dto.BuildingId ?? throw new InvalidOperationException("BuildingId missing")
+        }).ToList();
+
+        await _dbContext.Rooms.AddRangeAsync(roomDbModels);
+        await _dbContext.SaveChangesAsync();
+    }
+}
+
+services.AddScoped<IRoomImportService, RoomImportService>();
+
+[HttpPost("import")]
+public async Task<IActionResult> ImportRooms([FromBody] string json)
+{
+    await _roomImportService.ImportRoomsFromJsonAsync(json);
+    return Ok("Import completed");
+}
 
 
 # Explanation of `Configuration/Extensions` and `DbContext/Extensions`
