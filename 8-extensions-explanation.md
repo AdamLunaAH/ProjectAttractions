@@ -1,3 +1,115 @@
+public class RoomJsonDto
+{
+    public string RoomName { get; set; }
+    public string Floor { get; set; }
+    public int Capacity { get; set; }
+    public Guid RoomGuid { get; set; }
+    public string StreetAddress { get; set; } // e.g. "Storgatan 10 (City hall)"
+}
+
+var roomJsonDtos = JsonConvert.DeserializeObject<List<RoomJsonDto>>(json);
+
+
+var buildingDict = new Dictionary<string, BuildingDbM>();
+
+foreach (var dto in roomJsonDtos)
+{
+    string address = dto.StreetAddress;
+    string buildingName = null;
+
+    if (address.Contains("(") && address.Contains(")"))
+    {
+        int start = address.IndexOf("(");
+        int end = address.IndexOf(")", start);
+        buildingName = address.Substring(start + 1, end - start - 1).Trim();
+        address = address.Substring(0, start).Trim();
+    }
+
+    string key = $"{address}|{buildingName}";
+
+    if (!buildingDict.ContainsKey(key))
+    {
+        buildingDict[key] = new BuildingDbM
+        {
+            BuildingName = buildingName,
+            StreetAddress = address
+        };
+    }
+}
+
+
+
+
+
+
+
+var existingBuildings = _dbContext.Buildings
+    .ToList()
+    .ToDictionary(b => $"{b.StreetAddress}|{b.BuildingName}");
+
+foreach (var kvp in buildingDict)
+{
+    if (existingBuildings.TryGetValue(kvp.Key, out var existingBuilding))
+    {
+        buildingDict[kvp.Key] = existingBuilding; // reuse existing
+    }
+    else
+    {
+        _dbContext.Buildings.Add(kvp.Value); // add new
+    }
+}
+
+// Save new buildings first to generate IDs
+_dbContext.SaveChanges();
+
+
+var roomDbModels = new List<RoomDbM>();
+
+foreach (var dto in roomJsonDtos)
+{
+    string address = dto.StreetAddress;
+    string buildingName = null;
+
+    if (address.Contains("(") && address.Contains(")"))
+    {
+        int start = address.IndexOf("(");
+        int end = address.IndexOf(")", start);
+        buildingName = address.Substring(start + 1, end - start - 1).Trim();
+        address = address.Substring(0, start).Trim();
+    }
+
+    string key = $"{address}|{buildingName}";
+
+    var room = new RoomDbM
+    {
+        RoomName = dto.RoomName,
+        Floor = dto.Floor,
+        Capacity = dto.Capacity,
+        RoomGuid = dto.RoomGuid,
+        buildingDbM = buildingDict[key] // assign navigation property
+    };
+
+    roomDbModels.Add(room);
+}
+
+_dbContext.Rooms.AddRange(roomDbModels);
+_dbContext.SaveChanges();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 public class IntFromStringJsonConverter : JsonConverter<int>
 {
