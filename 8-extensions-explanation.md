@@ -32,8 +32,121 @@ public class RoomDbM
     [Required]
     [JsonProperty("floor")]
     [JsonConverter(typeof(IntFromStringJsonConverter))]
-    public override int Floor { get; set; }
+    public override int Floor { get; public class RoomJsonDto
+{
+    public string RoomName { get; set; }
+    public string Floor { get; set; }
+    public int Capacity { get; set; }
+    public Guid RoomGuid { get; set; }
+    public string StreetAddress { get; set; } // e.g. "Storgatan 10 (City var roomJsonDtos = JsonConvert.DeserializeObject<List<RoomJsonDto>>(json);
+
+
+
+
+
+
+
+    public class RoomJsonDto
+{
+    public string RoomName { get; set; }
+    public string Floor { get; set; }
+    public int Capacity { get; set; }
+    public Guid RoomGuid { get; set; }
+    public string StreetAddress { get; set; } // e.g. "Storgatan 10 (City hall)"
 }
+
+var roomJsonDtos = JsonConvert.DeserializeObject<List<RoomJsonDto>>(json);
+
+
+var buildingDict = new Dictionary<string, BuildingCuDto>();
+var roomDtos = new List<RoomCuDto>();
+
+foreach (var json in roomJsonDtos)
+{
+    // split streetAddress → address + building name
+    string address = json.StreetAddress;
+    string? buildingName = null;
+
+    if (address.Contains("(") && address.Contains(")"))
+    {
+        int start = address.IndexOf("(");
+        int end = address.IndexOf(")", start);
+        buildingName = address.Substring(start + 1, end - start - 1).Trim();
+        address = address.Substring(0, start).Trim();
+    }
+
+    string buildingKey = $"{address}|{buildingName}";
+
+    if (!buildingDict.TryGetValue(buildingKey, out var buildingDto))
+    {
+        buildingDto = new BuildingCuDto
+        {
+            BuildingId = null, // may be set later if found in DB
+            BuildingName = buildingName,
+            BuildingAddress = address
+        };
+        buildingDict[buildingKey] = buildingDto;
+    }
+
+    var roomDto = new RoomCuDto
+    {
+        RoomId = null,
+        RoomName = json.RoomName,
+        Floor = json.Floor,
+        Capacity = json.Capacity,
+        RoomGuid = json.RoomGuid,
+        BuildingId = buildingDto.BuildingId
+    };
+
+    roomDtos.Add(roomDto);
+    buildingDto.RoomsId.Add(roomDto.RoomId ?? 0); // placeholder until DB IDs assigned
+}
+
+// Load all existing buildings into memory keyed by Address+Name
+var existingBuildings = _dbContext.Buildings
+    .ToList()
+    .ToDictionary(
+        b => $"{b.BuildingAddress}|{b.BuildingName}",
+        b => b);
+
+foreach (var kvp in buildingDict)
+{
+    var key = kvp.Key;
+    var dto = kvp.Value;
+
+    if (existingBuildings.TryGetValue(key, out var existingBuilding))
+    {
+        // reuse existing building
+        dto.BuildingId = existingBuilding.Id;
+    }
+    else
+    {
+        // create new
+        var building = new BuildingDbM
+        {
+            BuildingName = dto.BuildingName,
+            StreetAddress = dto.BuildingAddress
+        };
+        _dbContext.Buildings.Add(building);
+        dto.BuildingId = building.Id; // will be set after SaveChanges
+    }
+}
+
+// Save buildings first
+_dbContext.SaveChanges();
+
+// Now map roomDtos → RoomDbM with correct BuildingId
+var roomDbModels = roomDtos.Select(dto => new RoomDbM
+{
+    RoomName = dto.RoomName,
+    Floor = dto.Floor,
+    Capacity = dto.Capacity,
+    RoomGuid = dto.RoomGuid,
+    BuildingId = dto.BuildingId.Value
+}).ToList();
+
+_dbContext.Rooms.AddRange(roomDbModels);
+_dbContext.SaveChanges();
 
 
 
