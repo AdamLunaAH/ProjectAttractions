@@ -1,3 +1,42 @@
+
+public class IntFromStringJsonConverter : JsonConverter<int>
+{
+    public override int ReadJson(JsonReader reader, Type objectType, int existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        if (reader.TokenType == JsonToken.String)
+        {
+            // Try parsing string to int
+            if (int.TryParse((string)reader.Value, out var result))
+            {
+                return result;
+            }
+            throw new JsonSerializationException($"Cannot convert {reader.Value} to int.");
+        }
+        if (reader.TokenType == JsonToken.Integer)
+        {
+            return Convert.ToInt32(reader.Value);
+        }
+        throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing int.");
+    }
+
+    public override void WriteJson(JsonWriter writer, int value, JsonSerializer serializer)
+    {
+        writer.WriteValue(value); // normal int serialization
+    }
+}
+
+
+
+public class RoomDbM
+{
+    [Required]
+    [JsonProperty("floor")]
+    [JsonConverter(typeof(IntFromStringJsonConverter))]
+    public override int Floor { get; set; }
+}
+
+
+
 # Explanation of `Configuration/Extensions` and `DbContext/Extensions`
 
 This document explains the purpose and structure of the files and classes found in the `Configuration/Extensions` and `DbContext/Extensions` folders. It also describes how these extension methods simplify application setup in `Program.cs` by encapsulating configuration and service registration logic.
