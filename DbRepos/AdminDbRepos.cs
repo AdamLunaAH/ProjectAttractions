@@ -15,6 +15,8 @@ namespace DbRepos;
 public class AdminDbRepos
 {
     private const string _seedSource = "./app-seeds.json";
+    private static bool IsAppSeedsEmpty = false;
+
     private readonly ILogger<AdminDbRepos> _logger;
     private Encryptions _encryptions;
     private readonly MainDbContext _dbContext;
@@ -68,7 +70,33 @@ public class AdminDbRepos
     public async Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAsync()
     {
         //Create a seeder
-        var fn = Path.GetFullPath(_seedSource); var seeder = new SeedGenerator(fn);
+        var fn = Path.GetFullPath(_seedSource);
+
+        var info = new FileInfo(fn);
+        if (info.Length < 20 )
+        {
+            IsAppSeedsEmpty = true;
+        }
+
+        if (IsAppSeedsEmpty == true)
+        {
+            try
+            {
+                // Create a master seed file using SeedGenerator and write it to the app-seeds.json location
+                var appSeedPath = new SeedGenerator().WriteMasterStream(fn);
+                _logger.LogInformation("app-seeds file created at: {path}", appSeedPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create app-seeds file at {path}", fn);
+                throw;
+            }
+        }
+
+        //Create a seeder
+
+
+        var seeder = new SeedGenerator(fn);
 
         #region old code
         //remove existing creditcards in the database

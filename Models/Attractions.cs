@@ -40,12 +40,12 @@ public class Attractions : IAttractions, ISeed<Attractions>
         AttractionId = Guid.NewGuid();
 
         // currently sets a random fist name from seeder
-        AttractionName = seeder.FirstName;
+        AttractionName = seeder.TouristAttractionName;
 
         // Category = seeder.FromEnum<AttractionCategories>();
 
         // currently set a random full name from seeder
-        AttractionDescription = seeder.FullName;
+        AttractionDescription = seeder.TouristAttractionDescription.TouristAttractionDescription;
 
         AttractionAddresses = new AttractionAddresses();
 

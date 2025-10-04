@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Seido.Utilities.SeedGenerator
 {
@@ -24,11 +24,6 @@ namespace Seido.Utilities.SeedGenerator
     {
         public string ReviewGood { get; init; }
     }
-
-    public class SeededTouristAttractionDescription
-    {
-        public string TouristAttractionDescription { get; init; }
-    }
     #endregion
 
     public class SeedGenerator : Random
@@ -40,9 +35,6 @@ namespace Seido.Utilities.SeedGenerator
         public string FirstName => _seeds.Names.FirstNames[this.Next(0, _seeds.Names.FirstNames.Count)];
         public string LastName => _seeds.Names.LastNames[this.Next(0, _seeds.Names.LastNames.Count)];
         public string FullName => $"{FirstName} {LastName}";
-        public string TouristAttractionName => _seeds.Names.TouristAttractionNames[this.Next(0, _seeds.Names.TouristAttractionNames.Count)];
-        public string CategoryName => _seeds.Names.CategoryNames[this.Next(0, _seeds.Names.CategoryNames.Count)];
-
         #endregion
 
         #region Addresses
@@ -131,20 +123,6 @@ namespace Seido.Utilities.SeedGenerator
         }
 
         public SeededReviewGood ReviewGood => ReviewsGood(1).FirstOrDefault();
-
-        #endregion
-
-        #region Tourist Attraction Description
-        public List<SeededTouristAttractionDescription> AllTouristAttractionDescriptions => _seeds.TouristAttractionDescriptions
-            .Select(q => new SeededTouristAttractionDescription { TouristAttractionDescription = q.TouristAttractionDescription })
-            .ToList<SeededTouristAttractionDescription>();
-
-        public List<SeededTouristAttractionDescription> TouristAttractionDescriptions(int tryNrOfItems)
-        {
-            return UniqueIndexPickedFromList(tryNrOfItems, AllTouristAttractionDescriptions);
-        }
-
-        public SeededTouristAttractionDescription TouristAttractionDescription => TouristAttractionDescriptions(1).FirstOrDefault();
 
         #endregion
 
@@ -338,7 +316,7 @@ namespace Seido.Utilities.SeedGenerator
             return new SeedJsonContent()
             {
 
-                ReviewsBad = new List<SeedReviewBad>
+                ReviewBad = new List<SeedReviewBad>
 {
     new SeedReviewBad { jsonReviewBad = "Overcrowded and noisy, couldn’t enjoy the view at all." },
     new SeedReviewBad { jsonReviewBad = "Way too expensive for what it offers, very disappointing." },
@@ -360,7 +338,7 @@ new SeedReviewBad { jsonReviewBad = "Bathrooms were dirty and hard to find." },
 new SeedReviewBad { jsonReviewBad = "Tour guide sounded bored and rushed through everything." },
 
 },
-                ReviewsAverage = new List<SeedReviewAverage>
+                ReviewAverage = new List<SeedReviewAverage>
 {
     new SeedReviewAverage { jsonReviewAverage = "It was okay, but nothing particularly special." },
     new SeedReviewAverage { jsonReviewAverage = "The view was decent, but crowded most of the time." },
@@ -382,7 +360,7 @@ new SeedReviewAverage { jsonReviewAverage = "Good atmosphere, but a bit too crow
 new SeedReviewAverage { jsonReviewAverage = "I liked it, but I’ve seen more impressive places elsewhere." },
 
 },
-                ReviewsGood = new List<SeedReviewGood>
+                ReviewGood = new List<SeedReviewGood>
 {
     new SeedReviewGood { jsonReviewGood = "Absolutely stunning! A must-see attraction." },
     new SeedReviewGood { jsonReviewGood = "Breathtaking views and a wonderful atmosphere." },
@@ -402,89 +380,6 @@ new SeedReviewGood { jsonReviewGood = "Worth every minute, especially around sun
 new SeedReviewGood { jsonReviewGood = "Great vibes, friendly staff, and lots to see." },
 new SeedReviewGood { jsonReviewGood = "Perfect spot for photos and making memories." },
 new SeedReviewGood { jsonReviewGood = "Exceeded my expectations, I’d happily come back again." }
-
-},
-                TouristAttractionDescriptions = new List<SeedTouristAttractionDescription>
-{
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A historic landmark known for its cultural significance and stunning architecture." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A natural wonder attracting visitors from all over the world." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Famous for its breathtaking views and unique surroundings." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A popular destination featuring beautiful gardens and walking paths." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Known for its rich history and fascinating stories from the past." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A vibrant attraction filled with art, music, and cultural events." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A peaceful retreat offering scenic landscapes and fresh air." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A must-see spot with iconic views and unforgettable experiences." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "An impressive structure showcasing architectural brilliance." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A lively area known for shopping, dining, and entertainment." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A charming old town full of narrow streets and historic buildings." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Famous for its panoramic viewpoints and sunset scenes." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A beautiful blend of history, culture, and modern attractions." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Renowned for its stunning artwork and priceless collections." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A landmark offering guided tours and educational experiences." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Surrounded by nature, it is a favorite spot for outdoor activities." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A bustling square filled with life, history, and energy." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A coastal destination with sandy beaches and clear waters." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "An awe-inspiring monument that leaves visitors speechless." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A peaceful lake area ideal for boating and picnics." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A spectacular viewpoint overlooking the city skyline." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Famous for its vibrant markets and lively atmosphere." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A quiet park with shaded paths and relaxing green spaces." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A historical museum preserving artifacts and ancient treasures." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "An architectural masterpiece admired worldwide." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A sacred site attracting pilgrims and tourists alike." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A dramatic mountain range popular for hiking and skiing." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A UNESCO World Heritage Site filled with cultural importance." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "An iconic tower recognized as a symbol of the region." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A beautiful cathedral showcasing centuries of craftsmanship." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A famous palace with lavish interiors and sprawling gardens." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A modern landmark representing innovation and design." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A lively festival area hosting seasonal events and performances." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A picturesque village with traditional houses and local charm." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A grand plaza surrounded by historic monuments and cafes." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A peaceful island escape known for its natural beauty." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A dramatic canyon carved by centuries of natural forces." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A fascinating archaeological site that reveals ancient civilizations." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A scenic coastal walkway perfect for sunsets and photos." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A lively entertainment district offering nightlife and dining." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A botanical garden with rare plants and exotic flowers." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "An old fortress standing as a reminder of past battles." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A historic bridge admired for its design and engineering." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A traditional market filled with spices, crafts, and souvenirs." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A mountain peak known for its hiking trails and panoramic views." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A coastal harbor offering boat tours and seafood restaurants." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "An artistic neighborhood full of murals and creative spaces." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A natural park with wildlife, trails, and peaceful scenery." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A cultural center hosting exhibitions, concerts, and events." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A perfect spot to take a stroll and snap some great photos." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Loved wandering around, lots of hidden corners to explore." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Great for families, with plenty of space for kids to play." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Awesome views and a really chill vibe, would visit again." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Packed with history but easy to enjoy even without a guide." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Perfect for a sunny afternoon, lots of cafes nearby." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A cool place to relax and soak up the local atmosphere." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Fun experience, lots of photo opportunities everywhere." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Great for a quick stop, but you could easily spend half a day here." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Loved the vibe, felt like a hidden gem in the city." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Easy to get to, and a lot more interesting than I expected." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Lots of local flavor, perfect for trying traditional snacks." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A really relaxed place to wander, not too crowded." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Perfect spot to watch the sunset and chill." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Felt like stepping back in time, really atmospheric." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Nice little corners to explore, fun for wandering around." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Great for casual photography, loved the colors and textures." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Loved the energy, felt alive but still manageable crowds." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Good mix of shops, food, and local charm." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A short walk but packed with interesting sights." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Cool local spot, perfect for people watching and relaxing." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Easy to navigate, with lots of little surprises along the way." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A friendly, vibrant place to spend a morning or afternoon." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Loved discovering the small details and local touches." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Perfect for a casual day out, lots of benches and greenery." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A lively area with music, street performers, and good energy." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Fun place to just wander and see what you stumble upon." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Great mix of old and new, really interesting architecture." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "A hidden corner that feels peaceful despite the city buzz." },
-    new SeedTouristAttractionDescription { jsonTouristAttractionDescription = "Perfect for grabbing a coffee and watching the world go by." }
 
 },
 
@@ -547,8 +442,8 @@ new SeedAddress {
                     jsonFirstNames = "Harry, Lord, Hermione, Albus, Severus, Ron, Draco, Frodo, Gandalf, Sam, Peregrin, Saruman, Alex, Steve, Maria, John, Sarah, David, Emily, James, Linda, Michael, Robert, Jessica, Daniel, Karen, Mark, Lisa, Paul, Angela, Brian, Susan",
                     jsonLastNames = "Potter, Voldemort, Granger, Dumbledore, Snape, Malfoy, Baggins, the Gray, Gamgee, Took, the White",
                     jsonPetNames = "Max, Charlie, Cooper, Milo, Rocky, Wanda, Teddy, Duke, Leo, Max, Simba, Smith, Johnson, Williams, Brown, Jones, Garcia, Miller, Davis, Rodriguez, Wilson, Martinez, Anderson, Taylor, Thomas, Hernandez, Moore, Martin, Jackson, Thompson, White",
-                    jsonTouristAttractionNames = "Eiffel Tower, Colosseum, Statue of Liberty, Great Wall of China, Machu Picchu, Taj Mahal, Christ the Redeemer, Big Ben, Louvre Museum, Sydney Opera House, Golden Gate Bridge, Mount Fuji, Burj Khalifa, Sagrada Familia, Petra, Acropolis of Athens, Angkor Wat, Mount Everest, Niagara Falls, Stonehenge, Times Square, Mount Kilimanjaro, Buckingham Palace, Grand Canyon, Leaning Tower of Pisa, Vatican City, Mount Rushmore, Alhambra, Tower Bridge, Yellowstone National Park, Hollywood Sign, Chichen Itza, Matterhorn, Kremlin, Saint Basil’s Cathedral, Brandenburg Gate, Palace of Versailles, Red Square, Mount Vesuvius, Yosemite National Park, Mount Etna, Great Barrier Reef, Westminster Abbey, Edinburgh Castle, Table Mountain, CN Tower, Berlin Wall, Neuschwanstein Castle, Central Park, Dubai Mall, Blue Mosque, Shwedagon Pagoda, Forbidden City, Mount Olympus, Pantheon, Piazza San Marco, Rialto Bridge, Dubai Fountain, Hagia Sophia, Cappadocia, Mecca Kaaba, Mount Sinai, Dead Sea, Dome of the Rock, Western Wall, Mount Ararat, Iguazu Falls, Galapagos Islands, Serengeti National Park, Victoria Falls, Mount McKinley, Mount Denali, Rocky Mountains, Banff National Park, Lake Louise, Yosemite Falls, Sequoia National Park, Mount Rainier, Mount St. Helens, Death Valley, Zion National Park, Bryce Canyon, Arches National Park, Antelope Canyon, Monument Valley, Mesa Verde, Hoover Dam, Mount Hood, Crater Lake, Grand Teton, Mount Whitney, Joshua Tree, White Sands, Carlsbad Caverns, Alcatraz Island, Mount Shasta, Redwood National Park, Mount Washington, Acadia National Park, Great Smoky Mountains, Everglades, Key West, Kennedy Space Center, Mount Haleakala, Diamond Head, Pearl Harbor, Waimea Canyon, Bora Bora Lagoon, Mount Cook, Milford Sound, Tongariro National Park, Fiordland, Rotorua Geysers, Hobbiton, Great Ocean Road, Uluru, Kakadu National Park, Fraser Island, Bondi Beach, Daintree Rainforest, Sydney Harbour Bridge, Twelve Apostles, Mount Kosciuszko, Melbourne Royal Botanic Gardens, Taronga Zoo, Singapore Marina Bay Sands, Gardens by the Bay, Merlion, Sentosa Island, Universal Studios Singapore, Orchard Road, Singapore Flyer, Esplanade Theatre, Mount Kinabalu, Borneo Rainforest, Komodo National Park, Borobudur Temple, Prambanan Temple, Bali Rice Terraces, Tanah Lot, Ubud Monkey Forest, Mount Bromo, Raja Ampat Islands, Toba Lake, Gili Islands, Shinjuku Gyoen, Tokyo Tower, Tokyo Disneyland, Tokyo Skytree, Shibuya Crossing, Fushimi Inari Shrine, Kinkaku-ji, Osaka Castle, Nara Park, Itsukushima Shrine, Hiroshima Peace Memorial, Himeji Castle, Okinawa Beaches, Mount Koya, Nikko Shrines, Sapporo Snow Festival, Seoul Tower, Gyeongbokgung Palace, Changdeokgung, Bukchon Hanok Village, Jeju Island, DMZ Korea, Lotte World, Everland, Mount Hallasan, Bukhansan National Park, Hong Kong Disneyland, Victoria Peak, Tian Tan Buddha, Star Ferry, Temple Street Market, Ocean Park Hong Kong, Macau Tower, Ruins of St. Paul’s, Venetian Macau, Senado Square, Mount Huangshan, Terracotta Army, Li River, Zhangjiajie National Forest, West Lake, Potala Palace, Mount Kailash, Mount Emei, Leshan Giant Buddha, Jiuzhaigou Valley, Silk Road, Mount Everest Base Camp, Mount K2, Karakoram Highway, Lahore Fort, Badshahi Mosque, Hunza Valley, Mohenjo-daro, Faisal Mosque, Mount Annapurna, Kathmandu Durbar Square, Bhaktapur Durbar Square, Swayambhunath Stupa, Lumbini, Mount Everest Base Camp Nepal, Bhutan Tiger’s Nest, Thimphu, Punakha Dzong, Paro Valley",
-                    jsonCategoryNames = "Historical Sites, Museums, Art Galleries, Castles, Palaces, Ancient Ruins, Temples, Churches, Cathedrals, Mosques, Monasteries, Archaeological Sites, Cultural Villages, Theatres, Opera Houses, Landmarks, Monuments, Statues, Bridges, Towers, Natural Wonders, Mountains, Volcanoes, Caves, Waterfalls, Lakes, Rivers, Beaches, Islands, National Parks, Wildlife Reserves, Botanical Gardens, Zoos, Aquariums, Theme Parks, Amusement Parks, Markets, Shopping Districts, Festivals, Heritage Trails, Scenic Roads",
+                    jsonTouristAttractions = "Eiffel Tower, Colosseum, Statue of Liberty, Great Wall of China, Machu Picchu, Taj Mahal, Christ the Redeemer, Big Ben, Louvre Museum, Sydney Opera House, Golden Gate Bridge, Mount Fuji, Burj Khalifa, Sagrada Familia, Petra, Acropolis of Athens, Angkor Wat, Mount Everest, Niagara Falls, Stonehenge, Times Square, Mount Kilimanjaro, Buckingham Palace, Grand Canyon, Leaning Tower of Pisa, Vatican City, Mount Rushmore, Alhambra, Tower Bridge, Yellowstone National Park, Hollywood Sign, Chichen Itza, Matterhorn, Kremlin, Saint Basil’s Cathedral, Brandenburg Gate, Palace of Versailles, Red Square, Mount Vesuvius, Yosemite National Park, Mount Etna, Great Barrier Reef, Westminster Abbey, Edinburgh Castle, Table Mountain, CN Tower, Berlin Wall, Neuschwanstein Castle, Central Park, Dubai Mall, Blue Mosque, Shwedagon Pagoda, Forbidden City, Mount Olympus, Pantheon, Piazza San Marco, Rialto Bridge, Dubai Fountain, Hagia Sophia, Cappadocia, Mecca Kaaba, Mount Sinai, Dead Sea, Dome of the Rock, Western Wall, Mount Ararat, Iguazu Falls, Galapagos Islands, Serengeti National Park, Victoria Falls, Mount McKinley, Mount Denali, Rocky Mountains, Banff National Park, Lake Louise, Yosemite Falls, Sequoia National Park, Mount Rainier, Mount St. Helens, Death Valley, Zion National Park, Bryce Canyon, Arches National Park, Antelope Canyon, Monument Valley, Mesa Verde, Hoover Dam, Mount Hood, Crater Lake, Grand Teton, Mount Whitney, Joshua Tree, White Sands, Carlsbad Caverns, Alcatraz Island, Mount Shasta, Redwood National Park, Mount Washington, Acadia National Park, Great Smoky Mountains, Everglades, Key West, Kennedy Space Center, Mount Haleakala, Diamond Head, Pearl Harbor, Waimea Canyon, Bora Bora Lagoon, Mount Cook, Milford Sound, Tongariro National Park, Fiordland, Rotorua Geysers, Hobbiton, Great Ocean Road, Uluru, Kakadu National Park, Fraser Island, Bondi Beach, Daintree Rainforest, Sydney Harbour Bridge, Twelve Apostles, Mount Kosciuszko, Melbourne Royal Botanic Gardens, Taronga Zoo, Singapore Marina Bay Sands, Gardens by the Bay, Merlion, Sentosa Island, Universal Studios Singapore, Orchard Road, Singapore Flyer, Esplanade Theatre, Mount Kinabalu, Borneo Rainforest, Komodo National Park, Borobudur Temple, Prambanan Temple, Bali Rice Terraces, Tanah Lot, Ubud Monkey Forest, Mount Bromo, Raja Ampat Islands, Toba Lake, Gili Islands, Shinjuku Gyoen, Tokyo Tower, Tokyo Disneyland, Tokyo Skytree, Shibuya Crossing, Fushimi Inari Shrine, Kinkaku-ji, Osaka Castle, Nara Park, Itsukushima Shrine, Hiroshima Peace Memorial, Himeji Castle, Okinawa Beaches, Mount Koya, Nikko Shrines, Sapporo Snow Festival, Seoul Tower, Gyeongbokgung Palace, Changdeokgung, Bukchon Hanok Village, Jeju Island, DMZ Korea, Lotte World, Everland, Mount Hallasan, Bukhansan National Park, Hong Kong Disneyland, Victoria Peak, Tian Tan Buddha, Star Ferry, Temple Street Market, Ocean Park Hong Kong, Macau Tower, Ruins of St. Paul’s, Venetian Macau, Senado Square, Mount Huangshan, Terracotta Army, Li River, Zhangjiajie National Forest, West Lake, Potala Palace, Mount Kailash, Mount Emei, Leshan Giant Buddha, Jiuzhaigou Valley, Silk Road, Mount Everest Base Camp, Mount K2, Karakoram Highway, Lahore Fort, Badshahi Mosque, Hunza Valley, Mohenjo-daro, Faisal Mosque, Mount Annapurna, Kathmandu Durbar Square, Bhaktapur Durbar Square, Swayambhunath Stupa, Lumbini, Mount Everest Base Camp Nepal, Bhutan Tiger’s Nest, Thimphu, Punakha Dzong, Paro Valley",
+                    jsonCategories = "Historical Sites, Museums, Art Galleries, Castles, Palaces, Ancient Ruins, Temples, Churches, Cathedrals, Mosques, Monasteries, Archaeological Sites, Cultural Villages, Theatres, Opera Houses, Landmarks, Monuments, Statues, Bridges, Towers, Natural Wonders, Mountains, Volcanoes, Caves, Waterfalls, Lakes, Rivers, Beaches, Islands, National Parks, Wildlife Reserves, Botanical Gardens, Zoos, Aquariums, Theme Parks, Amusement Parks, Markets, Shopping Districts, Festivals, Heritage Trails, Scenic Roads",
                 },
                 Domains = new SeedDomains
                 {
@@ -638,18 +533,6 @@ new SeedAddress {
             public string ReviewGood => _jsonReviewGood;
 
         }
-        class SeedTouristAttractionDescription
-        {
-            #region Good reviews towards json file
-            string _jsonTouristAttractionDescription;
-            public string jsonTouristAttractionDescription { get => _jsonTouristAttractionDescription; set => _jsonTouristAttractionDescription = value; }
-
-            #endregion
-
-            [JsonIgnore]
-            public string TouristAttractionDescription => _jsonTouristAttractionDescription;
-
-        }
         class SeedAddress
         {
             #region Country towards json file
@@ -729,27 +612,6 @@ new SeedAddress {
                     _petNames = _jsonPetNames.Split(", ").ToList();
                 }
             }
-            string _jsonTouristAttractionNames;
-            public string jsonTouristAttractionNames
-            {
-                get => _jsonTouristAttractionNames;
-                set
-                {
-                    _jsonTouristAttractionNames = value;
-                    _touristAttractionNames = _jsonTouristAttractionNames.Split(", ").ToList();
-                }
-            }
-
-            string _jsonCategoryNames;
-            public string jsonCategoryNames
-            {
-                get => _jsonCategoryNames;
-                set
-                {
-                    _jsonCategoryNames = value;
-                    _categoryNames = _jsonCategoryNames.Split(", ").ToList();
-                }
-            }
             #endregion
 
             List<string> _firstNames;
@@ -763,17 +625,6 @@ new SeedAddress {
             List<string> _petNames;
             [JsonIgnore]
             public List<string> PetNames => _petNames;
-
-            List<string> _touristAttractionNames;
-            [JsonIgnore]
-            public List<string> TouristAttractionNames => _touristAttractionNames;
-
-            List<string> _categoryNames;
-            [JsonIgnore]
-            public List<string> CategoryNames => _categoryNames;
-            List<string> _TouristAttractionDescription;
-            [JsonIgnore]
-            public List<string> TouristAttractionDescriptions => _TouristAttractionDescription;
         }
         class SeedDomains
         {
@@ -798,11 +649,9 @@ new SeedAddress {
         class SeedJsonContent
         {
             public List<SeedAddress> Addresses { get; set; } = new List<SeedAddress>();
-            public List<SeedReviewBad> ReviewsBad { get; set; } = new List<SeedReviewBad>();
-            public List<SeedReviewAverage> ReviewsAverage { get; set; } = new List<SeedReviewAverage>();
-            public List<SeedReviewGood> ReviewsGood { get; set; } = new List<SeedReviewGood>();
-            public List<SeedTouristAttractionDescription> TouristAttractionDescriptions { get; set; } = new List<SeedTouristAttractionDescription>();
-
+            public List<SeedReviewBad> ReviewsBad { get; set; } = new List<SeededReviewBad>();
+            public List<SeedReviewAverage> ReviewsAverage { get; set; } = new List<SeededReviewAverage>();
+            public List<SeedReviewGood> ReviewsGood { get; set; } = new List<SeededReviewGood>();
 
             public SeedNames Names { get; set; } = new SeedNames();
             public SeedDomains Domains { get; set; } = new SeedDomains();

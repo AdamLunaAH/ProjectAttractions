@@ -39,6 +39,7 @@ public class Reviews : IReviews, ISeed<Reviews>
 
     public virtual Reviews Seed(SeedGenerator seeder)
     {
+        string ReviewTextString = "";
         Seeded = true;
         ReviewScore = seeder.Next(0, 5);
         ReviewId = Guid.NewGuid();
@@ -46,7 +47,23 @@ public class Reviews : IReviews, ISeed<Reviews>
         // UserId = Guid.NewGuid();
         // this.Attractions = new Attractions();
         // AttractionId = Guid.NewGuid();
-        ReviewText = seeder.LatinSentences(2).FirstOrDefault();
+
+        switch (ReviewScore)
+        {
+            case <= 1:
+                ReviewTextString = seeder.ReviewBad.ReviewBad;
+                break;
+            case >= 2 and <= 3:
+                ReviewTextString = seeder.ReviewAverage.ReviewAverage;
+                break;
+            case >= 4:
+                ReviewTextString = seeder.ReviewGood.ReviewGood;
+                break;
+            default:
+                throw new Exception("Something went wrong when generating a review score or review text");
+        }
+
+        ReviewText = ReviewTextString;
 
         CreatedAt = seeder.DateAndTime(2020, 2025);
         // UpdatedAat = DateTime.Now;

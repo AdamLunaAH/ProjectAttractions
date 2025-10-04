@@ -27,7 +27,7 @@ public class Categories : ICategories, ISeed<Categories>
     {
         Seeded = true;
         CategoryId = Guid.NewGuid();
-        CategoryName = seeder.PetName;
+        CategoryName = seeder.CategoryName;
 
         return this;
     }
