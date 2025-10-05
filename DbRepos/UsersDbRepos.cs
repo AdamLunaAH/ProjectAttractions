@@ -211,8 +211,6 @@ public class UsersDbRepos
 
     public async Task<ResponseItemDto<IUsers>> CreateUserAsync(UserCreateDto itemDto)
     {
-        // if (itemDto.UserId != null)
-        //     throw new ArgumentException($"{nameof(itemDto.UserId)} must be null when creating a new object");
 
         //I cannot have duplicates in the Users table, so check that
         var query2 = _dbContext.Users
@@ -248,21 +246,10 @@ public class UsersDbRepos
 
     private async Task navProp_UsersCUdto_to_UsersDbM(UserCreateDto itemDtoSrc, UsersDbM itemDst)
     {
-        //update FriendsDbM from itemDto.FriendId
-        List<ReviewsDbM> reviews = null;
-        // if (itemDtoSrc.ReviewId != null)
-        // {
-        //     reviews = new List<ReviewsDbM>();
-        //     foreach (var id in itemDtoSrc.ReviewId)
-        //     {
-        //         var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
-        //         if (f == null)
-        //             throw new ArgumentException($"Item id {id} not existing");
 
-        //         reviews.Add(f);
-        //     }
-        // }
-        itemDst.ReviewsDbM = reviews;
+        List<ReviewsDbM> reviews = null;
+
+        await Task.Run(() => itemDst.ReviewsDbM = reviews);
     }
 
     private async Task navProp_UsersCUdto_to_UsersDbM(UsersCuDto itemDtoSrc, UsersDbM itemDst)

@@ -18,6 +18,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 builder.Services.AddEndpointsApiExplorer();
@@ -90,6 +91,8 @@ builder.Services.AddScoped<ISeederService, SeederServiceDb>();
 
 
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandling>();
 
 // Configure the HTTP request pipeline.
 // for the purpose of this example, we will use Swagger also in production

@@ -163,9 +163,11 @@ namespace Models.Utilities.SeedGenerator
                     int year = this.Next(Math.Min(fromYear.Value, toYear.Value),
                         Math.Max(fromYear.Value, toYear.Value));
                     int month = this.Next(1, 13);
-                    int day = this.Next(1, 32);
+                    //int day = this.Next(1, 32);
+                    int day = this.Next(1, DateTime.DaysInMonth(year, month) + 1);
 
                     _date = new DateTime(year, month, day);
+
                     dateOK = true;
                 }
                 catch
@@ -292,7 +294,7 @@ namespace Models.Utilities.SeedGenerator
 
         //Pick a number of items, all with unique indexes, from a list of TItem
         public List<TItem> UniqueIndexPickedFromList<TItem>(int tryNrOfItems, List<TItem> list)
-             where TItem : new()
+                where TItem : new()
         {
             //Create a hashed list of unique indexes
             HashSet<int> _set = new HashSet<int>();
@@ -640,7 +642,7 @@ new SeedAddress {
         }
         class SeedTouristAttractionDescription
         {
-            #region Good reviews towards json file
+            #region Tourist attraction descriptions towards json file
             string _jsonTouristAttractionDescription;
             public string jsonTouristAttractionDescription { get => _jsonTouristAttractionDescription; set => _jsonTouristAttractionDescription = value; }
 
@@ -771,9 +773,9 @@ new SeedAddress {
             List<string> _categoryNames;
             [JsonIgnore]
             public List<string> CategoryNames => _categoryNames;
-            List<string> _TouristAttractionDescription;
-            [JsonIgnore]
-            public List<string> TouristAttractionDescriptions => _TouristAttractionDescription;
+            // List<string> _TouristAttractionDescription;
+            // [JsonIgnore]
+            // public List<string> TouristAttractionDescriptions => _TouristAttractionDescription;
         }
         class SeedDomains
         {

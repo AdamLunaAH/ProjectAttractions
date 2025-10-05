@@ -37,32 +37,10 @@ public class SeederDbRepos
     private async Task<ResponseItemDto<SupUsrInfoAllDto>> DbInfo()
     {
         var info = new SupUsrInfoAllDto();
-        info.Db = await _dbContext.SUInfoDbView.FirstAsync();
-        // info.Db = new SupUsrInfoDbDto
-        // {
-        //     // NrUsers = await _dbContext.UsersDb.CountAsync(),
-        //     // NrSeededUsers = await _dbContext.UsersDb.Where(f => f.Seeded).CountAsync(),
-        //     // NrUnseededUsers = await _dbContext.UsersDb.Where(f => !f.Seeded).CountAsync(),
+        info.Db = await _dbContext.SUInfoDbView
+    .OrderBy(v => 1)
+    .FirstOrDefaultAsync();
 
-        //     // NrSeededAttractionAddresses = await _dbContext.AttractionAddressesDb.Where(f => f.Seeded).CountAsync(),
-        //     // NrUnseededAttractionAddresses = await _dbContext.AttractionAddressesDb.Where(f => !f.Seeded).CountAsync(),
-        //     // NrAttractionAddresses = await _dbContext.AttractionAddressesDb.CountAsync(),
-        //     // NrAttractions = await _dbContext.AttractionsDb.CountAsync(),
-
-        //     // NrSeededAttractions = await _dbContext.AttractionsDb.Where(f => f.Seeded).CountAsync(),
-        //     // NrUnseededAttractions = await _dbContext.AttractionsDb.Where(f => !f.Seeded).CountAsync(),
-        //     // NrAttractionsWithNoAddress = await _dbContext.AttractionsDb.Where(f => f.AddressId == null).CountAsync(),
-
-        //     // NrCategories = await _dbContext.CategoriesDb.CountAsync(),
-        //     // NrSeededCategories = await _dbContext.CategoriesDb.Where(f => f.Seeded).CountAsync(),
-        //     // NrUnseededCategories = await _dbContext.CategoriesDb.Where(f => !f.Seeded).CountAsync(),
-
-        //     // NrReviews = await _dbContext.ReviewsDb.CountAsync(),
-        //     // NrSeededReviews = await _dbContext.ReviewsDb.Where(f => f.Seeded).CountAsync(),
-        //     // NrUnseededReviews = await _dbContext.ReviewsDb.Where(f => !f.Seeded).CountAsync(),
-
-
-        // };
 
         return new ResponseItemDto<SupUsrInfoAllDto>
         {
@@ -73,7 +51,6 @@ public class SeederDbRepos
             Item = info
         };
     }
-
 
 
     public async Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAllAsync()
@@ -100,21 +77,12 @@ public class SeederDbRepos
                 throw;
             }
         }
+
         //Create a seeder
         var seeder = new SeedGenerator(fn);
 
         #region clear database
-        // _dbContext.Reviews.RemoveRange(_dbContext.Reviews);
-        // _dbContext.Categories.RemoveRange(_dbContext.Categories);
-        // _dbContext.AttractionAddresses.RemoveRange(_dbContext.AttractionAddresses);
-        // _dbContext.Attractions.RemoveRange(_dbContext.Attractions);
-        // _dbContext.Users.RemoveRange(_dbContext.Users);
-        // await _dbContext.SaveChangesAsync();
-        // await RemoveSeedAsync();
-
         await _dbContext.Database.ExecuteSqlRawAsync("EXEC supusr.sp_ClearDatabase");
-
-
         #endregion
 
         var rnd = new Random();
@@ -124,16 +92,14 @@ public class SeederDbRepos
         var existingEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var user in users)
         {
-            // ensure unique email in set and DB
             var originalEmail = user.Email;
             var email = originalEmail;
             int attempts = 0;
             while (existingEmails.Contains(email) || await _dbContext.Users.AnyAsync(u => u.Email == email))
             {
                 attempts++;
-                // append a random number suffix if conflict
                 email = $"{originalEmail.Split('@')[0]}{seeder.Next(1, 10000)}@{originalEmail.Split('@')[1]}";
-                if (attempts > 10) // fallback safety
+                if (attempts > 10)
                     email = $"{originalEmail.Split('@')[0]}{Guid.NewGuid():N}@{originalEmail.Split('@')[1]}";
             }
             user.Email = email.ToLower();
@@ -143,9 +109,7 @@ public class SeederDbRepos
 
         await _dbContext.SaveChangesAsync();
 
-        // --- 2) Create a pool of addresses (reused by many attractions) ---
-        // We'll create fewer addresses than attractions so they can be reused.
-        // e.g. create 200 addresses to be shared.
+        // --- 2) Create Addresses (200) ---
         var addressPoolSize = 200;
         var addresses = seeder.ItemsToList<AttractionAddressesDbM>(addressPoolSize);
         foreach (var addr in addresses)
@@ -157,21 +121,21 @@ public class SeederDbRepos
         // --- 3) Prepare category dedupe store ---
         var existingCategories = new List<CategoriesDbM>();
 
-        // --- 4) Create 1200 attractions ---
+        // --- 4) Create 1200 attractions with duplicate-safe logic ---
         var attractionCount = 1200;
         var attractions = seeder.ItemsToList<AttractionsDbM>(attractionCount);
+
+        var uniqueKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var attraction in attractions)
         {
             // 1-in-10 chance of NOT having an address
-            var useAddress = seeder.Next(1, 11) != 1; // 1..10 -> treat 1 as "no address"
+            var useAddress = seeder.Next(1, 11) != 1;
             if (useAddress && addresses.Count > 0)
             {
-                // pick random address from the pool
                 var addr = addresses[rnd.Next(addresses.Count)];
                 attraction.AttractionAddressesDbM = addr;
                 attraction.AddressId = addr.AddressId;
-                // also add the attraction to address navigation if you want
                 addr.AttractionsDbM ??= new List<AttractionsDbM>();
                 addr.AttractionsDbM.Add(attraction);
             }
@@ -182,13 +146,12 @@ public class SeederDbRepos
             }
 
             // Categories: 0 - 6 categories
-            var categoryCount = seeder.Next(0, 7); // 0..6
+            var categoryCount = seeder.Next(0, 7);
             if (categoryCount > 0)
             {
                 attraction.CategoriesDbM ??= new List<CategoriesDbM>();
                 for (int c = 0; c < categoryCount; c++)
                 {
-                    // create candidate category
                     var candidate = seeder.ItemsToList<CategoriesDbM>(1).First();
                     var existing = existingCategories
                         .FirstOrDefault(ec => string.Equals(ec.CategoryName, candidate.CategoryName, StringComparison.OrdinalIgnoreCase));
@@ -199,7 +162,6 @@ public class SeederDbRepos
                         _dbContext.Categories.Add(existing);
                     }
 
-                    // avoid duplicate category on same attraction
                     if (!attraction.CategoriesDbM.Any(x => string.Equals(x.CategoryName, existing.CategoryName, StringComparison.OrdinalIgnoreCase)))
                     {
                         attraction.CategoriesDbM.Add(existing);
@@ -209,44 +171,55 @@ public class SeederDbRepos
                 }
             }
 
+            // --- Ensure attraction uniqueness (AttractionName + Description + AddressId) ---
+            int suffix = 1;
+            bool unique = false;
+            string key = $"{attraction.AttractionName}|{attraction.AttractionDescription}|{attraction.AddressId}";
+
+            while (!unique)
+            {
+                if (uniqueKeys.Contains(key) || await _dbContext.Attractions.AnyAsync(a =>
+                    a.AttractionName == attraction.AttractionName &&
+                    a.AttractionDescription == attraction.AttractionDescription &&
+                    a.AddressId == attraction.AddressId))
+                {
+                    attraction.AttractionDescription = $"{attraction.AttractionDescription} (Alt {suffix++})";
+                    key = $"{attraction.AttractionName}|{attraction.AttractionDescription}|{attraction.AddressId}";
+                }
+                else
+                {
+                    uniqueKeys.Add(key);
+                    unique = true;
+                }
+            }
+
             _dbContext.Attractions.Add(attraction);
         }
 
-
-
-        // Persist categories added during attraction loop
         await _dbContext.SaveChangesAsync();
 
-        // --- 5) Reviews: For each attraction create 0 - 20 reviews, but at most one per user/attraction.
-        // We already have 'users' list loaded from DB earlier; make sure we fetch fresh user list from DB with keys
-        var userList = await _dbContext.Users.ToListAsync(); // UsersDbM list
+        // --- 5) Create Reviews ---
+        var userList = await _dbContext.Users.ToListAsync();
         var userCount = userList.Count;
         foreach (var attraction in attractions)
         {
-            // number of reviews for this attraction: 0..20 (cap at number of users)
-            var reviewCount = seeder.Next(0, 21); // 0..20
+            var reviewCount = seeder.Next(0, 21);
             if (reviewCount == 0 || userCount == 0) continue;
 
-            // cap at number of users (one review per user constraint)
             reviewCount = Math.Min(reviewCount, userCount);
-
-            // random unique users for this attraction: shuffle indices and take reviewCount
             var userIndices = Enumerable.Range(0, userCount).OrderBy(_ => rnd.Next()).Take(reviewCount).ToList();
 
             foreach (var idx in userIndices)
             {
                 var user = userList[idx];
-
                 var review = seeder.ItemsToList<ReviewsDbM>(1).First();
                 review.UsersDbM = user;
                 review.UserId = user.UserId;
                 review.AttractionsDbM = attraction;
                 review.AttractionId = attraction.AttractionId;
 
-                // push to DB
                 _dbContext.Reviews.Add(review);
 
-                // set navigation collections locally if needed
                 user.ReviewsDbM ??= new List<ReviewsDbM>();
                 user.ReviewsDbM.Add(review);
 
@@ -258,80 +231,263 @@ public class SeederDbRepos
         LogChangeTracker();
         await _dbContext.SaveChangesAsync();
         LogChangeTracker();
+
         return await DbInfo();
     }
 
 
-    // public async Task<ResponseItemDto<SupUsrInfoAllDto>> RemoveSeedAsync()
+    // public async Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAllAsync()
     // {
-    //     // Create parameters based on database provider
-    //     var connection = _dbContext.Database.GetDbConnection();
-    //     using var command = connection.CreateCommand();
-    //     command.CommandType = CommandType.StoredProcedure;
-
-    //     // List<DbParameter> parameters;
-
-    //         // SQL Server parameters (default)
-    //         command.CommandText = "supusr.sp_ClearDatabase";
-    //         // parameters = new List<DbParameter>
-    //         // {
-    //         //     new SqlParameter("nrReviewsAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
-    //         //     new SqlParameter("nrCategoriesAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
-    //         //     new SqlParameter("nrAddressesAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
-    //         //     new SqlParameter("nrAttractionsAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
-    //         //     new SqlParameter("nrUsersAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
-    //         // };
-
-
-    //     // command.Parameters.AddRange(parameters.ToArray());
-
-    //     if (connection.State != ConnectionState.Open)
-    //         await connection.OpenAsync();
-
-    //     else
+    //     //Create a seeder
+    //     var fn = Path.GetFullPath(_seedSource);
+    //     var info = new FileInfo(fn);
+    //     if (info.Length < 20)
     //     {
-    //         // Execute the stored procedure and get the result set
-    //         using var reader = await command.ExecuteReaderAsync();
+    //         IsAppSeedsEmpty = true;
+    //     }
 
-    //         // map reader result into SupUsrInfoDbDto result_set
-    //         // SupUsrInfoDbDto result_set = null;
-    //         // if (reader.HasRows)
-    //         // {
-    //         //     // Read the first result set which should be InfoDbView
-    //         //     await reader.ReadAsync();
+    //     if (IsAppSeedsEmpty == true)
+    //     {
+    //         try
+    //         {
+    //             // Create a master seed file using SeedGenerator and write it to the app-seeds.json location
+    //             var appSeedPath = new SeedGenerator().WriteMasterStream(fn);
+    //             _logger.LogInformation("app-seeds file created at: {path}", appSeedPath);
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             _logger.LogError(ex, "Failed to create app-seeds file at {path}", fn);
+    //             throw;
+    //         }
+    //     }
+    //     //Create a seeder
+    //     var seeder = new SeedGenerator(fn);
 
-    //         //     result_set = new SupUsrInfoDbDto
-    //         //     {
-    //         //         // Populate properties from the reader
-    //         //         NrUsers = reader.GetInt32(reader.GetOrdinal("NrUsers")),
-    //         //         NrSeededUsers = reader.GetInt32(reader.GetOrdinal("NrSeededUsers")),
-    //         //         NrUnseededUsers = reader.GetInt32(reader.GetOrdinal("NrUnseededUsers")),
-    //         //         NrAttractionsWithNoAddress = reader.GetInt32(reader.GetOrdinal("NrAttractionsWithNoAddress")),
-    //         //         NrSeededAttractionAddresses = reader.GetInt32(reader.GetOrdinal("NrSeededAttractionAddresses")),
-    //         //         NrUnseededAttractionAddresses = reader.GetInt32(reader.GetOrdinal("NrUnseededAttractionAddresses")),
-    //         //         NrSeededAttractions = reader.GetInt32(reader.GetOrdinal("NrSeededAttractions")),
-    //         //         NrUnseededAttractions = reader.GetInt32(reader.GetOrdinal("NrUnseededAttractions")),
-    //         //         NrSeededCategories = reader.GetInt32(reader.GetOrdinal("NrSeededCategories")),
-    //         //         NrUnseededCategories = reader.GetInt32(reader.GetOrdinal("NrUnseededCategories")),
-    //         //         NrSeededReviews = reader.GetInt32(reader.GetOrdinal("NrSeededReviews")),
-    //         //         NrUnseededReviews = reader.GetInt32(reader.GetOrdinal("NrUnseededReviews"))
+    //     #region clear database
+    //     await _dbContext.Database.ExecuteSqlRawAsync("EXEC supusr.sp_ClearDatabase");
 
-    //         //     };
-    //         // }
-    //         await reader.CloseAsync();
-    //         // result_set can now be accessed - not used in this example
+
+    //     #endregion
+
+    //     var rnd = new Random();
+
+    //     // --- 1) Create Users (80) and ensure unique emails ---
+    //     var users = seeder.ItemsToList<UsersDbM>(80);
+    //     var existingEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    //     foreach (var user in users)
+    //     {
+    //         // ensure unique email in set and DB
+    //         var originalEmail = user.Email;
+    //         var email = originalEmail;
+    //         int attempts = 0;
+    //         while (existingEmails.Contains(email) || await _dbContext.Users.AnyAsync(u => u.Email == email))
+    //         {
+    //             attempts++;
+    //             // append a random number suffix if conflict
+    //             email = $"{originalEmail.Split('@')[0]}{seeder.Next(1, 10000)}@{originalEmail.Split('@')[1]}";
+    //             if (attempts > 10) // fallback safety
+    //                 email = $"{originalEmail.Split('@')[0]}{Guid.NewGuid():N}@{originalEmail.Split('@')[1]}";
+    //         }
+    //         user.Email = email.ToLower();
+    //         existingEmails.Add(user.Email);
+    //         _dbContext.Users.Add(user);
+    //     }
+
+    //     await _dbContext.SaveChangesAsync();
+
+    //     // --- 2) Create a pool of addresses (reused by many attractions) ---
+    //     // We'll create fewer addresses than attractions so they can be reused.
+    //     // e.g. create 200 addresses to be shared.
+    //     var addressPoolSize = 200;
+    //     var addresses = seeder.ItemsToList<AttractionAddressesDbM>(addressPoolSize);
+    //     foreach (var addr in addresses)
+    //     {
+    //         _dbContext.AttractionAddresses.Add(addr);
+    //     }
+    //     await _dbContext.SaveChangesAsync();
+
+    //     // --- 3) Prepare category dedupe store ---
+    //     var existingCategories = new List<CategoriesDbM>();
+
+    //     // // --- 4) Create 1200 attractions ---
+    //     // var attractionCount = 1200;
+    //     // var attractions = seeder.ItemsToList<AttractionsDbM>(attractionCount);
+
+    //     // foreach (var attraction in attractions)
+    //     // {
+    //     //     // 1-in-10 chance of NOT having an address
+    //     //     var useAddress = seeder.Next(1, 11) != 1; // 1..10 -> treat 1 as "no address"
+    //     //     if (useAddress && addresses.Count > 0)
+    //     //     {
+    //     //         // pick random address from the pool
+    //     //         var addr = addresses[rnd.Next(addresses.Count)];
+    //     //         attraction.AttractionAddressesDbM = addr;
+    //     //         attraction.AddressId = addr.AddressId;
+    //     //         // also add the attraction to address navigation if you want
+    //     //         addr.AttractionsDbM ??= new List<AttractionsDbM>();
+    //     //         addr.AttractionsDbM.Add(attraction);
+    //     //     }
+    //     //     else
+    //     //     {
+    //     //         attraction.AttractionAddressesDbM = null;
+    //     //         attraction.AddressId = null;
+    //     //     }
+
+    //     //     // Categories: 0 - 6 categories
+    //     //     var categoryCount = seeder.Next(0, 7); // 0..6
+    //     //     if (categoryCount > 0)
+    //     //     {
+    //     //         attraction.CategoriesDbM ??= new List<CategoriesDbM>();
+    //     //         for (int c = 0; c < categoryCount; c++)
+    //     //         {
+    //     //             // create candidate category
+    //     //             var candidate = seeder.ItemsToList<CategoriesDbM>(1).First();
+    //     //             var existing = existingCategories
+    //     //                 .FirstOrDefault(ec => string.Equals(ec.CategoryName, candidate.CategoryName, StringComparison.OrdinalIgnoreCase));
+    //     //             if (existing == null)
+    //     //             {
+    //     //                 existing = candidate;
+    //     //                 existingCategories.Add(existing);
+    //     //                 _dbContext.Categories.Add(existing);
+    //     //             }
+
+    //     //             // avoid duplicate category on same attraction
+    //     //             if (!attraction.CategoriesDbM.Any(x => string.Equals(x.CategoryName, existing.CategoryName, StringComparison.OrdinalIgnoreCase)))
+    //     //             {
+    //     //                 attraction.CategoriesDbM.Add(existing);
+    //     //                 existing.AttractionsDbM ??= new List<AttractionsDbM>();
+    //     //                 existing.AttractionsDbM.Add(attraction);
+    //     //             }
+    //     //         }
+    //     //     }
+
+    //     //     _dbContext.Attractions.Add(attraction);
+    //     // }
+    //     // --- 4) Create 1200 attractions ---
+    //     var attractionCount = 1200;
+    //     var attractions = seeder.ItemsToList<AttractionsDbM>(attractionCount);
+
+    //     foreach (var attraction in attractions)
+    //     {
+    //         // 1-in-10 chance of NOT having an address
+    //         var useAddress = seeder.Next(1, 11) != 1;
+    //         if (useAddress && addresses.Count > 0)
+    //         {
+    //             var addr = addresses[rnd.Next(addresses.Count)];
+    //             attraction.AttractionAddressesDbM = addr;
+    //             attraction.AddressId = addr.AddressId;
+    //             addr.AttractionsDbM ??= new List<AttractionsDbM>();
+    //             addr.AttractionsDbM.Add(attraction);
+    //         }
+    //         else
+    //         {
+    //             attraction.AttractionAddressesDbM = null;
+    //             attraction.AddressId = null;
+    //         }
+
+    //         // Categories: 0 - 6 categories
+    //         var categoryCount = seeder.Next(0, 7);
+    //         if (categoryCount > 0)
+    //         {
+    //             attraction.CategoriesDbM ??= new List<CategoriesDbM>();
+    //             for (int c = 0; c < categoryCount; c++)
+    //             {
+    //                 var candidate = seeder.ItemsToList<CategoriesDbM>(1).First();
+    //                 var existing = existingCategories
+    //                     .FirstOrDefault(ec => string.Equals(ec.CategoryName, candidate.CategoryName, StringComparison.OrdinalIgnoreCase));
+    //                 if (existing == null)
+    //                 {
+    //                     existing = candidate;
+    //                     existingCategories.Add(existing);
+    //                     _dbContext.Categories.Add(existing);
+    //                 }
+
+    //                 if (!attraction.CategoriesDbM.Any(x => string.Equals(x.CategoryName, existing.CategoryName, StringComparison.OrdinalIgnoreCase)))
+    //                 {
+    //                     attraction.CategoriesDbM.Add(existing);
+    //                     existing.AttractionsDbM ??= new List<AttractionsDbM>();
+    //                     existing.AttractionsDbM.Add(attraction);
+    //                 }
+    //             }
+    //         }
+
+    //         // Handle duplicates safely
+    //         int suffix = 1;
+    //         bool unique = false;
+
+    //         while (!unique)
+    //         {
+    //             bool exists = await _dbContext.Attractions.AnyAsync(a =>
+    //                 a.AttractionName == attraction.AttractionName &&
+    //                 a.AttractionDescription == attraction.AttractionDescription &&
+    //                 a.AddressId == attraction.AddressId);
+
+    //             if (!exists)
+    //             {
+    //                 unique = true;
+    //             }
+    //             else
+    //             {
+    //                 // Append something to make it unique
+    //                 attraction.AttractionDescription = $"{attraction.AttractionDescription} (Alt {suffix++})";
+    //             }
+    //         }
+
+    //         _dbContext.Attractions.Add(attraction);
     //     }
 
 
-    //     // Output parameters can now be accessed - not used in this example
-    //     // int NrReviews = (int)parameters.First(p => p.ParameterName == "nrReviewsAffected").Value;
-    //     // int NrCategories = (int)parameters.First(p => p.ParameterName == "nrCategoriesAffected").Value;
-    //     // int NrAddresses = (int)parameters.First(p => p.ParameterName == "nrAddressesAffected").Value;
-    //     // int NrAttractions = (int)parameters.First(p => p.ParameterName == "nrAttractionsAffected").Value;
-    //     // int NrUsers = (int)parameters.First(p => p.ParameterName == "nrUsersAffected").Value;
 
+    //     // Persist categories added during attraction loop
+    //     await _dbContext.SaveChangesAsync();
+
+    //     // --- 5) Reviews: For each attraction create 0 - 20 reviews, but at most one per user/attraction.
+    //     // We already have 'users' list loaded from DB earlier; make sure we fetch fresh user list from DB with keys
+    //     var userList = await _dbContext.Users.ToListAsync(); // UsersDbM list
+    //     var userCount = userList.Count;
+    //     foreach (var attraction in attractions)
+    //     {
+    //         // number of reviews for this attraction: 0..20 (cap at number of users)
+    //         var reviewCount = seeder.Next(0, 21); // 0..20
+    //         if (reviewCount == 0 || userCount == 0) continue;
+
+    //         // cap at number of users (one review per user constraint)
+    //         reviewCount = Math.Min(reviewCount, userCount);
+
+    //         // random unique users for this attraction: shuffle indices and take reviewCount
+    //         var userIndices = Enumerable.Range(0, userCount).OrderBy(_ => rnd.Next()).Take(reviewCount).ToList();
+
+    //         foreach (var idx in userIndices)
+    //         {
+
+    //             var user = userList[idx];
+
+    //             var review = seeder.ItemsToList<ReviewsDbM>(1).First();
+    //             review.UsersDbM = user;
+    //             review.UserId = user.UserId;
+    //             review.AttractionsDbM = attraction;
+    //             review.AttractionId = attraction.AttractionId;
+
+    //             // push to DB
+    //             _dbContext.Reviews.Add(review);
+
+    //             // set navigation collections locally if needed
+    //             user.ReviewsDbM ??= new List<ReviewsDbM>();
+    //             user.ReviewsDbM.Add(review);
+
+    //             attraction.ReviewsDbM ??= new List<ReviewsDbM>();
+    //             attraction.ReviewsDbM.Add(review);
+    //         }
+    //     }
+
+    //     LogChangeTracker();
+    //     await _dbContext.SaveChangesAsync();
+    //     LogChangeTracker();
     //     return await DbInfo();
     // }
+
+
+
 
 
     // This method is for debugging purposes only and to demonstrate the ChangeTracker
