@@ -131,7 +131,16 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<AttractionsCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
                 bool flatArg = bool.Parse(flat);
 
                 _logger.LogInformation($"{nameof(ReadItem)}: {nameof(idArg)}: {idArg}, {nameof(flatArg)}: {flatArg}");
@@ -157,7 +166,16 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<AttractionsCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
 
                 _logger.LogInformation($"{nameof(DeleteItem)}: {nameof(idArg)}: {idArg}");
 
@@ -184,7 +202,16 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<AttractionsCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
 
                 _logger.LogInformation($"{nameof(ReadItemDto)}: {nameof(idArg)}: {idArg}");
 
@@ -197,7 +224,8 @@ namespace AppWebApi.Controllers
 #if DEBUG
                         ConnectionString = item.ConnectionString,
 #endif
-                        Item = new AttractionsCuDto(item.Item)
+                        Item = item.Item == null ? null : new AttractionsCuDto(item.Item),
+                        ErrorMessage = item.ErrorMessage
                     });
 
             }
@@ -218,11 +246,28 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<AttractionsCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
 
                 _logger.LogInformation($"{nameof(UpdateItem)}: {nameof(idArg)}: {idArg}");
 
-                if (item.AttractionId != idArg) throw new ArgumentException("Id mismatch");
+                // if (item.AttractionId != idArg) throw new ArgumentException("Id mismatch");
+                if (item.AttractionId != idArg)
+                {
+                    return BadRequest(new ResponseItemDto<AttractionsCuDto>
+                    {
+                        ErrorMessage = $"Input id {idArg} does not match item id {item.AttractionId}"
+                    }
+                    );
+                }
 
                 var model = await _service.UpdateAttractionAsync(item);
                 _logger.LogInformation($"item {idArg} updated");
@@ -246,8 +291,9 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                _logger.LogInformation($"{nameof(CreateItem)}:");
+
                 var model = await _service.CreateAttractionAsync(item);
+                _logger.LogInformation($"{nameof(CreateItem)}:");
                 return Ok(model);
             }
             catch (Exception ex)

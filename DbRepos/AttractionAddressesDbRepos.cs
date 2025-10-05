@@ -45,20 +45,24 @@ public class AttractionAddressesDbRepos
 
                 //Adding filter functionality
                 .Where(i => (seeded == null || i.Seeded == seeded) &&
-                            (i.Country.ToLower().Contains(filter) ||
+                            (
+                                i.Country.ToLower().Contains(filter) ||
                                 i.CityPlace.ToLower().Contains(filter) ||
                                 i.ZipCode.ToLower().Contains(filter) ||
-                                i.StreetAddress.ToLower().Contains(filter)))
-                                .CountAsync(),
+                                i.StreetAddress.ToLower().Contains(filter)
+                            ))
+                .CountAsync(),
 
                 PageItems = await query
 
                 //Adding filter functionality
                 .Where(i => (seeded == null || i.Seeded == seeded) &&
-                            i.Country.ToLower().Contains(filter) ||
+                            (
+                                i.Country.ToLower().Contains(filter) ||
                                 i.CityPlace.ToLower().Contains(filter) ||
                                 i.ZipCode.ToLower().Contains(filter) ||
-                                i.StreetAddress.ToLower().Contains(filter))
+                                i.StreetAddress.ToLower().Contains(filter)
+                            ))
 
                 //Adding paging
                 .Skip(pageNumber * pageSize)
@@ -73,7 +77,7 @@ public class AttractionAddressesDbRepos
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Could not read attraction addressesue to an unexpected error.");
+            _logger.LogError(ex, "Could not read attraction addresses due to an unexpected error.");
             return new ResponsePageDto<IAttractionAddresses>();
         }
     }
@@ -86,9 +90,20 @@ public class AttractionAddressesDbRepos
             {
                 //make sure the model is fully populated, try without include.
                 //remove tracking for all read operations for performance and to avoid recursion/circular access
+
                 var query = _dbContext.AttractionAddresses.AsNoTracking()
                     .Include(i => i.AttractionsDbM)
                     .Where(i => i.AddressId == id);
+
+                var item = await query.FirstOrDefaultAsync<AttractionAddressesDbM>();
+                if (item == null)
+                {
+                    return new ResponseItemDto<IAttractionAddresses>
+                    {
+                        ErrorMessage = $"Could not find item with id {id}"
+
+                    };
+                }
 
                 return new ResponseItemDto<IAttractionAddresses>()
                 {
@@ -129,13 +144,19 @@ public class AttractionAddressesDbRepos
     {
         try
         {
-            var query1 = _dbContext.AttractionAddresses
+            var query = _dbContext.AttractionAddresses
             .Where(i => i.AddressId == id);
 
-            var item = await query1.FirstOrDefaultAsync<AttractionAddressesDbM>();
 
             //If the item does not exists
-            if (item == null) throw new ArgumentException($"Item {id} is not existing");
+            var item = await query.FirstOrDefaultAsync<AttractionAddressesDbM>();
+            if (item == null)
+            {
+                return new ResponseItemDto<IAttractionAddresses>
+                {
+                    ErrorMessage = $"Could not find item with id {id}"
+                };
+            }
 
             //delete in the database model
             _dbContext.AttractionAddresses.Remove(item);
@@ -164,14 +185,17 @@ public class AttractionAddressesDbRepos
     {
         try
         {
-            var query1 = _dbContext.AttractionAddresses
+            var query = _dbContext.AttractionAddresses
             .Where(i => i.AddressId == itemDto.AddressId);
-            var item = await query1
-                    // .Include(i => i.ReviewsDbM)
-                    .FirstOrDefaultAsync<AttractionAddressesDbM>();
-
             //If the item does not exists
-            if (item == null) throw new ArgumentException($"Item {itemDto.AddressId} is not existing");
+            var item = await query.FirstOrDefaultAsync<AttractionAddressesDbM>();
+            if (item == null)
+            {
+                return new ResponseItemDto<IAttractionAddresses>
+                {
+                    ErrorMessage = $"Could not find item with id {itemDto.AddressId}"
+                };
+            }
 
             //transfer any changes from DTO to database objects
             //Update individual properties
@@ -205,6 +229,21 @@ public class AttractionAddressesDbRepos
             //transfer any changes from DTO to database objects
             //Update individual properties
             // var item = new AttractionAddressesDbM(itemDto);
+            var duplicate = await _dbContext.AttractionAddresses
+                .FirstOrDefaultAsync(a =>
+                    a.StreetAddress == itemDto.StreetAddress &&
+                    a.ZipCode == itemDto.ZipCode &&
+                    a.CityPlace == itemDto.CityPlace &&
+                    a.Country == itemDto.Country);
+
+            if (duplicate != null)
+            {
+                return new ResponseItemDto<IAttractionAddresses>
+                {
+                    ErrorMessage = $"An attraction with the same name, description, and address already exists (Id: {duplicate.AddressId})"
+                };
+            }
+
             var item = new AttractionAddressesDbM
             {
                 AddressId = Guid.NewGuid(),
@@ -244,6 +283,7 @@ public class AttractionAddressesDbRepos
             {
                 var f = await _dbContext.Attractions.FirstOrDefaultAsync(i => i.AttractionId == id);
                 if (f == null)
+
                     throw new ArgumentException($"Item id {id} not existing");
 
                 attractions.Add(f);

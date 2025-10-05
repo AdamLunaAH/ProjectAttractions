@@ -36,6 +36,12 @@ namespace Swagger.Filters
             if (schema.Properties.TryGetValue("categoryId", out var categoryId))
                 categoryId.Example = new OpenApiArray { new OpenApiString("Insert existing CategoryId here leave empty") };
 
+
+            if (schema.Properties.ContainsKey("reviewId"))
+            {
+                schema.Properties.Remove("reviewId");
+                schema.Required?.Remove("reviewId");
+            }
             // if (schema.Properties.TryGetValue("reviewId", out var reviewId))
             //     reviewId.Example = new OpenApiArray { new OpenApiString("Insert existing ReviewId here leave empty") };
         }

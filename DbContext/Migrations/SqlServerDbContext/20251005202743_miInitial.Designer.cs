@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbContext.Migrations.SqlServerDbContext
 {
     [DbContext(typeof(MainDbContext.SqlServerDbContext))]
-    [Migration("20251005145856_miInitial")]
+    [Migration("20251005202743_miInitial")]
     partial class miInitial
     {
         /// <inheritdoc />
@@ -270,9 +270,9 @@ namespace DbContext.Migrations.SqlServerDbContext
             modelBuilder.Entity("DbModels.AttractionsDbM", b =>
                 {
                     b.HasOne("DbModels.AttractionAddressesDbM", "AttractionAddressesDbM")
-                        .WithMany()
+                        .WithMany("AttractionsDbM")
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("AttractionAddressesDbM");
                 });
@@ -294,6 +294,11 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Navigation("AttractionsDbM");
 
                     b.Navigation("UsersDbM");
+                });
+
+            modelBuilder.Entity("DbModels.AttractionAddressesDbM", b =>
+                {
+                    b.Navigation("AttractionsDbM");
                 });
 
             modelBuilder.Entity("DbModels.AttractionsDbM", b =>

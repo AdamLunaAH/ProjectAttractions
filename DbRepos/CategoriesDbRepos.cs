@@ -204,12 +204,15 @@ public class CategoriesDbRepos
         try
         {
             //I cannot have duplicates in the Categories table, so check that
-            var query2 = _dbContext.Categories
-            .Where(i => i.CategoryName == itemDto.CategoryName);
-            var existingItem = await query2.FirstOrDefaultAsync();
-            if (existingItem != null && existingItem.CategoryName != itemDto.CategoryName)
-                throw new ArgumentException($"Category already exist with name: {existingItem.CategoryName}");
-
+            var query = await _dbContext.Categories
+            .FirstOrDefaultAsync(i => i.CategoryName == itemDto.CategoryName);
+            if (query != null)
+            {
+                return new ResponseItemDto<ICategories>
+                {
+                    ErrorMessage = $"A category with the same name already exists (Id: {query.CategoryId})"
+                };
+            }
             var item = new CategoriesDbM
             {
                 CategoryId = Guid.NewGuid(),

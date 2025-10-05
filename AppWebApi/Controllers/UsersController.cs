@@ -95,7 +95,16 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<UsersCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
                 bool flatArg = bool.Parse(flat);
 
                 _logger.LogInformation($"{nameof(ReadItem)}: {nameof(idArg)}: {idArg}, {nameof(flatArg)}: {flatArg}");
@@ -121,7 +130,16 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<UsersCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
 
                 _logger.LogInformation($"{nameof(DeleteItem)}: {nameof(idArg)}: {idArg}");
 
@@ -148,7 +166,16 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<UsersCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
 
                 _logger.LogInformation($"{nameof(ReadItemDto)}: {nameof(idArg)}: {idArg}");
 
@@ -182,13 +209,31 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                var idArg = Guid.Parse(id);
+                var checkGuid = Guid.TryParse(id, out var guid);
+                if (!checkGuid)
+                {
+                    return BadRequest(new ResponseItemDto<UsersCuDto>
+                    {
+                        ErrorMessage = "Input id is not a Guid"
+                    }
+                    );
+                }
+                var idArg = guid;
 
                 _logger.LogInformation($"{nameof(UpdateItem)}: {nameof(idArg)}: {idArg}");
 
-                if (item.UserId != idArg) throw new ArgumentException("Id mismatch");
+                // if (item.UserId != idArg) throw new ArgumentException("Id mismatch");
+                if (item.UserId != idArg)
+                {
+                    return BadRequest(new ResponseItemDto<UsersCuDto>
+                    {
+                        ErrorMessage = $"Input id {idArg} does not match item id {item.UserId}"
+                    }
+                    );
+                }
 
-                var model = await _service.UpdateUserAsync(item);
+
+                    var model = await _service.UpdateUserAsync(item);
                 _logger.LogInformation($"item {idArg} updated");
 
                 return Ok(model);

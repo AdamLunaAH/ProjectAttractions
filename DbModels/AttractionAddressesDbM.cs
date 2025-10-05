@@ -38,7 +38,6 @@ sealed public class AttractionAddressesDbM : AttractionAddresses, ISeed<Attracti
     #region correcting the Navigation properties migration error caused by using interfaces
     [NotMapped]
     public override List<IAttractions> Attractions { get => AttractionsDbM?.Cast<IAttractions>().ToList(); set => throw new NotImplementedException(); }
-    [JsonIgnore]
     [NotMapped]
     public List<AttractionsDbM> AttractionsDbM { get; set; } = new();
     #endregion

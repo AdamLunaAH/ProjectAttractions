@@ -60,6 +60,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SchemaFilter<Swagger.Filters.AttractionCreateDtoSchemaFilter>();
     c.SchemaFilter<Swagger.Filters.CategoryCreateDtoSchemaFilter>();
     c.SchemaFilter<Swagger.Filters.ReviewCreateDtoSchemaFilter>();
+    c.SchemaFilter<Swagger.Filters.AttractionFullCreateDtoSchemaFilter>();
+    c.SchemaFilter<Swagger.Filters.CategoriesCuDtoSchemaFilter>();
 });
 
 builder.Services.AddSwaggerGenNewtonsoftSupport();

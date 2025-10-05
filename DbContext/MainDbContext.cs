@@ -93,16 +93,6 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
             entity.HasIndex(e => e.CategoryName).IsUnique();
         });
 
-        // AttractionAddresses
-        modelBuilder.Entity<AttractionAddressesDbM>(entity =>
-        {
-            entity.ToTable("AttractionAddressesDb", schema: "supusr");
-
-            entity.HasKey(e => e.AddressId);
-
-            entity.HasIndex(e => new { e.StreetAddress, e.ZipCode, e.CityPlace, e.Country }).IsUnique();
-        });
-
         // Attractions
         modelBuilder.Entity<AttractionsDbM>(entity =>
         {
@@ -115,9 +105,9 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 
             // One Address -> Many Attractions
             entity.HasOne(a => a.AttractionAddressesDbM)
-                    .WithMany()
+                    .WithMany(addr => addr.AttractionsDbM)
                     .HasForeignKey(a => a.AddressId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.SetNull); 
 
             // Many Attractions <-> Many Categories (join table)
             entity.HasMany(a => a.CategoriesDbM)
@@ -143,6 +133,22 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
                     .WithOne(r => r.AttractionsDbM)
                     .HasForeignKey(r => r.AttractionId)
                     .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // AttractionAddresses
+        modelBuilder.Entity<AttractionAddressesDbM>(entity =>
+        {
+            entity.ToTable("AttractionAddressesDb", schema: "supusr");
+
+            entity.HasKey(e => e.AddressId);
+
+            entity.HasIndex(e => new { e.StreetAddress, e.ZipCode, e.CityPlace, e.Country }).IsUnique();
+
+            // One Address -> Many Attractions
+            entity.HasMany(addr => addr.AttractionsDbM)
+                    .WithOne(a => a.AttractionAddressesDbM)
+                    .HasForeignKey(a => a.AddressId)
+                    .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Reviews

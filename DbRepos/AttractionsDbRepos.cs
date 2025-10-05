@@ -195,13 +195,23 @@ public class AttractionsDbRepos
             .Include(i => i.CategoriesDbM)
             .Where(i => i.AttractionId == id);
 
-        return new ResponseItemDto<IAttractions>()
-        {
+            var item = await query.FirstOrDefaultAsync<AttractionsDbM>();
+            if (item == null)
+            {
+                return new ResponseItemDto<IAttractions>
+                {
+                    ErrorMessage = $"Could not find item with id {id}"
+
+                };
+            }
+
+            return new ResponseItemDto<IAttractions>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
-            Item = await query.FirstOrDefaultAsync<IAttractions>()
-        };
+                Item = await query.FirstOrDefaultAsync<IAttractions>()
+            };
     }
     else
     {
@@ -222,13 +232,20 @@ public class AttractionsDbRepos
 
     public async Task<ResponseItemDto<IAttractions>> DeleteAttractionAsync(Guid id)
     {
-        var query1 = _dbContext.Attractions
+        var query = _dbContext.Attractions
             .Where(i => i.AttractionId == id);
 
-        var item = await query1.FirstOrDefaultAsync<AttractionsDbM>();
+        // var item = await query.FirstOrDefaultAsync<AttractionsDbM>();
 
         //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} does not exist");
+        var item = await query.FirstOrDefaultAsync<AttractionsDbM>();
+        if (item == null)
+        {
+            return new ResponseItemDto<IAttractions>
+            {
+                ErrorMessage = $"Could not find item with id {id}"
+            };
+        }
 
         //delete in the database model
         _dbContext.Attractions.Remove(item);
@@ -292,6 +309,7 @@ public class AttractionsDbRepos
     {
         try
         {
+
             // Check for duplicates using unique index
             var duplicate = await _dbContext.Attractions
                 .FirstOrDefaultAsync(a =>
@@ -368,19 +386,23 @@ public class AttractionsDbRepos
 
                 // 2. Categories: reuse if exists
                 var categories = new List<CategoriesDbM>();
-                if (dto.Categories?.Any() == true)
+                if (dto.CategoryNames?.Any() == true)
                 {
-                    foreach (var catDto in dto.Categories)
+                    foreach (var categoryName in dto.CategoryNames)
                     {
-                        var category = await _dbContext.Categories
-                            .FirstOrDefaultAsync(c => c.CategoryName == catDto.CategoryName);
+                        var trimmedName = categoryName.Trim();
 
+                        // Try to find existing category by name
+                        var category = await _dbContext.Categories
+                            .FirstOrDefaultAsync(c => c.CategoryName == trimmedName);
+
+                        // If not found, create it
                         if (category == null)
                         {
                             category = new CategoriesDbM
                             {
                                 CategoryId = Guid.NewGuid(),
-                                CategoryName = catDto.CategoryName
+                                CategoryName = trimmedName
                             };
                             _dbContext.Categories.Add(category);
                             await _dbContext.SaveChangesAsync();
@@ -391,13 +413,13 @@ public class AttractionsDbRepos
                 }
 
                 // Include explicitly existing category IDs
-                if (dto.ExistingCategoryIds?.Any() == true)
-                {
-                    var existing = await _dbContext.Categories
-                        .Where(c => dto.ExistingCategoryIds.Contains(c.CategoryId))
-                        .ToListAsync();
-                    categories.AddRange(existing);
-                }
+                // if (dto.ExistingCategoryIds?.Any() == true)
+                // {
+                //     var existing = await _dbContext.Categories
+                //         .Where(c => dto.ExistingCategoryIds.Contains(c.CategoryId))
+                //         .ToListAsync();
+                //     categories.AddRange(existing);
+                // }
 
                 // 3. Check unique index gracefully
                 var duplicateAttraction = await _dbContext.Attractions
@@ -449,18 +471,18 @@ public class AttractionsDbRepos
     private async Task navProp_AttractionsCUdto_to_AttractionsDbM(AttractionCreateDto itemDtoSrc, AttractionsDbM itemDst)
     {
         List<ReviewsDbM> reviews = null;
-        if (itemDtoSrc.ReviewId != null)
-        {
-            reviews = new List<ReviewsDbM>();
-            foreach (var id in itemDtoSrc.ReviewId)
-            {
-                var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
-                if (f == null)
-                    throw new ArgumentException($"Item id {id} not existing");
+        // if (itemDtoSrc.ReviewId != null)
+        // {
+        //     reviews = new List<ReviewsDbM>();
+        //     foreach (var id in itemDtoSrc.ReviewId)
+        //     {
+        //         var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
+        //         if (f == null)
+        //             throw new ArgumentException($"Item id {id} not existing");
 
-                reviews.Add(f);
-            }
-        }
+        //         reviews.Add(f);
+        //     }
+        // }
         itemDst.ReviewsDbM = reviews;
 
 

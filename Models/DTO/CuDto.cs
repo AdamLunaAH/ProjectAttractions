@@ -32,6 +32,8 @@ public class UsersCuDto
     public UsersCuDto() { }
     public UsersCuDto(IUsers org)
     {
+        if (org == null)
+            return;
         UserId = org.UserId;
         FirstName = org.FirstName;
         LastName = org.LastName;
@@ -64,6 +66,8 @@ public class AttractionAddressesCuDto
     public AttractionAddressesCuDto() { }
     public AttractionAddressesCuDto(IAttractionAddresses org)
     {
+        if (org == null)
+            return;
         AddressId = org.AddressId;
         StreetAddress = org.StreetAddress;
         ZipCode = org.ZipCode;
@@ -102,6 +106,8 @@ public class AttractionsCuDto
     public AttractionsCuDto() { }
     public AttractionsCuDto(IAttractions org)
     {
+        if (org == null)
+            return;
         AttractionId = org.AttractionId;
         AttractionName = org.AttractionName;
         AttractionDescription = org.AttractionDescription;
@@ -128,6 +134,8 @@ public class CategoriesCuDto
     public CategoriesCuDto() { }
     public CategoriesCuDto(ICategories org)
     {
+        if (org == null)
+            return;
         CategoryId = org.CategoryId;
         CategoryName = org.CategoryName;
         AttractionId = org.Attractions?.Select(i => i.AttractionId).ToList();
@@ -159,6 +167,8 @@ public class ReviewsCuDto
     public ReviewsCuDto() { }
     public ReviewsCuDto(IReviews org)
     {
+        if (org == null)
+            return;
         ReviewId = org.ReviewId;
 
         UserId = org.Users.UserId;
@@ -169,6 +179,11 @@ public class ReviewsCuDto
     }
 }
 
+// public class CategoryCreateListDto
+// {
+//     public virtual string CategoryName { get; set; }
+// }
+
 public class AttractionFullCreateDto
 {
     public string AttractionName { get; set; }
@@ -178,9 +193,10 @@ public class AttractionFullCreateDto
     public AttractionAddressCreateDto Address { get; set; }
 
     // List of new categories
-    public List<CategoryCreateDto> Categories { get; set; } = new();
+    // public List<CategoryCreateDto> Categories { get; set; } = new();
+    public List<string> CategoryNames { get; set; } = new();
 
     // Existing category ID
-    public List<Guid> ExistingCategoryIds { get; set; } = new();
+    // public List<Guid> ExistingCategoryIds { get; set; } = new();
 }
 
