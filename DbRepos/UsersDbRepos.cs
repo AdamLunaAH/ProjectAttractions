@@ -22,98 +22,116 @@ public class UsersDbRepos
 
     public async Task<ResponsePageDto<IUsers>> ReadUsersAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        filter ??= "";
-        IQueryable<UsersDbM> query;
-        if (flat)
+        try
         {
-            query = _dbContext.Users.AsNoTracking();
-        }
-        else
-        {
-            query = _dbContext.Users.AsNoTracking()
-                .Include(i => i.ReviewsDbM);
-        }
+            filter ??= "";
+            IQueryable<UsersDbM> query;
+            if (flat)
+            {
+                query = _dbContext.Users.AsNoTracking();
+            }
+            else
+            {
+                query = _dbContext.Users.AsNoTracking()
+                    .Include(i => i.ReviewsDbM);
+            }
 
-        var ret = new ResponsePageDto<IUsers>()
-        {
+            var ret = new ResponsePageDto<IUsers>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query
+                DbItemsCount = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                (i.FirstName.ToLower().Contains(filter) ||
-                i.LastName.ToLower().Contains(filter)))
-                .CountAsync(),
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                    (i.FirstName.ToLower().Contains(filter) ||
+                    i.LastName.ToLower().Contains(filter)))
+                    .CountAsync(),
 
-            PageItems = await query
+                PageItems = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                (i.FirstName.ToLower().Contains(filter) ||
-                i.LastName.ToLower().Contains(filter)))
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                    (i.FirstName.ToLower().Contains(filter) ||
+                    i.LastName.ToLower().Contains(filter)))
 
-            //Adding paging
-            .Skip(pageNumber * pageSize)
-            .Take(pageSize)
+                //Adding paging
+                .Skip(pageNumber * pageSize)
+                .Take(pageSize)
 
-            .ToListAsync<IUsers>(),
+                .ToListAsync<IUsers>(),
 
-            PageNr = pageNumber,
-            PageSize = pageSize
-        };
-        return ret;
+                PageNr = pageNumber,
+                PageSize = pageSize
+            };
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not read users due to an unexpected error.");
+            return new ResponsePageDto<IUsers>();
+        }
     }
 
     public async Task<ResponsePageDto<IUsers>> ReadUsersReviewsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        filter ??= "";
-        IQueryable<UsersDbM> query;
-        if (flat)
+        try
         {
-            query = _dbContext.Users.AsNoTracking();
-        }
-        else
-        {
-            query = _dbContext.Users.AsNoTracking()
-                .Include(i => i.ReviewsDbM);
-        }
+            filter ??= "";
+            IQueryable<UsersDbM> query;
+            if (flat)
+            {
+                query = _dbContext.Users.AsNoTracking();
+            }
+            else
+            {
+                query = _dbContext.Users.AsNoTracking()
+                    .Include(i => i.ReviewsDbM);
+            }
 
-        var ret = new ResponsePageDto<IUsers>()
-        {
+            var ret = new ResponsePageDto<IUsers>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query
+                DbItemsCount = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        (i.FirstName.ToLower().Contains(filter) ||
-                            i.LastName.ToLower().Contains(filter))).CountAsync(),
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            (i.FirstName.ToLower().Contains(filter) ||
+                                i.LastName.ToLower().Contains(filter))).CountAsync(),
 
-            PageItems = await query
+                PageItems = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        (i.FirstName.ToLower().Contains(filter) ||
-                            i.LastName.ToLower().Contains(filter)))
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            (i.FirstName.ToLower().Contains(filter) ||
+                                i.LastName.ToLower().Contains(filter)))
 
-            //Adding paging
-            .Skip(pageNumber * pageSize)
-            .Take(pageSize)
+                //Adding paging
+                .Skip(pageNumber * pageSize)
+                .Take(pageSize)
 
-            .ToListAsync<IUsers>(),
+                .ToListAsync<IUsers>(),
 
-            PageNr = pageNumber,
-            PageSize = pageSize
-        };
-        return ret;
+                PageNr = pageNumber,
+                PageSize = pageSize
+            };
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not read user reviews due to an unexpected error.");
+            return new ResponsePageDto<IUsers>();
+        }
     }
 
     public async Task<ResponseItemDto<IUsers>> ReadUserAsync(Guid id, bool flat)
     {
-        if (!flat)
+        try
+        {
+            if (!flat)
         {
             //make sure the model is fully populated, try without include.
             //remove tracking for all read operations for performance and to avoid recursion/circular access
@@ -147,70 +165,119 @@ public class UsersDbRepos
             };
         }
     }
+    catch (Exception ex)
+        {
+            return new ResponseItemDto<IUsers>
+            {
+                ErrorMessage = $"Could not read user due to an unexpected error: {ex.Message}"
+            };
+        }
+    }
 
 
     public async Task<ResponseItemDto<IUsers>> DeleteUserAsync(Guid id)
     {
-        var query1 = _dbContext.Users
+        try
+        {
+            var query1 = _dbContext.Users
             .Where(i => i.UserId == id);
 
-        var item = await query1.FirstOrDefaultAsync<UsersDbM>();
+            var item = await query1.FirstOrDefaultAsync<UsersDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {id} does not exist");
 
-        //delete in the database model
-        _dbContext.Users.Remove(item);
+            //delete in the database model
+            _dbContext.Users.Remove(item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
-        return new ResponseItemDto<IUsers>()
-        {
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
+            return new ResponseItemDto<IUsers>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
 
-            Item = item
-        };
+                Item = item
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IUsers>()
+            {
+                ErrorMessage = $"Could not delete user due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     public async Task<ResponseItemDto<IUsers>> UpdateUserAsync(UsersCuDto itemDto)
     {
-        var query1 = _dbContext.Users
-            .Where(i => i.UserId == itemDto.UserId);
-        var item = await query1
-                // .Include(i => i.ReviewsDbM)
-                .FirstOrDefaultAsync<UsersDbM>();
+        // var query1 = _dbContext.Users
+        //     .Where(i => i.UserId == itemDto.UserId);
+        // var item = await query1
+        //         .FirstOrDefaultAsync<UsersDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {itemDto.UserId} is not existing");
+        try
+        {
+            var item = await _dbContext.Users
+                .FirstOrDefaultAsync(i => i.UserId == itemDto.UserId);
 
-        //I cannot have duplicates in the Users table, so check that
-        var query2 = _dbContext.Users
-            .Where(i => i.Email == itemDto.Email);
-        var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.UserId != itemDto.UserId)
-            throw new ArgumentException($"Item already exist with id {existingItem.UserId}");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {itemDto.UserId} does not exist");
 
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        item.UpdateFromDTO(itemDto);
+            //I cannot have duplicates in the Users table, so check that
+            // var query2 = _dbContext.Users
+            //     .Where(i => i.Email == itemDto.Email);
+            // var existingItem = await query2.FirstOrDefaultAsync();
+            // if (existingItem != null && existingItem.UserId != itemDto.UserId)
+            //     throw new ArgumentException($"Item already exist with id {existingItem.UserId}");
+            var existingItem = await _dbContext.Users
+                .FirstOrDefaultAsync(i => i.Email == itemDto.Email);
 
-        //Update navigation properties
-        await navProp_UsersCUdto_to_UsersDbM(itemDto, item);
+            if (existingItem != null)
+            {
+                return new ResponseItemDto<IUsers>
+                {
+                    ErrorMessage = $"A user with the same email already exists (Id: {existingItem.UserId})"
+                };
+            }
 
-        //write to database model
-        _dbContext.Users.Update(item);
+            //transfer any changes from DTO to database objects
+            //Update individual properties
+            item.UpdateFromDTO(itemDto);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
+            //Update navigation properties
+            await navProp_UsersCUdto_to_UsersDbM(itemDto, item);
 
-        //return the updated item in non-flat mode
-        return await ReadUserAsync(item.UserId, true);
+            //transfer any changes from DTO to database objects
+            //Update individual properties
+            item.UpdateFromDTO(itemDto);
+
+            //Update navigation properties
+            await navProp_UsersCUdto_to_UsersDbM(itemDto, item);
+
+            //write to database model
+            _dbContext.Users.Update(item);
+
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
+
+            //return the updated item in non-flat mode
+            return await ReadUserAsync(item.UserId, true);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IUsers>
+            {
+                ErrorMessage = $"Could not update user due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     public async Task<ResponseItemDto<IUsers>> CreateUserAsync(UserCreateDto itemDto)
     {
+        try
+        {
 
         //I cannot have duplicates in the Users table, so check that
         var query2 = _dbContext.Users
@@ -242,6 +309,14 @@ public class UsersDbRepos
 
         //return the updated item in non-flat mode
         return await ReadUserAsync(item.UserId, false);
+    }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IUsers>
+            {
+                ErrorMessage = $"Could not create user due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     private async Task navProp_UsersCUdto_to_UsersDbM(UserCreateDto itemDtoSrc, UsersDbM itemDst)

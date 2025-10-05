@@ -7,6 +7,7 @@ public class ResponsePageDto<T>
     public string ConnectionString { get; init; }
 #endif
 
+    
     public List<T> PageItems { get; init; }
     public int DbItemsCount { get; init; }
 
@@ -15,12 +16,12 @@ public class ResponsePageDto<T>
     public int PageCount => (int)Math.Ceiling((double)DbItemsCount / PageSize);
 }
 
+
 public class ResponseItemDto<T>
 {
+    public T Item { get; set; }
 #if DEBUG
-    //Only used in debug mode to show the connection string
-    public string ConnectionString { get; init; }
+    public string ConnectionString { get; set; }
 #endif
-
-    public T Item { get; init; }
+    public string ErrorMessage { get; set; }
 }

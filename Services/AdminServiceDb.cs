@@ -3,13 +3,13 @@
 using DbRepos;
 
 namespace Services;
-    
+
 public class AdminServiceDb : IAdminService
 {
     private readonly AdminDbRepos _repo = null;
     private readonly ILogger<AdminServiceDb> _logger = null;
 
-    public Task SeedAsync() => _repo.SeedAsync();
+    // public Task SeedAsync() => _repo.SeedAsync();
 
     #region constructors
     public AdminServiceDb(AdminDbRepos repo)

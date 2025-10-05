@@ -25,19 +25,19 @@ namespace Swagger.Filters
             _logger.LogInformation("Applying schema filter to {Type}", context.Type.FullName);
 
             if (schema.Properties.TryGetValue("attractionName", out var attractionName))
-                attractionName.Example = new OpenApiString("Eiffel Tower");
+                attractionName.Example = new OpenApiString("Insert the name of the attraction here");
 
             if (schema.Properties.TryGetValue("attractionDescription", out var attractionDescription))
-                attractionDescription.Example = new OpenApiString("A famous landmark in Paris.");
+                attractionDescription.Example = new OpenApiString("Insert a description of the attraction here");
 
             if (schema.Properties.TryGetValue("addressId", out var addressId))
-                addressId.Example = new OpenApiString("00000000-0000-0000-0000-000000000001");
+                addressId.Example = new OpenApiString("Insert existing AddressId here or leave empty/null to create a new address");
 
             if (schema.Properties.TryGetValue("categoryId", out var categoryId))
-                categoryId.Example = new OpenApiArray { new OpenApiString("00000000-0000-0000-0000-000000000002") };
+                categoryId.Example = new OpenApiArray { new OpenApiString("Insert existing CategoryId here leave empty") };
 
-            if (schema.Properties.TryGetValue("reviewId", out var reviewId))
-                reviewId.Example = new OpenApiArray { new OpenApiString("00000000-0000-0000-0000-000000000003") };
+            // if (schema.Properties.TryGetValue("reviewId", out var reviewId))
+            //     reviewId.Example = new OpenApiArray { new OpenApiString("Insert existing ReviewId here leave empty") };
         }
     }
 }

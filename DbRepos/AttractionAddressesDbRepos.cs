@@ -22,191 +22,240 @@ public class AttractionAddressesDbRepos
 
     public async Task<ResponsePageDto<IAttractionAddresses>> ReadAttractionAddressesAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        filter ??= "";
-        IQueryable<AttractionAddressesDbM> query;
-        if (flat)
+        try
         {
-            query = _dbContext.AttractionAddresses.AsNoTracking();
-        }
-        else
-        {
-            query = _dbContext.AttractionAddresses.AsNoTracking()
-                .Include(i => i.AttractionsDbM);
-        }
+            filter ??= "";
+            IQueryable<AttractionAddressesDbM> query;
+            if (flat)
+            {
+                query = _dbContext.AttractionAddresses.AsNoTracking();
+            }
+            else
+            {
+                query = _dbContext.AttractionAddresses.AsNoTracking()
+                    .Include(i => i.AttractionsDbM);
+            }
 
-        var ret = new ResponsePageDto<IAttractionAddresses>()
-        {
+            var ret = new ResponsePageDto<IAttractionAddresses>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query
+                DbItemsCount = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        (i.Country.ToLower().Contains(filter) ||
-                            i.CityPlace.ToLower().Contains(filter) ||
-                            i.ZipCode.ToLower().Contains(filter) ||
-                            i.StreetAddress.ToLower().Contains(filter)))
-                            .CountAsync(),
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            (i.Country.ToLower().Contains(filter) ||
+                                i.CityPlace.ToLower().Contains(filter) ||
+                                i.ZipCode.ToLower().Contains(filter) ||
+                                i.StreetAddress.ToLower().Contains(filter)))
+                                .CountAsync(),
 
-            PageItems = await query
+                PageItems = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        i.Country.ToLower().Contains(filter) ||
-                            i.CityPlace.ToLower().Contains(filter) ||
-                            i.ZipCode.ToLower().Contains(filter) ||
-                            i.StreetAddress.ToLower().Contains(filter))
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            i.Country.ToLower().Contains(filter) ||
+                                i.CityPlace.ToLower().Contains(filter) ||
+                                i.ZipCode.ToLower().Contains(filter) ||
+                                i.StreetAddress.ToLower().Contains(filter))
 
-            //Adding paging
-            .Skip(pageNumber * pageSize)
-            .Take(pageSize)
+                //Adding paging
+                .Skip(pageNumber * pageSize)
+                .Take(pageSize)
 
-            .ToListAsync<IAttractionAddresses>(),
+                .ToListAsync<IAttractionAddresses>(),
 
-            PageNr = pageNumber,
-            PageSize = pageSize
-        };
-        return ret;
+                PageNr = pageNumber,
+                PageSize = pageSize
+            };
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not read attraction addressesue to an unexpected error.");
+            return new ResponsePageDto<IAttractionAddresses>();
+        }
     }
 
     public async Task<ResponseItemDto<IAttractionAddresses>> ReadAttractionAddressAsync(Guid id, bool flat)
     {
-        if (!flat)
+        try
         {
-            //make sure the model is fully populated, try without include.
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.AttractionAddresses.AsNoTracking()
-                .Include(i => i.AttractionsDbM)
-                .Where(i => i.AddressId == id);
-
-            return new ResponseItemDto<IAttractionAddresses>()
+            if (!flat)
             {
+                //make sure the model is fully populated, try without include.
+                //remove tracking for all read operations for performance and to avoid recursion/circular access
+                var query = _dbContext.AttractionAddresses.AsNoTracking()
+                    .Include(i => i.AttractionsDbM)
+                    .Where(i => i.AddressId == id);
+
+                return new ResponseItemDto<IAttractionAddresses>()
+                {
 #if DEBUG
-                ConnectionString = _dbContext.dbConnection,
+                    ConnectionString = _dbContext.dbConnection,
 #endif
 
-                Item = await query.FirstOrDefaultAsync<IAttractionAddresses>()
-            };
+                    Item = await query.FirstOrDefaultAsync<IAttractionAddresses>()
+                };
+            }
+            else
+            {
+                //Not fully populated, compare the SQL Statements generated
+                //remove tracking for all read operations for performance and to avoid recursion/circular access
+                var query = _dbContext.AttractionAddresses.AsNoTracking()
+                    .Where(i => i.AddressId == id);
+
+                return new ResponseItemDto<IAttractionAddresses>()
+                {
+#if DEBUG
+                    ConnectionString = _dbContext.dbConnection,
+#endif
+
+                    Item = await query.FirstOrDefaultAsync<IAttractionAddresses>()
+                };
+            }
         }
-        else
+        catch (Exception ex)
         {
-            //Not fully populated, compare the SQL Statements generated
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.AttractionAddresses.AsNoTracking()
-                .Where(i => i.AddressId == id);
-
-            return new ResponseItemDto<IAttractionAddresses>()
+            return new ResponseItemDto<IAttractionAddresses>
             {
-#if DEBUG
-                ConnectionString = _dbContext.dbConnection,
-#endif
-
-                Item = await query.FirstOrDefaultAsync<IAttractionAddresses>()
+                ErrorMessage = $"Could not read attraction address due to an unexpected error: {ex.Message}"
             };
         }
     }
+
 
 
     public async Task<ResponseItemDto<IAttractionAddresses>> DeleteAttractionAddressAsync(Guid id)
     {
-        var query1 = _dbContext.AttractionAddresses
+        try
+        {
+            var query1 = _dbContext.AttractionAddresses
             .Where(i => i.AddressId == id);
 
-        var item = await query1.FirstOrDefaultAsync<AttractionAddressesDbM>();
+            var item = await query1.FirstOrDefaultAsync<AttractionAddressesDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {id} is not existing");
 
-        //delete in the database model
-        _dbContext.AttractionAddresses.Remove(item);
+            //delete in the database model
+            _dbContext.AttractionAddresses.Remove(item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
-        return new ResponseItemDto<IAttractionAddresses>()
-        {
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
+            return new ResponseItemDto<IAttractionAddresses>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
 
-            Item = item
-        };
+                Item = item
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IAttractionAddresses>()
+            {
+                ErrorMessage = $"Could not delete attraction address due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     public async Task<ResponseItemDto<IAttractionAddresses>> UpdateAttractionAddressAsync(AttractionAddressesCuDto itemDto)
     {
-        var query1 = _dbContext.AttractionAddresses
+        try
+        {
+            var query1 = _dbContext.AttractionAddresses
             .Where(i => i.AddressId == itemDto.AddressId);
-        var item = await query1
-                // .Include(i => i.ReviewsDbM)
-                .FirstOrDefaultAsync<AttractionAddressesDbM>();
+            var item = await query1
+                    // .Include(i => i.ReviewsDbM)
+                    .FirstOrDefaultAsync<AttractionAddressesDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {itemDto.AddressId} is not existing");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {itemDto.AddressId} is not existing");
 
-        //I cannot have duplicates in the AttractionAddresses table, so check that
-        // var query2 = _dbContext.AttractionAddresses
-        //     .Where(i => i.Email == itemDto.Email);
-        // var existingItem = await query2.FirstOrDefaultAsync();
-        // if (existingItem != null && existingItem.AddressId != itemDto.AddressId)
-        //     throw new ArgumentException($"Item already exist with id {existingItem.AddressId}");
+            //I cannot have duplicates in the AttractionAddresses table, so check that
+            // var query2 = _dbContext.AttractionAddresses
+            //     .Where(i => i.Email == itemDto.Email);
+            // var existingItem = await query2.FirstOrDefaultAsync();
+            // if (existingItem != null && existingItem.AddressId != itemDto.AddressId)
+            //     throw new ArgumentException($"Item already exist with id {existingItem.AddressId}");
 
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        item.UpdateFromDTO(itemDto);
+            //transfer any changes from DTO to database objects
+            //Update individual properties
+            item.UpdateFromDTO(itemDto);
 
-        //Update navigation properties
-        await navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(itemDto, item);
+            //Update navigation properties
+            await navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(itemDto, item);
 
-        //write to database model
-        _dbContext.AttractionAddresses.Update(item);
+            //write to database model
+            _dbContext.AttractionAddresses.Update(item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
 
-        //return the updated item in non-flat mode
-        return await ReadAttractionAddressAsync(item.AddressId, false);
+            //return the updated item in non-flat mode
+            return await ReadAttractionAddressAsync(item.AddressId, false);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IAttractionAddresses>
+            {
+                ErrorMessage = $"Could not update attraction address due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     public async Task<ResponseItemDto<IAttractionAddresses>> CreateAttractionAddressAsync(AttractionAddressCreateDto itemDto)
     {
-        // if (itemDto.AddressId != null)
-        //     throw new ArgumentException($"{nameof(itemDto.AddressId)} must be null when creating a new object");
-
-        //I cannot have duplicates in the AttractionAddresses table, so check that
-        // var query2 = _dbContext.AttractionAddresses
-        //     .Where(i => i.Email == itemDto.Email);
-        // var existingItem = await query2.FirstOrDefaultAsync();
-        // if (existingItem != null && existingItem.AddressId != itemDto.AddressId)
-        //     throw new ArgumentException($"Item already exist with id {existingItem.AddressId}");
-
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        // var item = new AttractionAddressesDbM(itemDto);
-        var item = new AttractionAddressesDbM
+        try
         {
-            AddressId = Guid.NewGuid(),
-            StreetAddress = itemDto.StreetAddress,
-            ZipCode = itemDto.ZipCode,
-            CityPlace = itemDto.CityPlace,
-            Country = itemDto.Country
+            // if (itemDto.AddressId != null)
+            //     throw new ArgumentException($"{nameof(itemDto.AddressId)} must be null when creating a new object");
 
-        };
+            //I cannot have duplicates in the AttractionAddresses table, so check that
+            // var query2 = _dbContext.AttractionAddresses
+            //     .Where(i => i.Email == itemDto.Email);
+            // var existingItem = await query2.FirstOrDefaultAsync();
+            // if (existingItem != null && existingItem.AddressId != itemDto.AddressId)
+            //     throw new ArgumentException($"Item already exist with id {existingItem.AddressId}");
+
+            //transfer any changes from DTO to database objects
+            //Update individual properties
+            // var item = new AttractionAddressesDbM(itemDto);
+            var item = new AttractionAddressesDbM
+            {
+                AddressId = Guid.NewGuid(),
+                StreetAddress = itemDto.StreetAddress,
+                ZipCode = itemDto.ZipCode,
+                CityPlace = itemDto.CityPlace,
+                Country = itemDto.Country
+
+            };
 
 
 
 
-        //Update navigation properties
-        // await navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(itemDto, item);
+            //Update navigation properties
+            // await navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(itemDto, item);
 
-        //write to database model
-        _dbContext.AttractionAddresses.Add(item);
+            //write to database model
+            _dbContext.AttractionAddresses.Add(item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
 
-        //return the updated item in non-flat mode
-        return await ReadAttractionAddressAsync(item.AddressId, false);
+            //return the updated item in non-flat mode
+            return await ReadAttractionAddressAsync(item.AddressId, false);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IAttractionAddresses>
+            {
+                ErrorMessage = $"Could not create attraction address due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     private async Task navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(AttractionAddressesCuDto itemDtoSrc, AttractionAddressesDbM itemDst)

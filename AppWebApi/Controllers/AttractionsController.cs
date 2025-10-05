@@ -251,8 +251,9 @@ namespace AppWebApi.Controllers
             {
                 _logger.LogInformation($"{nameof(CreateItem)}:");
 
+                // _logger.LogInformation($"item {model.Item.AttractionId} created");
                 var model = await _service.CreateAttractionAsync(item);
-                _logger.LogInformation($"item {model.Item.AttractionId} created");
+
 
                 return Ok(model);
             }

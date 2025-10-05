@@ -12,7 +12,7 @@ namespace DbRepos;
 public class AttractionsDbRepos
 {
 
-    private const string _seedSource = "./app-seeds.json";
+    // private const string _seedSource = "./app-seeds.json";
     private ILogger<AttractionsDbRepos> _logger;
     private readonly MainDbContext _dbContext;
 
@@ -228,7 +228,7 @@ public class AttractionsDbRepos
         var item = await query1.FirstOrDefaultAsync<AttractionsDbM>();
 
         //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+        if (item == null) throw new ArgumentException($"Item {id} does not exist");
 
         //delete in the database model
         _dbContext.Attractions.Remove(item);
@@ -247,80 +247,91 @@ public class AttractionsDbRepos
 
     public async Task<ResponseItemDto<IAttractions>> UpdateAttractionAsync(AttractionsCuDto itemDto)
     {
-        var query1 = _dbContext.Attractions
-            .Where(i => i.AttractionId == itemDto.AttractionId);
-        var item = await query1
-                // .Include(i => i.ReviewsDbM)
-                .FirstOrDefaultAsync<AttractionsDbM>();
+        try
+        {
+            var item = await _dbContext.Attractions
+                .FirstOrDefaultAsync(i => i.AttractionId == itemDto.AttractionId);
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {itemDto.AttractionId} is not existing");
+            if (item == null)
+                return new ResponseItemDto<IAttractions> { ErrorMessage = $"Item {itemDto.AttractionId} does not exist" };
 
-        //I cannot have duplicates in the Attractions table, so check that
-        var query2 = _dbContext.Attractions
-            .Where(i => i.AttractionName == itemDto.AttractionName);
-        var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.AttractionId != itemDto.AttractionId)
-            throw new ArgumentException($"Item already exist with id {existingItem.AttractionId}");
+            // Check for duplicates using unique index
+            var duplicate = await _dbContext.Attractions
+                .FirstOrDefaultAsync(a =>
+                    a.AttractionName == itemDto.AttractionName &&
+                    a.AttractionDescription == itemDto.AttractionDescription &&
+                    a.AddressId == itemDto.AddressId &&
+                    a.AttractionId != itemDto.AttractionId);
 
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        item.UpdateFromDTO(itemDto);
+            if (duplicate != null)
+            {
+                return new ResponseItemDto<IAttractions>
+                {
+                    ErrorMessage = $"An attraction with the same name, description, and address already exists (Id: {duplicate.AttractionId})"
+                };
+            }
 
-        //Update navigation properties
-        await navProp_AttractionsCUdto_to_AttractionsDbM(itemDto, item);
+            // Transfer changes
+            item.UpdateFromDTO(itemDto);
+            await navProp_AttractionsCUdto_to_AttractionsDbM(itemDto, item);
 
-        //write to database model
-        _dbContext.Attractions.Update(item);
+            _dbContext.Attractions.Update(item);
+            await _dbContext.SaveChangesAsync();
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
-
-        //return the updated item in non-flat mode
-        return await ReadAttractionAsync(item.AttractionId, false);
+            return await ReadAttractionAsync(item.AttractionId, false);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IAttractions>
+            {
+                ErrorMessage = $"Could not update attraction due to an unexpected error: {ex.Message}"
+            };
+        }
     }
-
     public async Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionCreateDto itemDto)
     {
-        // if (itemDto.AttractionId != null)
-        //     throw new ArgumentException($"{nameof(itemDto.AttractionId)} must be null when creating a new object");
-
-        // if (itemDto.AttractionId != Guid.Empty)
-        //     throw new ArgumentException("AttractionId must be empty when creating a new attraction.");
-
-
-        //I cannot have duplicates in the Attractions table, so check that
-        var query2 = _dbContext.Attractions
-            .Where(i => i.AttractionName == itemDto.AttractionName);
-        var existingItem = await query2.FirstOrDefaultAsync();
-        // if (existingItem != null && existingItem.AttractionId != itemDto.AttractionId)
-        //     throw new ArgumentException($"Item already exist with id {existingItem.AttractionId}");
-
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        // var item = new AttractionsDbM(itemDto);
-
-        var item = new AttractionsDbM
+        try
         {
-            AttractionId = Guid.NewGuid(),
-            AttractionName = itemDto.AttractionName,
-            AttractionDescription = itemDto.AttractionDescription,
-            AddressId = itemDto.AddressId
-        };
+            // Check for duplicates using unique index
+            var duplicate = await _dbContext.Attractions
+                .FirstOrDefaultAsync(a =>
+                    a.AttractionName == itemDto.AttractionName &&
+                    a.AttractionDescription == itemDto.AttractionDescription &&
+                    a.AddressId == itemDto.AddressId);
 
+            if (duplicate != null)
+            {
+                return new ResponseItemDto<IAttractions>
+                {
+                    ErrorMessage = $"An attraction with the same name, description, and address already exists (Id: {duplicate.AttractionId})"
+                };
+            }
 
-        //Update navigation properties
-        await navProp_AttractionsCUdto_to_AttractionsDbM(itemDto, item);
+            // Create new attraction
+            var item = new AttractionsDbM
+            {
+                AttractionId = Guid.NewGuid(),
+                AttractionName = itemDto.AttractionName,
+                AttractionDescription = itemDto.AttractionDescription,
+                AddressId = itemDto.AddressId
+            };
 
-        //write to database model
-        _dbContext.Attractions.Add(item);
+            await navProp_AttractionsCUdto_to_AttractionsDbM(itemDto, item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
+            _dbContext.Attractions.Add(item);
+            await _dbContext.SaveChangesAsync();
 
-        //return the updated item in non-flat mode
-        return await ReadAttractionAsync(item.AttractionId, true);
+            return await ReadAttractionAsync(item.AttractionId, true);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IAttractions>
+            {
+                ErrorMessage = $"Could not create attraction due to an unexpected error: {ex.Message}"
+            };
+        }
     }
+
 
 
     public async Task<ResponseItemDto<IAttractions>> CreateFullAttractionAsync(AttractionFullCreateDto dto)
@@ -333,31 +344,53 @@ public class AttractionsDbRepos
 
             try
             {
-                // 1. Create Address
-                var address = new AttractionAddressesDbM
-                {
-                    AddressId = Guid.NewGuid(),
-                    StreetAddress = dto.Address.StreetAddress,
-                    ZipCode = dto.Address.ZipCode,
-                    CityPlace = dto.Address.CityPlace,
-                    Country = dto.Address.Country
-                };
-                _dbContext.AttractionAddresses.Add(address);
-                await _dbContext.SaveChangesAsync();
+                // 1. Address: reuse if exists
+                var address = await _dbContext.AttractionAddresses
+                    .FirstOrDefaultAsync(a =>
+                        a.StreetAddress == dto.Address.StreetAddress &&
+                        a.ZipCode == dto.Address.ZipCode &&
+                        a.CityPlace == dto.Address.CityPlace &&
+                        a.Country == dto.Address.Country);
 
-                // 2. Categories
-                var categories = new List<CategoriesDbM>();
-                foreach (var catDto in dto.Categories)
+                if (address == null)
                 {
-                    var category = new CategoriesDbM
+                    address = new AttractionAddressesDbM
                     {
-                        CategoryId = Guid.NewGuid(),
-                        CategoryName = catDto.CategoryName
+                        AddressId = Guid.NewGuid(),
+                        StreetAddress = dto.Address.StreetAddress,
+                        ZipCode = dto.Address.ZipCode,
+                        CityPlace = dto.Address.CityPlace,
+                        Country = dto.Address.Country
                     };
-                    _dbContext.Categories.Add(category);
-                    categories.Add(category);
+                    _dbContext.AttractionAddresses.Add(address);
+                    await _dbContext.SaveChangesAsync();
                 }
 
+                // 2. Categories: reuse if exists
+                var categories = new List<CategoriesDbM>();
+                if (dto.Categories?.Any() == true)
+                {
+                    foreach (var catDto in dto.Categories)
+                    {
+                        var category = await _dbContext.Categories
+                            .FirstOrDefaultAsync(c => c.CategoryName == catDto.CategoryName);
+
+                        if (category == null)
+                        {
+                            category = new CategoriesDbM
+                            {
+                                CategoryId = Guid.NewGuid(),
+                                CategoryName = catDto.CategoryName
+                            };
+                            _dbContext.Categories.Add(category);
+                            await _dbContext.SaveChangesAsync();
+                        }
+
+                        categories.Add(category);
+                    }
+                }
+
+                // Include explicitly existing category IDs
                 if (dto.ExistingCategoryIds?.Any() == true)
                 {
                     var existing = await _dbContext.Categories
@@ -366,9 +399,22 @@ public class AttractionsDbRepos
                     categories.AddRange(existing);
                 }
 
-                await _dbContext.SaveChangesAsync();
+                // 3. Check unique index gracefully
+                var duplicateAttraction = await _dbContext.Attractions
+                    .FirstOrDefaultAsync(a =>
+                        a.AttractionName == dto.AttractionName &&
+                        a.AttractionDescription == dto.AttractionDescription &&
+                        a.AddressId == address.AddressId);
 
-                // 3. Attraction
+                if (duplicateAttraction != null)
+                {
+                    return new ResponseItemDto<IAttractions>
+                    {
+                        ErrorMessage = $"An attraction with the same name, description, and address already exists (Id: {duplicateAttraction.AttractionId})"
+                    };
+                }
+
+                // 4. Create new attraction
                 var attraction = new AttractionsDbM
                 {
                     AttractionId = Guid.NewGuid(),
@@ -377,6 +423,7 @@ public class AttractionsDbRepos
                     AddressId = address.AddressId,
                     CategoriesDbM = categories
                 };
+
                 _dbContext.Attractions.Add(attraction);
                 await _dbContext.SaveChangesAsync();
 
@@ -384,19 +431,23 @@ public class AttractionsDbRepos
 
                 return await ReadAttractionAsync(attraction.AttractionId, false);
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                throw;
+                return new ResponseItemDto<IAttractions>
+                {
+                    ErrorMessage = $"Could not create attraction due to an unexpected error: {ex.Message}"
+                };
             }
         });
     }
 
 
 
+
+
     private async Task navProp_AttractionsCUdto_to_AttractionsDbM(AttractionCreateDto itemDtoSrc, AttractionsDbM itemDst)
     {
-        //update FriendsDbM from itemDto.FriendId
         List<ReviewsDbM> reviews = null;
         if (itemDtoSrc.ReviewId != null)
         {

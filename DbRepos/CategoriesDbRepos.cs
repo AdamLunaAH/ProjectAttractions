@@ -22,81 +22,99 @@ public class CategoriesDbRepos
 
     public async Task<ResponsePageDto<ICategories>> ReadCategoriesAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        filter ??= "";
-        IQueryable<CategoriesDbM> query;
-        if (flat)
+        try
         {
-            query = _dbContext.Categories.AsNoTracking();
-        }
-        else
-        {
-            query = _dbContext.Categories.AsNoTracking()
-                .Include(i => i.AttractionsDbM);
-        }
+            filter ??= "";
+            IQueryable<CategoriesDbM> query;
+            if (flat)
+            {
+                query = _dbContext.Categories.AsNoTracking();
+            }
+            else
+            {
+                query = _dbContext.Categories.AsNoTracking()
+                    .Include(i => i.AttractionsDbM);
+            }
 
-        var ret = new ResponsePageDto<ICategories>()
-        {
+            var ret = new ResponsePageDto<ICategories>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query
+                DbItemsCount = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        i.CategoryName.ToLower().Contains(filter))
-                        .CountAsync(),
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            i.CategoryName.ToLower().Contains(filter))
+                            .CountAsync(),
 
-            PageItems = await query
+                PageItems = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        i.CategoryName.ToLower().Contains(filter))
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            i.CategoryName.ToLower().Contains(filter))
 
-            //Adding paging
-            .Skip(pageNumber * pageSize)
-            .Take(pageSize)
+                //Adding paging
+                .Skip(pageNumber * pageSize)
+                .Take(pageSize)
 
-            .ToListAsync<ICategories>(),
+                .ToListAsync<ICategories>(),
 
-            PageNr = pageNumber,
-            PageSize = pageSize
-        };
-        return ret;
+                PageNr = pageNumber,
+                PageSize = pageSize
+            };
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not read categories due to an unexpected error.");
+            return new ResponsePageDto<ICategories>();
+        }
     }
 
     public async Task<ResponseItemDto<ICategories>> ReadCategoryAsync(Guid id, bool flat)
     {
-        if (!flat)
+        try
         {
-            //make sure the model is fully populated, try without include.
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.Categories.AsNoTracking()
-                .Include(i => i.AttractionsDbM)
-                .Where(i => i.CategoryId == id);
-
-            return new ResponseItemDto<ICategories>()
+            if (!flat)
             {
+                //make sure the model is fully populated, try without include.
+                //remove tracking for all read operations for performance and to avoid recursion/circular access
+                var query = _dbContext.Categories.AsNoTracking()
+                    .Include(i => i.AttractionsDbM)
+                    .Where(i => i.CategoryId == id);
+
+                return new ResponseItemDto<ICategories>()
+                {
 #if DEBUG
-                ConnectionString = _dbContext.dbConnection,
+                    ConnectionString = _dbContext.dbConnection,
 #endif
 
-                Item = await query.FirstOrDefaultAsync<ICategories>()
-            };
+                    Item = await query.FirstOrDefaultAsync<ICategories>()
+                };
+            }
+            else
+            {
+                //Not fully populated, compare the SQL Statements generated
+                //remove tracking for all read operations for performance and to avoid recursion/circular access
+                var query = _dbContext.Categories.AsNoTracking()
+                    .Where(i => i.CategoryId == id);
+
+                return new ResponseItemDto<ICategories>()
+                {
+#if DEBUG
+                    ConnectionString = _dbContext.dbConnection,
+#endif
+
+                    Item = await query.FirstOrDefaultAsync<ICategories>()
+                };
+            }
         }
-        else
+        catch (Exception ex)
         {
-            //Not fully populated, compare the SQL Statements generated
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.Categories.AsNoTracking()
-                .Where(i => i.CategoryId == id);
-
             return new ResponseItemDto<ICategories>()
             {
-#if DEBUG
-                ConnectionString = _dbContext.dbConnection,
-#endif
-
-                Item = await query.FirstOrDefaultAsync<ICategories>()
+                ErrorMessage = $"Could not read category due to an unexpected error: {ex.Message}"
             };
         }
     }
@@ -104,101 +122,131 @@ public class CategoriesDbRepos
 
     public async Task<ResponseItemDto<ICategories>> DeleteCategoryAsync(Guid id)
     {
-        var query1 = _dbContext.Categories
+        try
+        {
+            var query1 = _dbContext.Categories
             .Where(i => i.CategoryId == id);
 
-        var item = await query1.FirstOrDefaultAsync<CategoriesDbM>();
+            var item = await query1.FirstOrDefaultAsync<CategoriesDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {id} is not existing");
 
-        //delete in the database model
-        _dbContext.Categories.Remove(item);
+            //delete in the database model
+            _dbContext.Categories.Remove(item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
-        return new ResponseItemDto<ICategories>()
-        {
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
+            return new ResponseItemDto<ICategories>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
 
-            Item = item
-        };
+                Item = item
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<ICategories>()
+            {
+                ErrorMessage = $"Could not delete category due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     public async Task<ResponseItemDto<ICategories>> UpdateCategoryAsync(CategoriesCuDto itemDto)
     {
-        var query1 = _dbContext.Categories
+        try
+        {
+            var query1 = _dbContext.Categories
             .Where(i => i.CategoryId == itemDto.CategoryId);
-        var item = await query1
-                // .Include(i => i.ReviewsDbM)
-                .FirstOrDefaultAsync<CategoriesDbM>();
+            var item = await query1
+                    // .Include(i => i.ReviewsDbM)
+                    .FirstOrDefaultAsync<CategoriesDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {itemDto.CategoryId} is not existing");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {itemDto.CategoryId} is not existing");
 
-        //I cannot have duplicates in the Categories table, so check that
-        var query2 = _dbContext.Categories
-            .Where(i => i.CategoryName == itemDto.CategoryName);
-        var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.CategoryId != itemDto.CategoryId)
-            throw new ArgumentException($"Item already exist with id {existingItem.CategoryId}");
+            //I cannot have duplicates in the Categories table, so check that
+            var query2 = _dbContext.Categories
+                .Where(i => i.CategoryName == itemDto.CategoryName);
+            var existingItem = await query2.FirstOrDefaultAsync();
+            if (existingItem != null && existingItem.CategoryId != itemDto.CategoryId)
+                throw new ArgumentException($"Item already exist with id {existingItem.CategoryId}");
 
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        item.UpdateFromDTO(itemDto);
+            //transfer any changes from DTO to database objects
+            //Update individual properties
+            item.UpdateFromDTO(itemDto);
 
-        //Update navigation properties
-        await navProp_CategoriesCUdto_to_CategoriesDbM(itemDto, item);
+            //Update navigation properties
+            await navProp_CategoriesCUdto_to_CategoriesDbM(itemDto, item);
 
-        //write to database model
-        _dbContext.Categories.Update(item);
+            //write to database model
+            _dbContext.Categories.Update(item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
 
-        //return the updated item in non-flat mode
-        return await ReadCategoryAsync(item.CategoryId, false);
+            //return the updated item in non-flat mode
+            return await ReadCategoryAsync(item.CategoryId, false);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<ICategories>()
+            {
+                ErrorMessage = $"Could not update category due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     public async Task<ResponseItemDto<ICategories>> CreateCategoryAsync(CategoryCreateDto itemDto)
     {
-        // if (itemDto.CategoryId != null)
-        //     throw new ArgumentException($"{nameof(itemDto.CategoryId)} must be null when creating a new object");
-
-        // if (itemDto.CategoryId != Guid.Empty)
-        //     throw new ArgumentException("CategoryId must be empty when creating a new category.");
-
-
-        //I cannot have duplicates in the Categories table, so check that
-        var query2 = _dbContext.Categories
-            .Where(i => i.CategoryName == itemDto.CategoryName);
-        var existingItem = await query2.FirstOrDefaultAsync();
-        if (existingItem != null && existingItem.CategoryName != itemDto.CategoryName)
-            throw new ArgumentException($"Category already exist with name: {existingItem.CategoryName}");
-
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        // var item = new CategoriesDbM(itemDto);
-        var item = new CategoriesDbM
+        try
         {
-            CategoryId = Guid.NewGuid(),
-            CategoryName = itemDto.CategoryName
-        };
+            // if (itemDto.CategoryId != null)
+            //     throw new ArgumentException($"{nameof(itemDto.CategoryId)} must be null when creating a new object");
+
+            // if (itemDto.CategoryId != Guid.Empty)
+            //     throw new ArgumentException("CategoryId must be empty when creating a new category.");
 
 
-        //Update navigation properties
-        // await navProp_CategoriesCUdto_to_CategoriesDbM(itemDto, item);
+            //I cannot have duplicates in the Categories table, so check that
+            var query2 = _dbContext.Categories
+            .Where(i => i.CategoryName == itemDto.CategoryName);
+            var existingItem = await query2.FirstOrDefaultAsync();
+            if (existingItem != null && existingItem.CategoryName != itemDto.CategoryName)
+                throw new ArgumentException($"Category already exist with name: {existingItem.CategoryName}");
 
-        //write to database model
-        _dbContext.Categories.Add(item);
+            //transfer any changes from DTO to database objects
+            //Update individual properties
+            // var item = new CategoriesDbM(itemDto);
+            var item = new CategoriesDbM
+            {
+                CategoryId = Guid.NewGuid(),
+                CategoryName = itemDto.CategoryName
+            };
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
 
-        //return the updated item in non-flat mode
-        return await ReadCategoryAsync(item.CategoryId, false);
+            //Update navigation properties
+            // await navProp_CategoriesCUdto_to_CategoriesDbM(itemDto, item);
+
+            //write to database model
+            _dbContext.Categories.Add(item);
+
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
+
+            //return the updated item in non-flat mode
+            return await ReadCategoryAsync(item.CategoryId, false);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<ICategories>
+            {
+                ErrorMessage = $"Could not create category due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
 

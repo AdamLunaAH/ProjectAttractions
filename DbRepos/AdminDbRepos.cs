@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
-using Models.Utilities.SeedGenerator;
+// using Models.Utilities.SeedGenerator;
 using Models.DTO;
 using DbModels;
 using DbContext;
@@ -14,8 +14,8 @@ namespace DbRepos;
 
 public class AdminDbRepos
 {
-    private const string _seedSource = "./app-seeds.json";
-    private static bool IsAppSeedsEmpty = false;
+    // private const string _seedSource = "./app-seeds.json";
+    // private static bool IsAppSeedsEmpty = false;
 
     private readonly ILogger<AdminDbRepos> _logger;
     private Encryptions _encryptions;
@@ -47,182 +47,182 @@ public class AdminDbRepos
 
 
 
-    public async Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAsync()
-    {
-        //Create a seeder
-        var fn = Path.GetFullPath(_seedSource);
+    // public async Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAsync()
+    // {
+    //     //Create a seeder
+    //     var fn = Path.GetFullPath(_seedSource);
 
-        var info = new FileInfo(fn);
-        if (info.Length < 20 )
-        {
-            IsAppSeedsEmpty = true;
-        }
+    //     var info = new FileInfo(fn);
+    //     if (info.Length < 20 )
+    //     {
+    //         IsAppSeedsEmpty = true;
+    //     }
 
-        if (IsAppSeedsEmpty == true)
-        {
-            try
-            {
-                // Create a master seed file using SeedGenerator and write it to the app-seeds.json location
-                var appSeedPath = new SeedGenerator().WriteMasterStream(fn);
-                _logger.LogInformation("app-seeds file created at: {path}", appSeedPath);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to create app-seeds file at {path}", fn);
-                throw;
-            }
-        }
+    //     if (IsAppSeedsEmpty == true)
+    //     {
+    //         try
+    //         {
+    //             // Create a master seed file using SeedGenerator and write it to the app-seeds.json location
+    //             var appSeedPath = new SeedGenerator().WriteMasterStream(fn);
+    //             _logger.LogInformation("app-seeds file created at: {path}", appSeedPath);
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             _logger.LogError(ex, "Failed to create app-seeds file at {path}", fn);
+    //             throw;
+    //         }
+    //     }
 
-        //Create a seeder
-
-
-        var seeder = new SeedGenerator(fn);
-
-        #region old code
-        //remove existing creditcards in the database
-        // _dbContext.CreditCards.RemoveRange(_dbContext.CreditCards);
-
-        //Seeding new creditcards into the database
-        // var creditcards = seeder.ItemsToList<CreditCardDbM>(10);
-        // _dbContext.CreditCards.AddRange(creditcards);
+    //     //Create a seeder
 
 
+    //     var seeder = new SeedGenerator(fn);
 
-        // var attractionAddresses = seeder.ItemsToList<AttractionAddressesDbM>(10);
-        // _dbContext.AttractionAddresses.AddRange(attractionAddresses);
-        #endregion
+    //     #region old code
+    //     //remove existing creditcards in the database
+    //     // _dbContext.CreditCards.RemoveRange(_dbContext.CreditCards);
 
-
-        #region clear database
-
-        _dbContext.Reviews.RemoveRange(_dbContext.Reviews);
-        _dbContext.Categories.RemoveRange(_dbContext.Categories);
-        _dbContext.AttractionAddresses.RemoveRange(_dbContext.AttractionAddresses);
-        _dbContext.Attractions.RemoveRange(_dbContext.Attractions);
-        _dbContext.Users.RemoveRange(_dbContext.Users);
-        await _dbContext.SaveChangesAsync();
+    //     //Seeding new creditcards into the database
+    //     // var creditcards = seeder.ItemsToList<CreditCardDbM>(10);
+    //     // _dbContext.CreditCards.AddRange(creditcards);
 
 
 
-        #endregion
-
-        // Create attractions
-
-
-        #region new create attraction
-        // List<Attractions> tempAttractions = new List<Attractions>();
-
-        // do
-        // {
-
-        // }
-        // while (tempAttractions.Count < 100);
-        #endregion
-        var attractions = seeder.ItemsToList<AttractionsDbM>(10);
-        _dbContext.Attractions.AddRange(attractions);
-
-        // Create users
-        var users = seeder.ItemsToList<UsersDbM>(10);
-        _dbContext.Users.AddRange(users);
-
-        // Addresses
-        var addresses = seeder.ItemsToList<AttractionAddressesDbM>(10);
-        _dbContext.AttractionAddresses.AddRange(addresses);
-
-        // Categories
-        var existingCategories = new List<CategoriesDbM>();
-
-        foreach (var attraction in attractions)
-        {
-            // Address
-            attraction.AttractionAddressesDbM = (seeder.Bool) ? seeder.FromList(addresses) : null;
-
-            //         attraction.AttractionAddressesDbM =
-            // seeder.UniqueItemsPickedFromList(1, addresses);
+    //     // var attractionAddresses = seeder.ItemsToList<AttractionAddressesDbM>(10);
+    //     // _dbContext.AttractionAddresses.AddRange(attractionAddresses);
+    //     #endregion
 
 
-            // ---- Categories (0–3 per attraction) ----
-            var count = seeder.Next(1, 5);
-            for (int i = 0; i < count; i++)
-            {
-                // var candidate = seeder.Item<CategoriesDbM>();
-                // change it to not re-fetch the data from the database but instead create a copy of the categories in a list locally
-                var candidate = seeder.ItemsToList<CategoriesDbM>(1).First(); ;
-                var existing = existingCategories
-                    .FirstOrDefault(c =>
-                        string.Equals(c.CategoryName, candidate.CategoryName, StringComparison.OrdinalIgnoreCase));
+    //     #region clear database
 
-                if (existing == null)
-                {
-                    existing = candidate;
-                    existingCategories.Add(existing);
-                    _dbContext.Categories.Add(existing);
-                }
-
-                attraction.CategoriesDbM ??= new List<CategoriesDbM>();
-                attraction.CategoriesDbM.Add(existing);
-            }
-        }
-
-        // ---------- Reviews ----------
-        var rnd = new Random();
-        foreach (var user in users)
-        {
-            // Let each user review 0–4 random attractions, but only once per attraction
-            var reviewCount = seeder.Next(5, 15);
-            var reviewedAttractions = attractions
-                .OrderBy(_ => rnd.Next())
-                .Take(reviewCount);
-
-            foreach (var attraction in reviewedAttractions)
-            {
-                // var review = seeder.Item<ReviewsDbM>();
-                var review = seeder.ItemsToList<ReviewsDbM>(1).First();
-                review.UsersDbM = user;
-                review.AttractionsDbM = attraction;
-                review.UserId = user.UserId;
-                review.AttractionId = attraction.AttractionId;
-
-                _dbContext.Reviews.Add(review);
-            }
-        }
-
-        // foreach (var attraction in attractions)
-        // {
-        //     // attraction.AttractionAddressesDbM = seeder.AttractionAddressesDbM;
-        //     attraction.CategoriesDbM = seeder.ItemsToList<CategoriesDbM>(seeder.Next(0, 3));
-
-        // }
-
-        // foreach (var user in users)
-        // {
-        //     user.ReviewsDbM = seeder.ItemsToList<ReviewsDbM>(seeder.Next(0, 4));
-
-        //     // foreach (var review in user.ReviewsDbM)
-        //     // {
-        //     //     // review.AttractionsDbM = seeder.UniqueIndexPickedFromList(seeder.Next(0, 1), attractions);
-        //     // }
-        // }
+    //     _dbContext.Reviews.RemoveRange(_dbContext.Reviews);
+    //     _dbContext.Categories.RemoveRange(_dbContext.Categories);
+    //     _dbContext.AttractionAddresses.RemoveRange(_dbContext.AttractionAddresses);
+    //     _dbContext.Attractions.RemoveRange(_dbContext.Attractions);
+    //     _dbContext.Users.RemoveRange(_dbContext.Users);
+    //     await _dbContext.SaveChangesAsync();
 
 
 
-        // var reviews = seeder.ItemsToList<ReviewsDbM>(10);
-        // _dbContext.Reviews.AddRange(reviews);
+    //     #endregion
 
-        // var categories = seeder.ItemsToList<CategoriesDbM>(10);
-        // _dbContext.Categories.AddRange(categories);
+    //     // Create attractions
 
 
+    //     #region new create attraction
+    //     // List<Attractions> tempAttractions = new List<Attractions>();
+
+    //     // do
+    //     // {
+
+    //     // }
+    //     // while (tempAttractions.Count < 100);
+    //     #endregion
+    //     var attractions = seeder.ItemsToList<AttractionsDbM>(10);
+    //     _dbContext.Attractions.AddRange(attractions);
+
+    //     // Create users
+    //     var users = seeder.ItemsToList<UsersDbM>(10);
+    //     _dbContext.Users.AddRange(users);
+
+    //     // Addresses
+    //     var addresses = seeder.ItemsToList<AttractionAddressesDbM>(10);
+    //     _dbContext.AttractionAddresses.AddRange(addresses);
+
+    //     // Categories
+    //     var existingCategories = new List<CategoriesDbM>();
+
+    //     foreach (var attraction in attractions)
+    //     {
+    //         // Address
+    //         attraction.AttractionAddressesDbM = (seeder.Bool) ? seeder.FromList(addresses) : null;
+
+    //         //         attraction.AttractionAddressesDbM =
+    //         // seeder.UniqueItemsPickedFromList(1, addresses);
+
+
+    //         // ---- Categories (0–3 per attraction) ----
+    //         var count = seeder.Next(1, 5);
+    //         for (int i = 0; i < count; i++)
+    //         {
+    //             // var candidate = seeder.Item<CategoriesDbM>();
+    //             // change it to not re-fetch the data from the database but instead create a copy of the categories in a list locally
+    //             var candidate = seeder.ItemsToList<CategoriesDbM>(1).First(); ;
+    //             var existing = existingCategories
+    //                 .FirstOrDefault(c =>
+    //                     string.Equals(c.CategoryName, candidate.CategoryName, StringComparison.OrdinalIgnoreCase));
+
+    //             if (existing == null)
+    //             {
+    //                 existing = candidate;
+    //                 existingCategories.Add(existing);
+    //                 _dbContext.Categories.Add(existing);
+    //             }
+
+    //             attraction.CategoriesDbM ??= new List<CategoriesDbM>();
+    //             attraction.CategoriesDbM.Add(existing);
+    //         }
+    //     }
+
+    //     // ---------- Reviews ----------
+    //     var rnd = new Random();
+    //     foreach (var user in users)
+    //     {
+    //         // Let each user review 0–4 random attractions, but only once per attraction
+    //         var reviewCount = seeder.Next(5, 15);
+    //         var reviewedAttractions = attractions
+    //             .OrderBy(_ => rnd.Next())
+    //             .Take(reviewCount);
+
+    //         foreach (var attraction in reviewedAttractions)
+    //         {
+    //             // var review = seeder.Item<ReviewsDbM>();
+    //             var review = seeder.ItemsToList<ReviewsDbM>(1).First();
+    //             review.UsersDbM = user;
+    //             review.AttractionsDbM = attraction;
+    //             review.UserId = user.UserId;
+    //             review.AttractionId = attraction.AttractionId;
+
+    //             _dbContext.Reviews.Add(review);
+    //         }
+    //     }
+
+    //     // foreach (var attraction in attractions)
+    //     // {
+    //     //     // attraction.AttractionAddressesDbM = seeder.AttractionAddressesDbM;
+    //     //     attraction.CategoriesDbM = seeder.ItemsToList<CategoriesDbM>(seeder.Next(0, 3));
+
+    //     // }
+
+    //     // foreach (var user in users)
+    //     // {
+    //     //     user.ReviewsDbM = seeder.ItemsToList<ReviewsDbM>(seeder.Next(0, 4));
+
+    //     //     // foreach (var review in user.ReviewsDbM)
+    //     //     // {
+    //     //     //     // review.AttractionsDbM = seeder.UniqueIndexPickedFromList(seeder.Next(0, 1), attractions);
+    //     //     // }
+    //     // }
 
 
 
-        //Save changes to the database
-        LogChangeTracker();
-        await _dbContext.SaveChangesAsync();
-        LogChangeTracker();
+    //     // var reviews = seeder.ItemsToList<ReviewsDbM>(10);
+    //     // _dbContext.Reviews.AddRange(reviews);
 
-        return await DbInfo();
-    }
+    //     // var categories = seeder.ItemsToList<CategoriesDbM>(10);
+    //     // _dbContext.Categories.AddRange(categories);
+
+
+
+
+
+    //     //Save changes to the database
+    //     LogChangeTracker();
+    //     await _dbContext.SaveChangesAsync();
+    //     LogChangeTracker();
+
+    //     return await DbInfo();
+    // }
 
 
     // This method is for debugging purposes only and to demonstrate the ChangeTracker

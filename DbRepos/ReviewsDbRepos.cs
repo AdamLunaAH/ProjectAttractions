@@ -22,85 +22,103 @@ public class ReviewsDbRepos
 
     public async Task<ResponsePageDto<IReviews>> ReadReviewsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        filter ??= "";
-        IQueryable<ReviewsDbM> query;
-        if (flat)
+        try
         {
-            query = _dbContext.Reviews.AsNoTracking();
-        }
-        else
-        {
-            query = _dbContext.Reviews.AsNoTracking()
-                .Include(i => i.AttractionsDbM)
-                .Include(i => i.UsersDbM);
-        }
+            filter ??= "";
+            IQueryable<ReviewsDbM> query;
+            if (flat)
+            {
+                query = _dbContext.Reviews.AsNoTracking();
+            }
+            else
+            {
+                query = _dbContext.Reviews.AsNoTracking()
+                    .Include(i => i.AttractionsDbM)
+                    .Include(i => i.UsersDbM);
+            }
 
-        var ret = new ResponsePageDto<IReviews>()
-        {
+            var ret = new ResponsePageDto<IReviews>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query
+                DbItemsCount = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        (i.ReviewScore.ToString().Contains(filter) ||
-                            i.ReviewText.ToLower().Contains(filter))).CountAsync(),
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            (i.ReviewScore.ToString().Contains(filter) ||
+                                i.ReviewText.ToLower().Contains(filter))).CountAsync(),
 
-            PageItems = await query
+                PageItems = await query
 
-            //Adding filter functionality
-            .Where(i => (seeded == null || i.Seeded == seeded) &&
-                        (i.ReviewScore.ToString().Contains(filter) ||
-                            i.ReviewText.ToLower().Contains(filter)))
+                //Adding filter functionality
+                .Where(i => (seeded == null || i.Seeded == seeded) &&
+                            (i.ReviewScore.ToString().Contains(filter) ||
+                                i.ReviewText.ToLower().Contains(filter)))
 
-            //Adding paging
-            .Skip(pageNumber * pageSize)
-            .Take(pageSize)
+                //Adding paging
+                .Skip(pageNumber * pageSize)
+                .Take(pageSize)
 
-            .ToListAsync<IReviews>(),
+                .ToListAsync<IReviews>(),
 
-            PageNr = pageNumber,
-            PageSize = pageSize
-        };
-        return ret;
+                PageNr = pageNumber,
+                PageSize = pageSize
+            };
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not read reviews due to an unexpected error.");
+            return new ResponsePageDto<IReviews>();
+        }
     }
 
     public async Task<ResponseItemDto<IReviews>> ReadReviewAsync(Guid id, bool flat)
     {
-        if (!flat)
+        try
         {
-            //make sure the model is fully populated, try without include.
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.Reviews.AsNoTracking()
-                .Include(i => i.UsersDbM)
-                .Include(i => i.AttractionsDbM)
-                .Where(i => i.ReviewId == id);
-
-            return new ResponseItemDto<IReviews>()
+            if (!flat)
             {
+                //make sure the model is fully populated, try without include.
+                //remove tracking for all read operations for performance and to avoid recursion/circular access
+                var query = _dbContext.Reviews.AsNoTracking()
+                    .Include(i => i.UsersDbM)
+                    .Include(i => i.AttractionsDbM)
+                    .Where(i => i.ReviewId == id);
+
+                return new ResponseItemDto<IReviews>()
+                {
 #if DEBUG
-                ConnectionString = _dbContext.dbConnection,
+                    ConnectionString = _dbContext.dbConnection,
 #endif
 
-                Item = await query.FirstOrDefaultAsync<IReviews>()
-            };
+                    Item = await query.FirstOrDefaultAsync<IReviews>()
+                };
+            }
+            else
+            {
+                //Not fully populated, compare the SQL Statements generated
+                //remove tracking for all read operations for performance and to avoid recursion/circular access
+                var query = _dbContext.Reviews.AsNoTracking()
+                    .Include(i => i.UsersDbM)
+                    .Include(i => i.AttractionsDbM);
+
+                return new ResponseItemDto<IReviews>()
+                {
+#if DEBUG
+                    ConnectionString = _dbContext.dbConnection,
+#endif
+
+                    Item = await query.FirstOrDefaultAsync<IReviews>()
+                };
+            }
         }
-        else
+        catch (Exception ex)
         {
-            //Not fully populated, compare the SQL Statements generated
-            //remove tracking for all read operations for performance and to avoid recursion/circular access
-            var query = _dbContext.Reviews.AsNoTracking()
-                .Include(i => i.UsersDbM)
-                .Include(i => i.AttractionsDbM);
-
             return new ResponseItemDto<IReviews>()
             {
-#if DEBUG
-                ConnectionString = _dbContext.dbConnection,
-#endif
-
-                Item = await query.FirstOrDefaultAsync<IReviews>()
+                ErrorMessage = $"Could not read review due to an unexpected error: {ex.Message}"
             };
         }
     }
@@ -108,32 +126,45 @@ public class ReviewsDbRepos
 
     public async Task<ResponseItemDto<IReviews>> DeleteReviewAsync(Guid id)
     {
-        var query1 = _dbContext.Reviews
+        try
+        {
+            var query1 = _dbContext.Reviews
             .Where(i => i.ReviewId == id);
 
-        var item = await query1.FirstOrDefaultAsync<ReviewsDbM>();
+            var item = await query1.FirstOrDefaultAsync<ReviewsDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {id} is not existing");
 
-        //delete in the database model
-        _dbContext.Reviews.Remove(item);
+            //delete in the database model
+            _dbContext.Reviews.Remove(item);
 
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
-        return new ResponseItemDto<IReviews>()
-        {
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
+            return new ResponseItemDto<IReviews>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
 
-            Item = item
-        };
+                Item = item
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IReviews>()
+            {
+                ErrorMessage = $"Could not delete review due to an unexpected error: {ex.Message}"
+            };
+        }
+
     }
 
     public async Task<ResponseItemDto<IReviews>> UpdateReviewAsync(ReviewsCuDto itemDto)
     {
-        var query1 = _dbContext.Reviews
+        try
+        {
+            var query1 = _dbContext.Reviews
             .Where(i => i.ReviewId == itemDto.ReviewId);
         var item = await query1
                 // .Include(i => i.ReviewsDbM)
@@ -148,9 +179,13 @@ public class ReviewsDbRepos
                         r.AttractionId == itemDto.AttractionId &&
                         r.ReviewId != itemDto.ReviewId);
 
-        if (exists)
-            throw new ArgumentException(
-                $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
+        if (exists == true)
+        {
+            return new ResponseItemDto<IReviews>()
+            {
+                ErrorMessage = $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}"
+            };
+        }
 
 
         //transfer any changes from DTO to database objects
@@ -169,77 +204,95 @@ public class ReviewsDbRepos
         //return the updated item in non-flat mode
         return await ReadReviewAsync(item.ReviewId, false);
     }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IReviews>()
+            {
+                ErrorMessage = $"Could not update review due to an unexpected error: {ex.Message}"
+            };
+        }
+    }
 
     // public async Task<ResponseItemDto<IReviews>> CreateReviewAsync(ReviewsCuDto itemDto)
     // {
     //     // if (itemDto.ReviewId != Guid.Empty)
     //     //     throw new ArgumentException($"{nameof(itemDto.ReviewId)} must be empty when creating a new object");
 
-    //     if (itemDto.ReviewId != Guid.Empty && itemDto.ReviewId != default)
-    //         throw new ArgumentException($"{nameof(itemDto.ReviewId)} must be Empty when creating a new object");
+        //     if (itemDto.ReviewId != Guid.Empty && itemDto.ReviewId != default)
+        //         throw new ArgumentException($"{nameof(itemDto.ReviewId)} must be Empty when creating a new object");
 
 
-    //     if (itemDto.UserId == null || itemDto.AttractionId == null)
-    //         throw new ArgumentException("UserId and AttractionId must be provided");
+        //     if (itemDto.UserId == null || itemDto.AttractionId == null)
+        //         throw new ArgumentException("UserId and AttractionId must be provided");
 
-    //     //I cannot have duplicates in the Reviews table, so check that
-    //     var exists = await _dbContext.Reviews
-    //         .AnyAsync(r => r.UserId == itemDto.UserId &&
-    //                         r.AttractionId == itemDto.AttractionId);
+        //     //I cannot have duplicates in the Reviews table, so check that
+        //     var exists = await _dbContext.Reviews
+        //         .AnyAsync(r => r.UserId == itemDto.UserId &&
+        //                         r.AttractionId == itemDto.AttractionId);
 
-    //     if (exists)
-    //         throw new ArgumentException(
-    //             $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
+        //     if (exists)
+        //         throw new ArgumentException(
+        //             $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
 
 
-    //     //transfer any changes from DTO to database objects
-    //     //Update individual properties
-    //     var item = new ReviewsDbM(itemDto);
+        //     //transfer any changes from DTO to database objects
+        //     //Update individual properties
+        //     var item = new ReviewsDbM(itemDto);
 
-    //     //Update navigation properties
-    //     await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
+        //     //Update navigation properties
+        //     await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
 
-    //     //write to database model
-    //     _dbContext.Reviews.Add(item);
+        //     //write to database model
+        //     _dbContext.Reviews.Add(item);
 
-    //     //write to database in a UoW
-    //     await _dbContext.SaveChangesAsync();
+        //     //write to database in a UoW
+        //     await _dbContext.SaveChangesAsync();
 
-    //     //return the updated item in non-flat mode
-    //     return await ReadReviewAsync(item.ReviewId, false);
-    // }
+        //     //return the updated item in non-flat mode
+        //     return await ReadReviewAsync(item.ReviewId, false);
+        // }
 
     public async Task<ResponseItemDto<IReviews>> CreateReviewAsync(ReviewCreateDto itemDto)
     {
-        if (itemDto.UserId == null || itemDto.UserId == Guid.Empty)
-            throw new ArgumentException("UserId must be provided");
-        if (itemDto.AttractionId == null || itemDto.AttractionId == Guid.Empty)
-            throw new ArgumentException("AttractionId must be provided");
-
-        var exists = await _dbContext.Reviews
-            .AnyAsync(r => r.UserId == itemDto.UserId &&
-                            r.AttractionId == itemDto.AttractionId);
-
-        if (exists)
-            throw new ArgumentException(
-                $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
-
-        var item = new ReviewsDbM
+        try
         {
-            ReviewId = Guid.NewGuid(),
-            UserId = itemDto.UserId.Value,
-            AttractionId = itemDto.AttractionId.Value,
-            ReviewScore = itemDto.ReviewScore,
-            ReviewText = itemDto.ReviewText,
-            CreatedAt = itemDto.CreatedAt ?? DateTime.UtcNow
-        };
+            if (itemDto.UserId == null || itemDto.UserId == Guid.Empty)
+                throw new ArgumentException("UserId must be provided");
+            if (itemDto.AttractionId == null || itemDto.AttractionId == Guid.Empty)
+                throw new ArgumentException("AttractionId must be provided");
 
-        await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
+            var exists = await _dbContext.Reviews
+                .AnyAsync(r => r.UserId == itemDto.UserId &&
+                                r.AttractionId == itemDto.AttractionId);
 
-        _dbContext.Reviews.Add(item);
-        await _dbContext.SaveChangesAsync();
+            if (exists)
+                throw new ArgumentException(
+                    $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
 
-        return await ReadReviewAsync(item.ReviewId, false);
+            var item = new ReviewsDbM
+            {
+                ReviewId = Guid.NewGuid(),
+                UserId = itemDto.UserId.Value,
+                AttractionId = itemDto.AttractionId.Value,
+                ReviewScore = itemDto.ReviewScore,
+                ReviewText = itemDto.ReviewText,
+                CreatedAt = itemDto.CreatedAt ?? DateTime.UtcNow
+            };
+
+            await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
+
+            _dbContext.Reviews.Add(item);
+            await _dbContext.SaveChangesAsync();
+
+            return await ReadReviewAsync(item.ReviewId, false);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseItemDto<IReviews>()
+            {
+                ErrorMessage = $"Could not create review due to an unexpected error: {ex.Message}"
+            };
+        }
     }
 
     private async Task navProp_ReviewsCUdto_to_ReviewsDbM(ReviewCreateDto itemDtoSrc, ReviewsDbM itemDst)
