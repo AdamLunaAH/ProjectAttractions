@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
+using Models.DTO;
 
 using Services;
 using Configuration;
@@ -25,17 +26,18 @@ namespace AppWebApi.Controllers
         //GET: api/seeder/seed?count={count}
         [HttpGet()]
         [ActionName("SeedAll")]
-        [ProducesResponseType(200, Type = typeof(string))]
+        [ProducesResponseType(200, Type = typeof(ResponseItemDto<SupUsrInfoAllDto>))]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<IActionResult> SeedAll()
+
         {
             try
             {
 
                 _logger.LogInformation($"{nameof(SeedAll)}");
-                await _service.SeedAllAsync();
+                var result = await _service.SeedAllAsync();
+                return Ok(result);
 
-                return Ok("Seeding completed successfully.");
             }
             catch (Exception ex)
             {

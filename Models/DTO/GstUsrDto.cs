@@ -2,46 +2,81 @@
 
 public class GstUsrInfoDbDto
 {
-    public int NrSeededFriends { get; set; } = 0;
-    public int NrUnseededFriends { get; set; } = 0;
-    public int NrFriendsWithAddress { get; set; } = 0;
 
-    public int NrSeededAddresses { get; set; } = 0;
-    public int NrUnseededAddresses { get; set; } = 0;
+    public int NrSeededUsers { get; set; } = 0;
+    public int NrUnseededUsers { get; set; } = 0;
+    public int NrAttractionsWithNoAddress { get; set; } = 0;
 
-    public int NrSeededPets { get; set; } = 0;
-    public int NrUnseededPets { get; set; } = 0;
+    public int NrSeededAttractionAddresses { get; set; } = 0;
+    public int NrUnseededAttractionAddresses { get; set; } = 0;
 
-    public int NrSeededQuotes { get; set; } = 0;
-    public int NrUnseededQuotes { get; set; } = 0;
+    public int NrSeededAttractions { get; set; } = 0;
+    public int NrUnseededAttractions { get; set; } = 0;
+
+    public int NrSeededCategories { get; set; } = 0;
+    public int NrUnseededCategories { get; set; } = 0;
+
+    public int NrSeededReviews { get; set; } = 0;
+    public int NrUnseededReviews { get; set; } = 0;
+
+    public int AttractionsWithoutReviews { get; set; } = 0;
 }
 
-public class GstUsrInfoFriendsDto
+
+public class GstUsrInfoAttractionsDto
 {
     public string Country { get; set; } = null;
-    public string City { get; set; } = null;
-    public int NrFriends { get; set; } = 0;
+    public string CityPlace { get; set; } = null;
+    public int NrAddresses { get; set; } = 0;
 }
 
-public class GstUsrInfoPetsDto
+public class GstUsrInfoCategoriesDto
 {
+    public string CategoryName { get; set; } = null;
+    public int NrCategories { get; set; } = 0;
+}
+public class GstUsrInfoAttractionAddressesDto
+{
+    public string StreetAddress { get; set; } = null;
+    public string ZipCode { get; set; } = null;
+    public string CityPlace { get; set; } = null;
     public string Country { get; set; } = null;
-    public string City { get; set; } = null;
-    public int NrPets { get; set; } = 0;
+    public int NrAddresses { get; set; } = 0;
 }
 
-public class GstUsrInfoQuotesDto
+public class GstUsrInfoUsersDto
 {
-    public string Author { get; set; } = null;
-    public int NrQuotes { get; set; } = 0;
+    public string FirstName { get; set; } = null;
+    public string LastName { get; set; } = null;
+
+    public string Email { get; set; } = null;
+
+    public int NrUsers { get; set; } = 0;
 }
+public class GstUsrInfoReviewsDto
+{
+    public string ReviewScore { get; set; } = null;
+    public string ReviewText { get; set; } = null;
+    public int NrReviews { get; set; } = 0;
+}
+
+public class GstUsrInfoAttractionsWithoutReviewsDto
+{
+    public string AttractionName { get; set; } = null;
+    public string Country { get; set; } = null;
+    public string CityPlace { get; set; } = null;
+    public int NrAttractions { get; set; } = 0;
+}
+
 
 public class GstUsrInfoAllDto
 {
     public GstUsrInfoDbDto Db { get; set; } = null;
-    public List<GstUsrInfoFriendsDto> Friends { get; set; } = null;
-    public List<GstUsrInfoPetsDto> Pets { get; set; } = null;
-    public List<GstUsrInfoQuotesDto> Quotes { get; set; } = null;
+    public List<GstUsrInfoAttractionsDto> Attractions { get; set; } = null;
+    public List<GstUsrInfoCategoriesDto> Categories { get; set; } = null;
+    public List<GstUsrInfoAttractionAddressesDto> AttractionAddresses { get; set; } = null;
+    public List<GstUsrInfoUsersDto> Users { get; set; } = null;
+    public List<GstUsrInfoReviewsDto> Reviews { get; set; } = null;
+    public List<GstUsrInfoAttractionsWithoutReviewsDto> AttractionsWithoutReviews { get; set; } = null;
+
 }
-
-

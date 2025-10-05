@@ -194,6 +194,61 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.ToTable("UsersDb", "supusr");
                 });
 
+            modelBuilder.Entity("Models.DTO.SupUsrInfoDbDto", b =>
+                {
+                    b.Property<int>("NrAttractionAddresses")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrAttractions")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrAttractionsWithNoAddress")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrCategories")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrReviews")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrSeededAttractionAddresses")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrSeededAttractions")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrSeededCategories")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrSeededReviews")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrSeededUsers")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrUnseededAttractionAddresses")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrUnseededAttractions")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrUnseededCategories")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrUnseededReviews")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrUnseededUsers")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NrUsers")
+                        .HasColumnType("int");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_SupUsrInfoDb", "supusr");
+                });
+
             modelBuilder.Entity("AttractionCategories", b =>
                 {
                     b.HasOne("DbModels.AttractionsDbM", null)

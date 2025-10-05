@@ -1,6 +1,10 @@
+using Models.DTO;
+
 namespace Services;
 
 public interface ISeederService
 {
-    public Task SeedAllAsync();
+    public Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAllAsync();
 }
+
+

@@ -28,32 +28,39 @@ public class SeederDbRepos
         _dbContext = context;
     }
 
+
     public async Task<ResponseItemDto<SupUsrInfoAllDto>> InfoAsync() => await DbInfo();
+
 
     private async Task<ResponseItemDto<SupUsrInfoAllDto>> DbInfo()
     {
         var info = new SupUsrInfoAllDto();
-        info.Db = new SupUsrInfoDbDto
-        {
-            NrSeededUsers = await _dbContext.Users.Where(f => f.Seeded).CountAsync(),
-            NrUnseededUsers = await _dbContext.Users.Where(f => !f.Seeded).CountAsync(),
-            NrAttractionsWithAddress = await _dbContext.Attractions.Where(f => f.AddressId != null).CountAsync(),
+        info.Db = await _dbContext.SUInfoDbView.FirstAsync();
+        // info.Db = new SupUsrInfoDbDto
+        // {
+        //     // NrUsers = await _dbContext.UsersDb.CountAsync(),
+        //     // NrSeededUsers = await _dbContext.UsersDb.Where(f => f.Seeded).CountAsync(),
+        //     // NrUnseededUsers = await _dbContext.UsersDb.Where(f => !f.Seeded).CountAsync(),
 
-            NrSeededAttractionAddresses = await _dbContext.AttractionAddresses.Where(f => f.Seeded).CountAsync(),
-            NrUnseededAttractionAddresses = await _dbContext.AttractionAddresses.Where(f => !f.Seeded).CountAsync(),
+        //     // NrSeededAttractionAddresses = await _dbContext.AttractionAddressesDb.Where(f => f.Seeded).CountAsync(),
+        //     // NrUnseededAttractionAddresses = await _dbContext.AttractionAddressesDb.Where(f => !f.Seeded).CountAsync(),
+        //     // NrAttractionAddresses = await _dbContext.AttractionAddressesDb.CountAsync(),
+        //     // NrAttractions = await _dbContext.AttractionsDb.CountAsync(),
 
-            NrSeededAttractions = await _dbContext.Attractions.Where(f => f.Seeded).CountAsync(),
-            NrUnseededAttractions = await _dbContext.Attractions.Where(f => !f.Seeded).CountAsync(),
+        //     // NrSeededAttractions = await _dbContext.AttractionsDb.Where(f => f.Seeded).CountAsync(),
+        //     // NrUnseededAttractions = await _dbContext.AttractionsDb.Where(f => !f.Seeded).CountAsync(),
+        //     // NrAttractionsWithNoAddress = await _dbContext.AttractionsDb.Where(f => f.AddressId == null).CountAsync(),
 
-            NrSeededCategories = await _dbContext.Categories.Where(f => f.Seeded).CountAsync(),
-            NrUnseededCategories = await _dbContext.Categories.Where(f => !f.Seeded).CountAsync(),
+        //     // NrCategories = await _dbContext.CategoriesDb.CountAsync(),
+        //     // NrSeededCategories = await _dbContext.CategoriesDb.Where(f => f.Seeded).CountAsync(),
+        //     // NrUnseededCategories = await _dbContext.CategoriesDb.Where(f => !f.Seeded).CountAsync(),
 
-            NrSeededReviews = await _dbContext.Reviews.Where(f => f.Seeded).CountAsync(),
-            NrUnseededReviews = await _dbContext.Reviews.Where(f => !f.Seeded).CountAsync(),
+        //     // NrReviews = await _dbContext.ReviewsDb.CountAsync(),
+        //     // NrSeededReviews = await _dbContext.ReviewsDb.Where(f => f.Seeded).CountAsync(),
+        //     // NrUnseededReviews = await _dbContext.ReviewsDb.Where(f => !f.Seeded).CountAsync(),
 
-            AttractionsWithoutReviews = await _dbContext.Attractions.Where(f => f.Seeded).CountAsync(),
 
-        };
+        // };
 
         return new ResponseItemDto<SupUsrInfoAllDto>
         {
@@ -94,16 +101,17 @@ public class SeederDbRepos
     //Create a seeder
     var seeder = new SeedGenerator(fn);
 
-    #region clear database
-    _dbContext.Reviews.RemoveRange(_dbContext.Reviews);
-    _dbContext.Categories.RemoveRange(_dbContext.Categories);
-    _dbContext.AttractionAddresses.RemoveRange(_dbContext.AttractionAddresses);
-    _dbContext.Attractions.RemoveRange(_dbContext.Attractions);
-    _dbContext.Users.RemoveRange(_dbContext.Users);
-    await _dbContext.SaveChangesAsync();
+        #region clear database
+        // _dbContext.Reviews.RemoveRange(_dbContext.Reviews);
+        // _dbContext.Categories.RemoveRange(_dbContext.Categories);
+        // _dbContext.AttractionAddresses.RemoveRange(_dbContext.AttractionAddresses);
+        // _dbContext.Attractions.RemoveRange(_dbContext.Attractions);
+        // _dbContext.Users.RemoveRange(_dbContext.Users);
+        // await _dbContext.SaveChangesAsync();
+
     #endregion
 
-    var rnd = new Random();
+        var rnd = new Random();
 
     // --- 1) Create Users (80) and ensure unique emails ---
     var users = seeder.ItemsToList<UsersDbM>(80);

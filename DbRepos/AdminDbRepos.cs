@@ -37,7 +37,7 @@ public class AdminDbRepos
         {
             NrSeededUsers = await _dbContext.Users.Where(f => f.Seeded).CountAsync(),
             NrUnseededUsers = await _dbContext.Users.Where(f => !f.Seeded).CountAsync(),
-            NrAttractionsWithAddress = await _dbContext.Attractions.Where(f => f.AddressId != null).CountAsync(),
+            NrAttractionsWithNoAddress = await _dbContext.Attractions.Where(f => f.AddressId == null).CountAsync(),
 
             NrSeededAttractionAddresses = await _dbContext.AttractionAddresses.Where(f => f.Seeded).CountAsync(),
             NrUnseededAttractionAddresses = await _dbContext.AttractionAddresses.Where(f => !f.Seeded).CountAsync(),
@@ -51,7 +51,7 @@ public class AdminDbRepos
             NrSeededReviews = await _dbContext.Reviews.Where(f => f.Seeded).CountAsync(),
             NrUnseededReviews = await _dbContext.Reviews.Where(f => !f.Seeded).CountAsync(),
 
-            AttractionsWithoutReviews = await _dbContext.Attractions.Where(f => f.Seeded).CountAsync(),
+            // AttractionsWithoutReviews = await _dbContext.Attractions.Where(f => f.Seeded).CountAsync(),
 
         };
 

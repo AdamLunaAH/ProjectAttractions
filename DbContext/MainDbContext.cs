@@ -7,6 +7,7 @@ using DbModels;
 using Microsoft.Extensions.Hosting.Internal;
 using DbContext.Extensions;
 using Models;
+using Models.DTO;
 
 namespace DbContext;
 
@@ -37,6 +38,12 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<ReviewsDbM> Reviews { get; set; }
     #endregion
 
+
+    #region model the Views
+    public DbSet<SupUsrInfoDbDto> SUInfoDbView { get; set; }
+    #endregion
+
+
     #region constructors
     public MainDbContext() { }
     public MainDbContext(DbContextOptions options, DatabaseConnections databaseConnections) : base(options)
@@ -50,6 +57,12 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        #region  model the Views
+        modelBuilder.Entity<SupUsrInfoDbDto>()
+            .ToView("vw_SupUsrInfoDb", "supusr")
+            .HasNoKey();
+        #endregion
+
         #region override modelbuilder
         // Users
         modelBuilder.Entity<UsersDbM>(entity =>
@@ -145,6 +158,12 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 
             // Foreign keys configured in Users & Attractions
         });
+
+        // Views
+
+
+
+
 
         base.OnModelCreating(modelBuilder);
         #endregion
