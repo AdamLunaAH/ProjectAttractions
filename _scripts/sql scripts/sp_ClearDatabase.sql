@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE supusr.ClearDatabase
+CREATE OR ALTER PROCEDURE supusr.sp_ClearDatabase
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -9,8 +9,8 @@ BEGIN
         -- Delete data in the correct dependency order
         DELETE FROM supusr.ReviewsDb;
         DELETE FROM supusr.CategoriesDb;
-        DELETE FROM supusr.AttractionAddressesDb;
         DELETE FROM supusr.AttractionsDb;
+        DELETE FROM supusr.AttractionAddressesDb;
         DELETE FROM supusr.UsersDb;
 
         COMMIT TRANSACTION;

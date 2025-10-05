@@ -33,27 +33,7 @@ public class AdminDbRepos
     private async Task<ResponseItemDto<SupUsrInfoAllDto>> DbInfo()
     {
         var info = new SupUsrInfoAllDto();
-        info.Db = new SupUsrInfoDbDto
-        {
-            NrSeededUsers = await _dbContext.Users.Where(f => f.Seeded).CountAsync(),
-            NrUnseededUsers = await _dbContext.Users.Where(f => !f.Seeded).CountAsync(),
-            NrAttractionsWithNoAddress = await _dbContext.Attractions.Where(f => f.AddressId == null).CountAsync(),
-
-            NrSeededAttractionAddresses = await _dbContext.AttractionAddresses.Where(f => f.Seeded).CountAsync(),
-            NrUnseededAttractionAddresses = await _dbContext.AttractionAddresses.Where(f => !f.Seeded).CountAsync(),
-
-            NrSeededAttractions = await _dbContext.Attractions.Where(f => f.Seeded).CountAsync(),
-            NrUnseededAttractions = await _dbContext.Attractions.Where(f => !f.Seeded).CountAsync(),
-
-            NrSeededCategories = await _dbContext.Categories.Where(f => f.Seeded).CountAsync(),
-            NrUnseededCategories = await _dbContext.Categories.Where(f => !f.Seeded).CountAsync(),
-
-            NrSeededReviews = await _dbContext.Reviews.Where(f => f.Seeded).CountAsync(),
-            NrUnseededReviews = await _dbContext.Reviews.Where(f => !f.Seeded).CountAsync(),
-
-            // AttractionsWithoutReviews = await _dbContext.Attractions.Where(f => f.Seeded).CountAsync(),
-
-        };
+        info.Db = await _dbContext.SUInfoDbView.FirstAsync();
 
         return new ResponseItemDto<SupUsrInfoAllDto>
         {
