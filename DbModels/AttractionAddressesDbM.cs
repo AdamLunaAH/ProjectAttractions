@@ -3,14 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-using Seido.Utilities.SeedGenerator;
+using Models.Utilities.SeedGenerator;
 using Models;
 using Models.DTO;
 
 namespace DbModels;
 
 [Table("AttractionAddressesDb", Schema = "supusr")]
-[Index(nameof(StreetAddress), nameof(ZipCode), nameof(CityPlace), nameof(Country), IsUnique = false)]
+[Index(nameof(StreetAddress), nameof(ZipCode), nameof(CityPlace), nameof(Country), IsUnique = true)]
 
 
 sealed public class AttractionAddressesDbM : AttractionAddresses, ISeed<AttractionAddressesDbM>, IEquatable<AttractionAddressesDbM>

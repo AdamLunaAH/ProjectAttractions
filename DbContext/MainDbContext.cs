@@ -87,7 +87,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 
             entity.HasKey(e => e.AddressId);
 
-            entity.HasIndex(e => new { e.StreetAddress, e.ZipCode, e.CityPlace, e.Country });
+            entity.HasIndex(e => new { e.StreetAddress, e.ZipCode, e.CityPlace, e.Country }).IsUnique();
         });
 
         // Attractions
@@ -178,7 +178,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties<decimal>().HaveColumnType("money");
-            configurationBuilder.Properties<string>().HaveColumnType("varchar(200)");
+            configurationBuilder.Properties<string>().HaveColumnType("nvarchar(200)");
 
             base.ConfigureConventions(configurationBuilder);
         }
@@ -212,7 +212,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
-            configurationBuilder.Properties<string>().HaveColumnType("varchar(200)");
+            configurationBuilder.Properties<string>().HaveColumnType("nvarchar(200)");
 
             base.ConfigureConventions(configurationBuilder);
 
@@ -239,7 +239,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
-            configurationBuilder.Properties<string>().HaveColumnType("varchar(200)");
+            configurationBuilder.Properties<string>().HaveColumnType("nvarchar(200)");
             base.ConfigureConventions(configurationBuilder);
         }
     }

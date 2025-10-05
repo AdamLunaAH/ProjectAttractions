@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Seido.Utilities.SeedGenerator
+namespace Models.Utilities.SeedGenerator
 {
     #region exported types
     public interface ISeed<T>

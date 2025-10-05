@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
-using Seido.Utilities.SeedGenerator;
+using Models.Utilities.SeedGenerator;
 using Models.DTO;
 using DbModels;
 using DbContext;

@@ -74,6 +74,7 @@ builder.Services.AddScoped<AttractionsDbRepos>();
 builder.Services.AddScoped<CategoriesDbRepos>();
 builder.Services.AddScoped<UsersDbRepos>();
 builder.Services.AddScoped<ReviewsDbRepos>();
+builder.Services.AddScoped<SeederDbRepos>();
 
 
 
@@ -83,6 +84,8 @@ builder.Services.AddScoped<IAttractionsService, AttractionsServiceDb>();
 builder.Services.AddScoped<ICategoriesService, CategoriesServiceDb>();
 builder.Services.AddScoped<IUsersService, UsersServiceDb>();
 builder.Services.AddScoped<IReviewsService, ReviewsServiceDb>();
+builder.Services.AddScoped<ISeederService, SeederServiceDb>();
+
 
 
 

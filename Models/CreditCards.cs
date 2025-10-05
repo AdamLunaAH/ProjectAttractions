@@ -1,4 +1,4 @@
-using Seido.Utilities.SeedGenerator;
+using Models.Utilities.SeedGenerator;
 
 namespace Models;
 

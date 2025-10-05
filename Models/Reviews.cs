@@ -1,5 +1,5 @@
 using Models;
-using Seido.Utilities.SeedGenerator;
+using Models.Utilities.SeedGenerator;
 namespace Models;
 
 public class Reviews : IReviews, ISeed<Reviews>

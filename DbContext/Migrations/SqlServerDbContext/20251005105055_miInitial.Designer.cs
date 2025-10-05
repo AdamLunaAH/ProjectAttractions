@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbContext.Migrations.SqlServerDbContext
 {
     [DbContext(typeof(MainDbContext.SqlServerDbContext))]
-    [Migration("20250924121636_miInitial")]
+    [Migration("20251005105055_miInitial")]
     partial class miInitial
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace DbContext.Migrations.SqlServerDbContext
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -48,26 +48,27 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.Property<string>("CityPlace")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Country")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
 
                     b.Property<string>("StreetAddress")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ZipCode")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("AddressId");
 
-                    b.HasIndex("StreetAddress", "ZipCode", "CityPlace", "Country");
+                    b.HasIndex("StreetAddress", "ZipCode", "CityPlace", "Country")
+                        .IsUnique();
 
                     b.ToTable("AttractionAddressesDb", "supusr");
                 });
@@ -82,11 +83,11 @@ namespace DbContext.Migrations.SqlServerDbContext
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AttractionDescription")
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("AttractionName")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
@@ -110,7 +111,7 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
@@ -140,7 +141,7 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.Property<string>("ReviewText")
                         .HasMaxLength(250)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
@@ -171,15 +172,15 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
