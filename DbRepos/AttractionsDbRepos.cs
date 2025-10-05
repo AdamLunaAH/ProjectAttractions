@@ -552,6 +552,4 @@ public class AttractionsDbRepos
         }
 
     }
-
-
 }

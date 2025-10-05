@@ -8,8 +8,6 @@ public class Users : IUsers, ISeed<Users>
     public virtual string LastName { get; set; }
     public virtual string Email { get; set; }
     public virtual DateTime CreatedAt { get; set; }
-    // public virtual DateTime UpdatedaAt { get; set; }
-
     public virtual List<IReviews> Reviews { get; set; }
 
 
@@ -25,7 +23,6 @@ public class Users : IUsers, ISeed<Users>
         this.LastName = org.LastName;
         this.Email = org.Email;
         this.CreatedAt = org.CreatedAt;
-        // this.UpdatedaAt = org.UpdatedaAt;
 
         //using Linq Select and copy contructor to create a list copy
         this.Reviews = (org.Reviews != null) ? org.Reviews.Select(p => new Reviews((Reviews)p)).ToList<IReviews>() : null;
@@ -41,7 +38,6 @@ public class Users : IUsers, ISeed<Users>
         UserId = Guid.NewGuid();
         FirstName = seeder.FirstName;
         LastName = seeder.LastName;
-        // Email = seeder.Email(FirstName, LastName).ToLower();
         Email = new string(
             seeder.Email(FirstName, LastName)
                 .ToLower()
@@ -49,7 +45,6 @@ public class Users : IUsers, ISeed<Users>
                 .ToArray()
             );
         CreatedAt = seeder.DateAndTime(2010, 2024);
-        // UpdatedaAt = DateTime.Now;
 
         return this;
     }

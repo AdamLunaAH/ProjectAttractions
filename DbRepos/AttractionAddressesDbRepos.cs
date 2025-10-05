@@ -125,8 +125,6 @@ public class AttractionAddressesDbRepos
         }
     }
 
-
-
     public async Task<ResponseItemDto<IAttractionAddresses>> DeleteAttractionAddressAsync(Guid id)
     {
         try
@@ -175,13 +173,6 @@ public class AttractionAddressesDbRepos
             //If the item does not exists
             if (item == null) throw new ArgumentException($"Item {itemDto.AddressId} is not existing");
 
-            //I cannot have duplicates in the AttractionAddresses table, so check that
-            // var query2 = _dbContext.AttractionAddresses
-            //     .Where(i => i.Email == itemDto.Email);
-            // var existingItem = await query2.FirstOrDefaultAsync();
-            // if (existingItem != null && existingItem.AddressId != itemDto.AddressId)
-            //     throw new ArgumentException($"Item already exist with id {existingItem.AddressId}");
-
             //transfer any changes from DTO to database objects
             //Update individual properties
             item.UpdateFromDTO(itemDto);
@@ -211,16 +202,6 @@ public class AttractionAddressesDbRepos
     {
         try
         {
-            // if (itemDto.AddressId != null)
-            //     throw new ArgumentException($"{nameof(itemDto.AddressId)} must be null when creating a new object");
-
-            //I cannot have duplicates in the AttractionAddresses table, so check that
-            // var query2 = _dbContext.AttractionAddresses
-            //     .Where(i => i.Email == itemDto.Email);
-            // var existingItem = await query2.FirstOrDefaultAsync();
-            // if (existingItem != null && existingItem.AddressId != itemDto.AddressId)
-            //     throw new ArgumentException($"Item already exist with id {existingItem.AddressId}");
-
             //transfer any changes from DTO to database objects
             //Update individual properties
             // var item = new AttractionAddressesDbM(itemDto);
@@ -233,12 +214,6 @@ public class AttractionAddressesDbRepos
                 Country = itemDto.Country
 
             };
-
-
-
-
-            //Update navigation properties
-            // await navProp_AttractionAddressesCUdto_to_AttractionAddressesDbM(itemDto, item);
 
             //write to database model
             _dbContext.AttractionAddresses.Add(item);

@@ -34,7 +34,6 @@ namespace AppWebApi.Controllers
                     "null" => null,
                     _ => throw new ArgumentException("Invalid seeded value")
                 };
-                // bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
@@ -69,7 +68,6 @@ namespace AppWebApi.Controllers
                     "null" => null,
                     _ => throw new ArgumentException("Invalid seeded value")
                 };
-                // bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
@@ -105,7 +103,6 @@ namespace AppWebApi.Controllers
                     "null" => null,
                     _ => throw new ArgumentException("Invalid seeded value")
                 };
-                // bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
@@ -250,11 +247,7 @@ namespace AppWebApi.Controllers
             try
             {
                 _logger.LogInformation($"{nameof(CreateItem)}:");
-
-                // _logger.LogInformation($"item {model.Item.AttractionId} created");
                 var model = await _service.CreateAttractionAsync(item);
-
-
                 return Ok(model);
             }
             catch (Exception ex)
@@ -264,7 +257,9 @@ namespace AppWebApi.Controllers
             }
         }
 
-        [HttpPost]
+        // POST: api/attractions/createfullattraction
+        // Body: AttractionFullCreateDto in Json
+        [HttpPost()]
         [ActionName("CreateFullAttraction")]
         [ProducesResponseType(200, Type = typeof(IAttractions))]
         [ProducesResponseType(400, Type = typeof(string))]

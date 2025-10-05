@@ -34,7 +34,6 @@ namespace AppWebApi.Controllers
                     "null" => null,
                     _ => throw new ArgumentException("Invalid seeded value")
                 };
-                // bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
@@ -69,7 +68,6 @@ namespace AppWebApi.Controllers
                     "null" => null,
                     _ => throw new ArgumentException("Invalid seeded value")
                 };
-                // bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);

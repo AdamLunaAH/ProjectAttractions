@@ -25,10 +25,9 @@ public class VersionOptions
     public string Copyright { get; set; }
     public string CompanyUrl { get; set; }
 
-    /// <summary>
-    /// Creates a VersionInfo object from the current assembly
-    /// </summary>
-    /// <returns>A populated VersionInfo object</returns>
+
+    // Creates a VersionInfo object from the current assembly
+    // <returns>A populated VersionInfo object</returns>
     public static VersionOptions ReadFromAssembly(VersionOptions options)
     {
         var assembly = Assembly.GetExecutingAssembly();

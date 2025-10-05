@@ -12,7 +12,6 @@ public class AttractionAddresses : IAttractionAddresses, ISeed<AttractionAddress
 
     public override string ToString() => $"{StreetAddress}, {ZipCode} {CityPlace}, {Country}";
 
-    // public virtual IAttractions Attractions { get; set; } = null;
     public virtual List<IAttractions> Attractions { get; set; } = null;
 
 
@@ -58,53 +57,3 @@ public class AttractionAddresses : IAttractionAddresses, ISeed<AttractionAddress
 
 
 }
-
-
-// using Seido.Utilities.SeedGenerator;
-
-// namespace Models;
-
-// public class AttractionAddresses : IAttractionAddresses, ISeed<AttractionAddresses>, IEquatable<AttractionAddresses>
-// {
-//     public virtual Guid AddressId { get; set; }
-//     public virtual string StreetAddress { get; set; }
-//     public virtual string ZipCode { get; set; }
-//     public virtual string Place { get; set; }
-//     public virtual string Country { get; set; }
-
-//     #region Seeder
-//     public bool Seeded { get; set; } = false;
-//     public AttractionAddresses Seed(SeedGenerator seeder)
-//     {
-//         Seeded = true;
-//         AddressId = Guid.NewGuid();
-//         StreetAddress = seeder.StreetAddress();
-//         ZipCode = seeder.ZipCode.ToString();
-//         Country = seeder.Country;
-
-//         return this;
-
-//     }
-
-//     #endregion
-//     public AttractionAddresses() { }
-
-//     public AttractionAddresses Seed(SeedGenerator seeder)
-//     {
-//         Seeded = true;
-//         AddressId = Guid.NewGuid();
-//         StreetAddress = seeder.StreetAddress();
-//         ZipCode = seeder.ZipCode.ToString();
-//         Country = seeder.Country;
-
-//         return this;
-
-//     }
-
-//     #region IEquatable
-//     public bool Equals(Addresses other) => (other != null) && ((this.StreetAddress, this.ZipCode, this.City, this.Country) ==
-//         (other.StreetAddress, other.ZipCode, other.City, other.Country));
-//     public override bool Equals(object obj) => Equals(obj as Addresses);
-//     public override int GetHashCode() => (StreetAddress, ZipCode, City, Country).GetHashCode();
-//     #endregion
-// }

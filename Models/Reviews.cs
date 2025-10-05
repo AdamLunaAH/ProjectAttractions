@@ -10,7 +10,6 @@ public class Reviews : IReviews, ISeed<Reviews>
     public virtual int ReviewScore { get; set; }
     public virtual string ReviewText { get; set; }
     public virtual DateTime CreatedAt { get; set; }
-    // public virtual DateTime UpdatedaAt { get; set; }
 
 
     #region constructors
@@ -24,7 +23,6 @@ public class Reviews : IReviews, ISeed<Reviews>
         this.ReviewScore = org.ReviewScore;
         this.ReviewText = org.ReviewText;
         this.CreatedAt = org.CreatedAt;
-        // this.UpdatedaAt = org.UpdatedaAt;
 
         //use the ternary operator to create only if the original is not null
         this.Users = (org.Users != null) ? new Users((Users)org.Users) : null;
@@ -43,10 +41,6 @@ public class Reviews : IReviews, ISeed<Reviews>
         Seeded = true;
         ReviewScore = seeder.Next(0, 5);
         ReviewId = Guid.NewGuid();
-        // this.Users = new Users();
-        // UserId = Guid.NewGuid();
-        // this.Attractions = new Attractions();
-        // AttractionId = Guid.NewGuid();
 
         switch (ReviewScore)
         {
@@ -66,7 +60,6 @@ public class Reviews : IReviews, ISeed<Reviews>
         ReviewText = ReviewTextString;
 
         CreatedAt = seeder.DateAndTime(2020, 2025);
-        // UpdatedAat = DateTime.Now;
 
         return this;
 

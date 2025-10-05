@@ -212,46 +212,6 @@ public class ReviewsDbRepos
             };
         }
     }
-
-    // public async Task<ResponseItemDto<IReviews>> CreateReviewAsync(ReviewsCuDto itemDto)
-    // {
-    //     // if (itemDto.ReviewId != Guid.Empty)
-    //     //     throw new ArgumentException($"{nameof(itemDto.ReviewId)} must be empty when creating a new object");
-
-        //     if (itemDto.ReviewId != Guid.Empty && itemDto.ReviewId != default)
-        //         throw new ArgumentException($"{nameof(itemDto.ReviewId)} must be Empty when creating a new object");
-
-
-        //     if (itemDto.UserId == null || itemDto.AttractionId == null)
-        //         throw new ArgumentException("UserId and AttractionId must be provided");
-
-        //     //I cannot have duplicates in the Reviews table, so check that
-        //     var exists = await _dbContext.Reviews
-        //         .AnyAsync(r => r.UserId == itemDto.UserId &&
-        //                         r.AttractionId == itemDto.AttractionId);
-
-        //     if (exists)
-        //         throw new ArgumentException(
-        //             $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
-
-
-        //     //transfer any changes from DTO to database objects
-        //     //Update individual properties
-        //     var item = new ReviewsDbM(itemDto);
-
-        //     //Update navigation properties
-        //     await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
-
-        //     //write to database model
-        //     _dbContext.Reviews.Add(item);
-
-        //     //write to database in a UoW
-        //     await _dbContext.SaveChangesAsync();
-
-        //     //return the updated item in non-flat mode
-        //     return await ReadReviewAsync(item.ReviewId, false);
-        // }
-
     public async Task<ResponseItemDto<IReviews>> CreateReviewAsync(ReviewCreateDto itemDto)
     {
         try

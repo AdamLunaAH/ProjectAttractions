@@ -212,10 +212,6 @@ public class UsersDbRepos
 
     public async Task<ResponseItemDto<IUsers>> UpdateUserAsync(UsersCuDto itemDto)
     {
-        // var query1 = _dbContext.Users
-        //     .Where(i => i.UserId == itemDto.UserId);
-        // var item = await query1
-        //         .FirstOrDefaultAsync<UsersDbM>();
 
         try
         {
@@ -226,11 +222,6 @@ public class UsersDbRepos
             if (item == null) throw new ArgumentException($"Item {itemDto.UserId} does not exist");
 
             //I cannot have duplicates in the Users table, so check that
-            // var query2 = _dbContext.Users
-            //     .Where(i => i.Email == itemDto.Email);
-            // var existingItem = await query2.FirstOrDefaultAsync();
-            // if (existingItem != null && existingItem.UserId != itemDto.UserId)
-            //     throw new ArgumentException($"Item already exist with id {existingItem.UserId}");
             var existingItem = await _dbContext.Users
                 .FirstOrDefaultAsync(i => i.Email == itemDto.Email);
 

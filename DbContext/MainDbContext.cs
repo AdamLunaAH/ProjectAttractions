@@ -155,24 +155,10 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
             entity.HasIndex(e => new { e.ReviewScore, e.ReviewText });
             entity.HasIndex(e => new { e.AttractionId, e.UserId }).IsUnique();
 
-
-            // Foreign keys configured in Users & Attractions
         });
-
-        // Views
-
-
-
-
-
         base.OnModelCreating(modelBuilder);
         #endregion
     }
-
-
-
-
-
 
     #region DbContext for some popular databases
     public class SqlServerDbContext : MainDbContext

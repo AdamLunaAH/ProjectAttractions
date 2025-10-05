@@ -20,7 +20,6 @@ public class AttractionsServiceDb : IAttractionsService
         _logger = logger;
     }
 
-    //Simple 1:1 calls in this case, but as Services expands, this will no longer need to be the case
     public Task<ResponsePageDto<IAttractions>> ReadAttractionsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadAttractionsAsync(seeded, flat, filter, pageNumber, pageSize);
 
     public Task<ResponsePageDto<IAttractions>> ReadAttractionsNoAddressAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize, bool noAddress) => _repo.ReadAttractionsNoAddressAsync(seeded, flat, filter, pageNumber, pageSize, noAddress);

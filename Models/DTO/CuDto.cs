@@ -14,13 +14,6 @@ public class UserCreateDto
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Email { get; set; }
-    // public DateTime? CreatedAt { get; set; }
-    // [SwaggerSchema(
-    //     Description = "Optional list of review IDs (leave empty when creating a new user).",
-    //     Example = new string[0])]
-    // public List<Guid> ReviewId { get; set; } = new();
-    // public List<Guid> ReviewId { get; set; } = null;
-
 }
 public class UsersCuDto
 {
@@ -45,9 +38,6 @@ public class UsersCuDto
         Email = org.Email;
         CreatedAt = org.CreatedAt;
 
-        // UpdatedaAt = org.UpdatedaAt;
-        // ReviewId = org.Reviews?.Select(i => i.ReviewId).ToList();
-        // QuotesId = org.Quotes?.Select(i => i.QuoteId).ToList();
     }
 }
 
@@ -70,8 +60,6 @@ public class AttractionAddressesCuDto
     public virtual string CityPlace { get; set; }
     public virtual string Country { get; set; }
     public virtual List<Guid> AttractionId { get; set; } = null;
-
-    // public virtual List<Guid> AttractionId { get; set; } = null;
 
     public AttractionAddressesCuDto() { }
     public AttractionAddressesCuDto(IAttractionAddresses org)
@@ -100,7 +88,6 @@ public class AttractionCreateDto
 
 public class AttractionsCuDto
 {
-    //cannot be nullable as a Pets has to have an owner even when created
     public virtual Guid AttractionId { get; set; }
 
     public virtual string AttractionName { get; set; }
@@ -128,9 +115,6 @@ public class AttractionsCuDto
 public class CategoryCreateDto
 {
     public virtual string CategoryName { get; set; }
-
-    // public virtual List<Guid> AttractionId { get; set; } = null;
-
 }
 
 public class CategoriesCuDto
@@ -163,7 +147,6 @@ public class ReviewCreateDto
 
 public class ReviewsCuDto
 {
-    //cannot be nullable as a Pets has to have an owner even when created
     public virtual Guid ReviewId { get; set; }
 
     public virtual Guid? UserId { get; set; }
@@ -173,14 +156,6 @@ public class ReviewsCuDto
     public virtual string ReviewText { get; set; }
 
     public DateTime? CreatedAt { get; set; } = null;
-    // public DateTime? UpdatedaAt { get; set; } = null;
-
-
-
-    // public virtual List<Guid> CategoryId { get; set; } = null;
-
-    // public virtual List<Guid> ReviewId { get; set; } = null;
-
     public ReviewsCuDto() { }
     public ReviewsCuDto(IReviews org)
     {
@@ -191,8 +166,6 @@ public class ReviewsCuDto
         ReviewScore = org.ReviewScore;
         ReviewText = org.ReviewText;
         CreatedAt = org.CreatedAt;
-        // UpdatedaAt = org.UpdatedaAt;
-
     }
 }
 
@@ -201,13 +174,13 @@ public class AttractionFullCreateDto
     public string AttractionName { get; set; }
     public string AttractionDescription { get; set; }
 
-    // Inline Address info
+    // Address info
     public AttractionAddressCreateDto Address { get; set; }
 
-    // Inline Categories (list of new categories)
+    // List of new categories
     public List<CategoryCreateDto> Categories { get; set; } = new();
 
-    // Optionally: existing category IDs if you don’t want to create new ones each time
+    // Existing category ID
     public List<Guid> ExistingCategoryIds { get; set; } = new();
 }
 

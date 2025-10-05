@@ -8,14 +8,12 @@ using Models;
 using Models.DTO;
 
 namespace DbModels;
-
 [Table("UsersDb", Schema = "supusr")]
 [Index(nameof(FirstName), nameof(LastName), IsUnique = false)]
 [Index(nameof(LastName), nameof(FirstName), IsUnique = false)]
 [Index(nameof(Email), IsUnique = true)]
 sealed public class UsersDbM : Users, ISeed<UsersDbM>, IEquatable<UsersDbM>
 {
-    // public override Guid UserId { get => base.UserId; set => base.UserId = value; }
     [Key]
     public override Guid UserId { get; set; }
     [Required]
@@ -25,17 +23,13 @@ sealed public class UsersDbM : Users, ISeed<UsersDbM>, IEquatable<UsersDbM>
     [Required]
     public override string Email { get; set; }
     public override DateTime CreatedAt { get; set; }
-    // public override DateTime UpdatedaAt { get; set; }
-
     #region implementing entity Navigation properties when model is using interfaces in the relationships between models
     [NotMapped]
     public override List<IReviews> Reviews { get => ReviewsDbM?.ToList<IReviews>(); set => new NotImplementedException(); }
     [JsonIgnore]
     public List<ReviewsDbM> ReviewsDbM { get; set; } = null;
     #endregion
-
     #region IEquatable
-
     public bool Equals(UsersDbM other) => (other != null) && ((FirstName, LastName, Email) == (other.FirstName, other.LastName, other.Email));
     public override bool Equals(object obj) => Equals(obj as UsersDbM);
     public override int GetHashCode() => (FirstName, LastName, Email).GetHashCode();

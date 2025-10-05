@@ -57,26 +57,6 @@ namespace AppWebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        // //GET: api/admin/seed?count={count}
-        // [HttpGet()]
-        // [ActionName("Seed")]
-        // [ProducesResponseType(200, Type = typeof(string))]
-        // [ProducesResponseType(400, Type = typeof(string))]
-        // public async Task<IActionResult> Seed()
-        // {
-        //     try
-        //     {
-        //         _logger.LogInformation($"{nameof(Seed)}");
-        //         await _service.SeedAsync();
-
-        //         return Ok("Seeding completed successfully");
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError($"{nameof(Seed)}: {ex.Message}");
-        //         return BadRequest(ex.Message);
-        //     }
-        // }
 
         //GET: api/admin/log
         [HttpGet()]

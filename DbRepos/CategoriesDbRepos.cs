@@ -162,7 +162,6 @@ public class CategoriesDbRepos
             var query1 = _dbContext.Categories
             .Where(i => i.CategoryId == itemDto.CategoryId);
             var item = await query1
-                    // .Include(i => i.ReviewsDbM)
                     .FirstOrDefaultAsync<CategoriesDbM>();
 
             //If the item does not exists
@@ -204,13 +203,6 @@ public class CategoriesDbRepos
     {
         try
         {
-            // if (itemDto.CategoryId != null)
-            //     throw new ArgumentException($"{nameof(itemDto.CategoryId)} must be null when creating a new object");
-
-            // if (itemDto.CategoryId != Guid.Empty)
-            //     throw new ArgumentException("CategoryId must be empty when creating a new category.");
-
-
             //I cannot have duplicates in the Categories table, so check that
             var query2 = _dbContext.Categories
             .Where(i => i.CategoryName == itemDto.CategoryName);
@@ -218,18 +210,12 @@ public class CategoriesDbRepos
             if (existingItem != null && existingItem.CategoryName != itemDto.CategoryName)
                 throw new ArgumentException($"Category already exist with name: {existingItem.CategoryName}");
 
-            //transfer any changes from DTO to database objects
-            //Update individual properties
-            // var item = new CategoriesDbM(itemDto);
             var item = new CategoriesDbM
             {
                 CategoryId = Guid.NewGuid(),
                 CategoryName = itemDto.CategoryName
             };
 
-
-            //Update navigation properties
-            // await navProp_CategoriesCUdto_to_CategoriesDbM(itemDto, item);
 
             //write to database model
             _dbContext.Categories.Add(item);

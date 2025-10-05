@@ -1,6 +1,5 @@
 namespace Models;
 
-// public enum AttractionCategories { Restaurant, Cafe, Architecture }
 
 public interface ICategories
 {

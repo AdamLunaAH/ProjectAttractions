@@ -18,50 +18,35 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
 {
     [Key]
     public override Guid ReviewId { get; set; }
-
     [Required]
     [JsonIgnore]
     public Guid UserId { get; set; }
-
     #region implementing entity Navigation properties when model is using interfaces in the relationships between models
     [NotMapped]
     public override IUsers Users { get => UsersDbM; set => new NotImplementedException(); }
     [JsonIgnore]
-    // [ForeignKey("AddressId")]
     public UsersDbM UsersDbM { get; set; } = null;    //This is implemented in the database table
     #endregion
-
     [Required]
     public Guid AttractionId { get; set; }
-
     #region implementing entity Navigation properties when model is using interfaces in the relationships between models
     [NotMapped]
     public override IAttractions Attractions { get => AttractionsDbM; set => new NotImplementedException(); }
     [JsonIgnore]
-    // [ForeignKey("AddressId")]
-    public AttractionsDbM AttractionsDbM { get; set; } = null;    //This is implemented in the database table
+    public AttractionsDbM AttractionsDbM { get; set; } = null;
     #endregion
-
-
 
     public override int ReviewScore { get; set; }
     [Column(TypeName = "VARCHAR")]
     [StringLength(250)]
     public override string ReviewText { get; set; }
-
     public override DateTime CreatedAt { get; set; }
-    // public override DateTime UpdatedaAt { get; set; }
-
-
-
     #region IEquatable
     public bool Equals(ReviewsDbM other) => (other != null) && ((Users, Attractions, ReviewScore, CreatedAt) == (other.Users, other.Attractions, other.ReviewScore, other.CreatedAt));
 
     public override bool Equals(object obj) => Equals(obj as ReviewsDbM);
     public override int GetHashCode() => (Users, Attractions, ReviewScore, CreatedAt).GetHashCode();
     #endregion
-
-
 
     public override ReviewsDbM Seed(SeedGenerator seeder)
     {
@@ -73,7 +58,7 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
     public ReviewsDbM UpdateFromDTO(ReviewsCuDto org)
     {
         if (org == null) return null;
-        
+
         ReviewScore = org.ReviewScore;
         ReviewText = org.ReviewText;
 
@@ -88,7 +73,5 @@ sealed public class ReviewsDbM : Reviews, ISeed<ReviewsDbM>, IEquatable<ReviewsD
         ReviewId = org.ReviewId == Guid.Empty ? Guid.NewGuid() : org.ReviewId;
         UpdateFromDTO(org);
     }
-
     #endregion
-
 }

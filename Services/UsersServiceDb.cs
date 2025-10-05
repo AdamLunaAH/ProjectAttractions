@@ -21,7 +21,6 @@ public class UsersServiceDb : IUsersService
         _logger = logger;
     }
 
-    //Simple 1:1 calls in this case, but as Services expands, this will no longer need to be the case
     public Task<ResponsePageDto<IUsers>> ReadUsersAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadUsersAsync(seeded, flat, filter, pageNumber, pageSize);
 
     public Task<ResponsePageDto<IUsers>> ReadUsersReviewsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadUsersReviewsAsync(seeded, flat, filter, pageNumber, pageSize);

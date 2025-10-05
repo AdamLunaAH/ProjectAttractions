@@ -20,7 +20,6 @@ public class CategoriesServiceDb : ICategoriesService
         _logger = logger;
     }
 
-    //Simple 1:1 calls in this case, but as Services expands, this will no longer need to be the case
     public Task<ResponsePageDto<ICategories>> ReadCategoriesAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadCategoriesAsync(seeded, flat, filter, pageNumber, pageSize);
 
     public Task<ResponseItemDto<ICategories>> ReadCategoryAsync(Guid id, bool flat) => _repo.ReadCategoryAsync(id, flat);
