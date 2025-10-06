@@ -87,7 +87,8 @@ public class UsersDbRepos
             else
             {
                 query = _dbContext.Users.AsNoTracking()
-                    .Include(i => i.ReviewsDbM);
+                    .Include(i => i.ReviewsDbM)
+                    .ThenInclude(r => r.AttractionsDbM);
             }
 
             var ret = new ResponsePageDto<IUsers>()
@@ -137,6 +138,7 @@ public class UsersDbRepos
             //remove tracking for all read operations for performance and to avoid recursion/circular access
             var query = _dbContext.Users.AsNoTracking()
                 .Include(i => i.ReviewsDbM)
+                .ThenInclude(r => r.AttractionsDbM)
                 .Where(i => i.UserId == id);
 
             return new ResponseItemDto<IUsers>()
@@ -223,7 +225,7 @@ public class UsersDbRepos
 
             //I cannot have duplicates in the Users table, so check that
             var existingItem = await _dbContext.Users
-                .FirstOrDefaultAsync(i => i.Email == itemDto.Email);
+                .FirstOrDefaultAsync(i => i.Email == itemDto.Email && i.UserId != itemDto.UserId);
 
             if (existingItem != null)
             {

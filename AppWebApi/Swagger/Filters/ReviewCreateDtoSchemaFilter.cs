@@ -23,9 +23,19 @@ namespace Swagger.Filters
 
             _logger.LogInformation("Applying schema filter to {Type}", context.Type.FullName);
 
+            // if (schema.Properties.ContainsKey("userId"))
+            // {
+            //     schema.Properties.Remove("userId");
+            //     schema.Required?.Remove("userId");
+            // }
             if (schema.Properties.TryGetValue("userId", out var userId))
                 userId.Example = new OpenApiString("00000000-0000-0000-0000-000000000010");
 
+            // if (schema.Properties.ContainsKey("attractionId"))
+            // {
+            //     schema.Properties.Remove("attractionId");
+            //     schema.Required?.Remove("attractionId");
+            // }
             if (schema.Properties.TryGetValue("attractionId", out var attractionId))
                 attractionId.Example = new OpenApiString("00000000-0000-0000-0000-000000000020");
 
@@ -35,8 +45,14 @@ namespace Swagger.Filters
             if (schema.Properties.TryGetValue("reviewText", out var reviewText))
                 reviewText.Example = new OpenApiString("Amazing experience, highly recommended!");
 
-            if (schema.Properties.TryGetValue("createdAt", out var createdAt))
-                createdAt.Example = new OpenApiString(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+            if (schema.Properties.ContainsKey("creatdAt"))
+            {
+                schema.Properties.Remove("createdAt");
+                schema.Required?.Remove("createdAt");
+            }
+
+            // if (schema.Properties.TryGetValue("createdAt", out var createdAt))
+            //     createdAt.Example = new OpenApiString(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
         }
     }
 }

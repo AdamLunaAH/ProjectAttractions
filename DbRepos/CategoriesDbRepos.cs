@@ -130,7 +130,7 @@ public class CategoriesDbRepos
             var item = await query1.FirstOrDefaultAsync<CategoriesDbM>();
 
             //If the item does not exists
-            if (item == null) throw new ArgumentException($"Item {id} is not existing");
+            if (item == null) throw new ArgumentException($"Item {id} does not exist");
 
             //delete in the database model
             _dbContext.Categories.Remove(item);
@@ -165,7 +165,7 @@ public class CategoriesDbRepos
                     .FirstOrDefaultAsync<CategoriesDbM>();
 
             //If the item does not exists
-            if (item == null) throw new ArgumentException($"Item {itemDto.CategoryId} is not existing");
+            if (item == null) throw new ArgumentException($"Item {itemDto.CategoryId} does not exist");
 
             //I cannot have duplicates in the Categories table, so check that
             var query2 = _dbContext.Categories

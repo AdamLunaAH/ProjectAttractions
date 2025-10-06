@@ -286,8 +286,11 @@ public class SeederDbRepos
                 _ => Guid.Empty
             };
 
+
             _logger.LogInformation($"{nameof(LogChangeTracker)}: {e.Entity.GetType().Name}: {id} - {e.State}");
+
         }
+
     }
 
 

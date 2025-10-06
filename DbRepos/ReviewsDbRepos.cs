@@ -134,7 +134,7 @@ public class ReviewsDbRepos
             var item = await query1.FirstOrDefaultAsync<ReviewsDbM>();
 
             //If the item does not exists
-            if (item == null) throw new ArgumentException($"Item {id} is not existing");
+            if (item == null) throw new ArgumentException($"Item {id} does not exist");
 
             //delete in the database model
             _dbContext.Reviews.Remove(item);
@@ -166,44 +166,44 @@ public class ReviewsDbRepos
         {
             var query1 = _dbContext.Reviews
             .Where(i => i.ReviewId == itemDto.ReviewId);
-        var item = await query1
-                // .Include(i => i.ReviewsDbM)
-                .FirstOrDefaultAsync<ReviewsDbM>();
+            var item = await query1
+                    // .Include(i => i.ReviewsDbM)
+                    .FirstOrDefaultAsync<ReviewsDbM>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {itemDto.ReviewId} is not existing");
+            //If the item does not exists
+            if (item == null) throw new ArgumentException($"Item {itemDto.ReviewId} does not exist");
 
-        //I cannot have duplicates in the Reviews table, so check that
-        var exists = await _dbContext.Reviews
-        .AnyAsync(r => r.UserId == itemDto.UserId &&
-                        r.AttractionId == itemDto.AttractionId &&
-                        r.ReviewId != itemDto.ReviewId);
+            //I cannot have duplicates in the Reviews table, so check that
+            var exists = await _dbContext.Reviews
+            .AnyAsync(r => r.UserId == itemDto.UserId &&
+                            r.AttractionId == itemDto.AttractionId &&
+                            r.ReviewId != itemDto.ReviewId);
 
-        if (exists == true)
-        {
-            return new ResponseItemDto<IReviews>()
+            if (exists == true)
             {
-                ErrorMessage = $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}"
-            };
+                return new ResponseItemDto<IReviews>()
+                {
+                    ErrorMessage = $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}"
+                };
+            }
+
+
+            //transfer any changes from DTO to database objects
+            //Update individual properties
+            item.UpdateFromDTO(itemDto);
+
+            //Update navigation properties
+            await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
+
+            //write to database model
+            _dbContext.Reviews.Update(item);
+
+            //write to database in a UoW
+            await _dbContext.SaveChangesAsync();
+
+            //return the updated item in non-flat mode
+            return await ReadReviewAsync(item.ReviewId, false);
         }
-
-
-        //transfer any changes from DTO to database objects
-        //Update individual properties
-        item.UpdateFromDTO(itemDto);
-
-        //Update navigation properties
-        await navProp_ReviewsCUdto_to_ReviewsDbM(itemDto, item);
-
-        //write to database model
-        _dbContext.Reviews.Update(item);
-
-        //write to database in a UoW
-        await _dbContext.SaveChangesAsync();
-
-        //return the updated item in non-flat mode
-        return await ReadReviewAsync(item.ReviewId, false);
-    }
         catch (Exception ex)
         {
             return new ResponseItemDto<IReviews>()
@@ -225,9 +225,16 @@ public class ReviewsDbRepos
                 .AnyAsync(r => r.UserId == itemDto.UserId &&
                                 r.AttractionId == itemDto.AttractionId);
 
+
             if (exists)
-                throw new ArgumentException(
-                    $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
+            {
+                return new ResponseItemDto<IReviews>
+                {
+                    ErrorMessage = $"A review with the same user {itemDto.UserId} and attraction {itemDto.AttractionId} already exists"
+                };
+            }
+            // throw new ArgumentException(
+            //     $"User {itemDto.UserId} already has a review for attraction {itemDto.AttractionId}");
 
             var item = new ReviewsDbM
             {

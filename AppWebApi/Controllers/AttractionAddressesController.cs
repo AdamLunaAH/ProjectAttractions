@@ -18,15 +18,15 @@ namespace AppWebApi.Controllers
         readonly ILogger<AttractionAddressesController> _logger = null;
 
         [HttpGet()]
-        [ActionName("Read")]
+        [ActionName("ReadEverything")]
         [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttractions>))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> Read(string seeded = "both", string flat = "true",
+        public async Task<IActionResult> ReadEverything(string seeded = "both", string flat = "true",
             string filter = null, string pageNr = "0", string pageSize = "10")
         {
             try
             {
-                bool? seededArg = seeded.ToLower() switch
+                bool? seededArg = seeded.ToLower().Trim() switch
                 {
                     "true" => true,
                     "false" => false,
@@ -38,7 +38,7 @@ namespace AppWebApi.Controllers
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
 
-                _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
+                _logger.LogInformation($"{nameof(ReadEverything)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
                     $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
 
                 var resp = await _service.ReadAttractionAddressesAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);
@@ -46,7 +46,7 @@ namespace AppWebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(Read)}: {ex.Message}");
+                _logger.LogError($"{nameof(ReadEverything)}: {ex.Message}");
                 return BadRequest(ex.Message);
             }
         }

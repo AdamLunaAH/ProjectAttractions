@@ -18,27 +18,29 @@ namespace AppWebApi.Controllers
         readonly ILogger<ReviewsController> _logger = null;
 
         [HttpGet()]
-        [ActionName("Read")]
+        [ActionName("ReadEverything")]
         [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttractions>))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> Read(string seeded = "both", string flat = "true",
+        public async Task<IActionResult> ReadEverything(string seeded = "both", string flat = "true",
             string filter = null, string pageNr = "0", string pageSize = "10")
         {
             try
             {
-                bool? seededArg = seeded.ToLower() switch
+
+                bool? seededArg = seeded.ToLower().Trim() switch
                 {
                     "true" => true,
                     "false" => false,
                     "both" => null,
                     "null" => null,
+
                     _ => throw new ArgumentException("Invalid seeded value")
                 };
                 bool flatArg = bool.Parse(flat);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
 
-                _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
+                _logger.LogInformation($"{nameof(ReadEverything)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
                     $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
 
                 var resp = await _service.ReadReviewsAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);
@@ -46,7 +48,7 @@ namespace AppWebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(Read)}: {ex.Message}");
+                _logger.LogError($"{nameof(ReadEverything)}: {ex.Message}");
                 return BadRequest(ex.Message);
             }
         }
@@ -219,10 +221,10 @@ namespace AppWebApi.Controllers
         {
             try
             {
-                _logger.LogInformation($"{nameof(CreateItem)}:");
 
                 var model = await _service.CreateReviewAsync(item);
-                _logger.LogInformation($"item {model.Item.ReviewId} created");
+                _logger.LogInformation($"{nameof(CreateItem)}:");
+
 
                 return Ok(model);
             }
