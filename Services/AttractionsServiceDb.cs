@@ -21,6 +21,8 @@ public class AttractionsServiceDb : IAttractionsService
     }
 
     public Task<ResponsePageDto<IAttractions>> ReadAttractionsAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadAttractionsAsync(seeded, flat, filter, pageNumber, pageSize);
+    public Task<ResponsePageDto<IAttractions>> ReadSearchByAttractionAddressCategoryAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadSearchByAttractionAddressCategoryAsync(seeded, flat, filter, pageNumber, pageSize);
+
 
     public Task<ResponsePageDto<IAttractions>> ReadAttractionsNoAddressAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize, bool noAddress) => _repo.ReadAttractionsNoAddressAsync(seeded, flat, filter, pageNumber, pageSize, noAddress);
 
@@ -29,7 +31,7 @@ public class AttractionsServiceDb : IAttractionsService
     public Task<ResponseItemDto<IAttractions>> ReadAttractionAsync(Guid id, bool flat) => _repo.ReadAttractionAsync(id, flat);
 
     public Task<ResponseItemDto<IAttractions>> DeleteAttractionAsync(Guid id) => _repo.DeleteAttractionAsync(id);
-    public Task<ResponseItemDto<IAttractions>> UpdateAttractionAsync(AttractionsCuDto item) => _repo.UpdateAttractionAsync(item);
+    public Task<ResponseItemDto<IAttractions>> UpdateAttractionAsync(AttractionUpdateDto item) => _repo.UpdateAttractionAsync(item);
     public Task<ResponseItemDto<IAttractions>> CreateAttractionAsync(AttractionCreateDto item) => _repo.CreateAttractionAsync(item);
     public async Task<ResponseItemDto<IAttractions>> CreateFullAttractionAsync(AttractionFullCreateDto dto)
     {

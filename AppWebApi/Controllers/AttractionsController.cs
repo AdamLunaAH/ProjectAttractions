@@ -52,6 +52,40 @@ namespace AppWebApi.Controllers
         }
 
         [HttpGet()]
+        [ActionName("SearchByAttractionAddressCategory")]
+        [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttractions>))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> SearchByAttractionAddressCategory(string seeded = "both", string flat = "true",
+            string filter = null, string pageNr = "0", string pageSize = "10")
+        {
+            try
+            {
+                bool? seededArg = seeded.ToLower().Trim() switch
+                {
+                    "true" => true,
+                    "false" => false,
+                    "both" => null,
+                    "null" => null,
+                    _ => throw new ArgumentException("Invalid seeded value")
+                };
+                bool flatArg = bool.Parse(flat);
+                int pageNrArg = int.Parse(pageNr);
+                int pageSizeArg = int.Parse(pageSize);
+
+                _logger.LogInformation($"{nameof(SearchByAttractionAddressCategory)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
+                    $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
+
+                var resp = await _service.ReadSearchByAttractionAddressCategoryAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);
+                return Ok(resp);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(SearchByAttractionAddressCategory)}: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet()]
         [ActionName("Attraction with no address")]
         [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttractions>))]
         [ProducesResponseType(400, Type = typeof(string))]
@@ -90,7 +124,7 @@ namespace AppWebApi.Controllers
         [ActionName("Attraction with no reviews")]
         [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttractions>))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> AttractionNoReviews(string seeded = "both", string flat = "true",
+        public async Task<IActionResult> AttractionNoReviews(string seeded = "both", string flat = "false",
     string filter = null, string pageNr = "0", string pageSize = "10", string noReview = "true")
         {
             try
@@ -242,7 +276,7 @@ namespace AppWebApi.Controllers
         [ActionName("UpdateItem")]
         [ProducesResponseType(200, Type = typeof(IAttractions))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> UpdateItem(string id, [FromBody] AttractionsCuDto item)
+        public async Task<IActionResult> UpdateItem(string id, [FromBody] AttractionUpdateDto item)
         {
             try
             {
@@ -262,7 +296,7 @@ namespace AppWebApi.Controllers
                 // if (item.AttractionId != idArg) throw new ArgumentException("Id mismatch");
                 if (item.AttractionId != idArg)
                 {
-                    return BadRequest(new ResponseItemDto<AttractionsCuDto>
+                    return BadRequest(new ResponseItemDto<AttractionUpdateDto>
                     {
                         ErrorMessage = $"Input id {idArg} does not match item id {item.AttractionId}"
                     }

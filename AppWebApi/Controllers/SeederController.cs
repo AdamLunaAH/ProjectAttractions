@@ -24,7 +24,7 @@ namespace AppWebApi.Controllers
 
 
         //GET: api/seeder/seed?count={count}
-        [HttpGet()]
+        [HttpPost()]
         [ActionName("SeedAll")]
         [ProducesResponseType(200, Type = typeof(ResponseItemDto<SupUsrInfoAllDto>))]
         [ProducesResponseType(400, Type = typeof(string))]
@@ -58,6 +58,44 @@ namespace AppWebApi.Controllers
                 return Ok(await cl.MessagesAsync);
             }
             return Ok("No messages in log");
+        }
+
+        [HttpDelete()]
+        [ActionName("RemoveSeededData")]
+        [ProducesResponseType(200, Type = typeof(ResponseItemDto<SupUsrInfoAllDto>))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> RemoveSeededData()
+        {
+            try
+            {
+                _logger.LogInformation($"{nameof(RemoveSeededData)}");
+                var result = await _service.RemoveSeededDataAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(RemoveSeededData)}: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete()]
+        [ActionName("RemoveAllData")]
+        [ProducesResponseType(200, Type = typeof(ResponseItemDto<SupUsrInfoAllDto>))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> RemoveAllData()
+        {
+            try
+            {
+                _logger.LogInformation($"{nameof(RemoveAllData)}");
+                var result = await _service.RemoveAllDataAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(RemoveAllData)}: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
         }
 
 

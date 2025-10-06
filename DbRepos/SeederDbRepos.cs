@@ -292,6 +292,46 @@ public class SeederDbRepos
         }
 
     }
+    public async Task<ResponseItemDto<string>> RemoveSeededDataAsync()
+    {
+        try
+        {
+            int affected = await _dbContext.Database.ExecuteSqlRawAsync("EXEC supusr.sp_ClearSeededDatabase");
+
+            return new ResponseItemDto<string>
+            {
+                Item = $"Removed seeded data, affected rows: {affected}"
+            };
+        }
+        catch (Exception ex)
+        {
+
+            return new ResponseItemDto<string>
+            {
+                ErrorMessage = $"Could not remove seeded data due to an unexpected error: {ex.Message}"
+            };
+        }
+    }
+    public async Task<ResponseItemDto<string>> RemoveAllDataAsync()
+    {
+        try
+        {
+            int affected = await _dbContext.Database.ExecuteSqlRawAsync("EXEC supusr.sp_ClearDatabase");
+
+            return new ResponseItemDto<string>
+            {
+                Item = $"Removed all data, affected rows: {affected}"
+            };
+        }
+        catch (Exception ex)
+        {
+
+            return new ResponseItemDto<string>
+            {
+                ErrorMessage = $"Could not remove all data due to an unexpected error: {ex.Message}"
+            };
+        }
+    }
 
 
 }

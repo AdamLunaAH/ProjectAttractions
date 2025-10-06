@@ -11,6 +11,8 @@ public class SeederServiceDb : ISeederService
     private readonly ILogger<SeederServiceDb> _logger = null;
 
     public Task<ResponseItemDto<SupUsrInfoAllDto>> SeedAllAsync() => _repo.SeedAllAsync();
+    public Task<ResponseItemDto<string>> RemoveSeededDataAsync() => _repo.RemoveSeededDataAsync();
+    public Task<ResponseItemDto<string>> RemoveAllDataAsync() => _repo.RemoveAllDataAsync();
 
     #region constructors
     public SeederServiceDb(SeederDbRepos repo)

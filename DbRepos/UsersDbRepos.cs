@@ -87,8 +87,8 @@ public class UsersDbRepos
             else
             {
                 query = _dbContext.Users.AsNoTracking()
-                    .Include(i => i.ReviewsDbM)
-                    .ThenInclude(r => r.AttractionsDbM);
+                    .Include(i => i.ReviewsDbM);
+                    // .ThenInclude(r => r.AttractionsDbM);
             }
 
             var ret = new ResponsePageDto<IUsers>()

@@ -90,7 +90,7 @@ public class AttractionCreateDto
 
 }
 
-public class AttractionsCuDto
+public class AttractionUpdateDto
 {
     public virtual Guid AttractionId { get; set; }
 
@@ -103,20 +103,35 @@ public class AttractionsCuDto
 
     public virtual List<Guid> ReviewId { get; set; } = null;
 
-    public AttractionsCuDto() { }
-    public AttractionsCuDto(IAttractions org)
-    {
-        if (org == null)
-            return;
-        AttractionId = org.AttractionId;
-        AttractionName = org.AttractionName;
-        AttractionDescription = org.AttractionDescription;
-        AddressId = org?.AttractionAddresses?.AddressId;
-        ReviewId = org.Reviews?.Select(i => i.ReviewId).ToList();
-        CategoryId = org.Categories?.Select(i => i.CategoryId).ToList();
-
-    }
 }
+
+    public class AttractionsCuDto
+    {
+        public virtual Guid AttractionId { get; set; }
+
+        public virtual string AttractionName { get; set; }
+
+        public virtual string AttractionDescription { get; set; }
+        public virtual Guid? AddressId { get; set; }
+
+        public virtual List<Guid> CategoryId { get; set; } = null;
+
+        public virtual List<Guid> ReviewId { get; set; } = null;
+
+        public AttractionsCuDto() { }
+        public AttractionsCuDto(IAttractions org)
+        {
+            if (org == null)
+                return;
+            AttractionId = org.AttractionId;
+            AttractionName = org.AttractionName;
+            AttractionDescription = org.AttractionDescription;
+            AddressId = org?.AttractionAddresses?.AddressId;
+            ReviewId = org.Reviews?.Select(i => i.ReviewId).ToList();
+            CategoryId = org.Categories?.Select(i => i.CategoryId).ToList();
+
+        }
+    }
 
 public class CategoryCreateDto
 {

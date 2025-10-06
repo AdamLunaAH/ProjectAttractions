@@ -48,14 +48,91 @@ public class AttractionsDbRepos
             //Adding filter functionality
             .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
-                            i.AttractionDescription.ToLower().Contains(filter))).CountAsync(),
+                            i.AttractionDescription.ToLower().Contains(filter)
+                            ||
+                            i.AttractionAddressesDbM.StreetAddress.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.CityPlace.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.Country.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.ZipCode.ToLower().Contains(filter) ||
+                            i.CategoriesDbM.Any(c => c.CategoryName.ToLower().Contains(filter)) ||
+                            i.ReviewsDbM.Any(r => r.ReviewText.ToLower().Contains(filter)) ||
+                            i.ReviewsDbM.Any(r => r.ReviewScore.ToString().ToLower().Contains(filter))
+                            )).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
             .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
-                            i.AttractionDescription.ToLower().Contains(filter)))
+                            i.AttractionDescription.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.StreetAddress.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.CityPlace.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.Country.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.ZipCode.ToLower().Contains(filter) ||
+                            i.CategoriesDbM.Any(c => c.CategoryName.ToLower().Contains(filter)) ||
+                            i.ReviewsDbM.Any(r => r.ReviewText.ToLower().Contains(filter)) ||
+                            i.ReviewsDbM.Any(r => r.ReviewScore.ToString().ToLower().Contains(filter))
+                        ))
+
+            //Adding paging
+            .Skip(pageNumber * pageSize)
+            .Take(pageSize)
+
+            .ToListAsync<IAttractions>(),
+
+            PageNr = pageNumber,
+            PageSize = pageSize
+        };
+        return ret;
+    }
+
+    public async Task<ResponsePageDto<IAttractions>> ReadSearchByAttractionAddressCategoryAsync(bool? seeded, bool flat, string filter, int pageNumber, int pageSize)
+    {
+        filter ??= "";
+        IQueryable<AttractionsDbM> query;
+        if (flat)
+        {
+            query = _dbContext.Attractions.AsNoTracking();
+        }
+        else
+        {
+            query = _dbContext.Attractions.AsNoTracking()
+                .Include(i => i.AttractionAddressesDbM)
+                .Include(i => i.CategoriesDbM);
+            // .Include(i => i.ReviewsDbM);
+        }
+
+        var ret = new ResponsePageDto<IAttractions>()
+        {
+#if DEBUG
+            ConnectionString = _dbContext.dbConnection,
+#endif
+            DbItemsCount = await query
+
+            //Adding filter functionality
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
+                        (i.AttractionName.ToLower().Contains(filter) ||
+                            i.AttractionDescription.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.StreetAddress.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.CityPlace.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.Country.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.ZipCode.ToLower().Contains(filter) ||
+                            i.CategoriesDbM.Any(c => c.CategoryName.ToLower().Contains(filter))
+            )).CountAsync(),
+
+
+            PageItems = await query
+
+            //Adding filter functionality
+            .Where(i => (seeded == null || i.Seeded == seeded) &&
+                        (i.AttractionName.ToLower().Contains(filter) ||
+                            i.AttractionDescription.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.StreetAddress.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.CityPlace.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.Country.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.ZipCode.ToLower().Contains(filter) ||
+                            i.CategoriesDbM.Any(c => c.CategoryName.ToLower().Contains(filter))
+                            ))
 
             //Adding paging
             .Skip(pageNumber * pageSize)
@@ -81,14 +158,19 @@ public class AttractionsDbRepos
         {
             query = _dbContext.Attractions.AsNoTracking()
                 .Include(i => i.AttractionAddressesDbM)
-                .Include(i => i.CategoriesDbM)
-                .Include(i => i.ReviewsDbM);
+                .Include(i => i.CategoriesDbM);
+            // .Include(i => i.ReviewsDbM);
         }
 
         var addressQuery = query
         .Where(i => (!seeded.HasValue || i.Seeded == seeded.Value) &&
                     (i.AttractionName.ToLower().Contains(filter) ||
-                    i.AttractionDescription.ToLower().Contains(filter)));
+                    i.AttractionDescription.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.StreetAddress.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.CityPlace.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.Country.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.ZipCode.ToLower().Contains(filter) ||
+                            i.CategoriesDbM.Any(c => c.CategoryName.ToLower().Contains(filter))));
 
         if (noAddress)
         {
@@ -106,14 +188,28 @@ public class AttractionsDbRepos
             //Adding filter functionality
             .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
-                            i.AttractionDescription.ToLower().Contains(filter))).CountAsync(),
+                            i.AttractionDescription.ToLower().Contains(filter)
+                            ||
+                            i.AttractionAddressesDbM.StreetAddress.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.CityPlace.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.Country.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.ZipCode.ToLower().Contains(filter) ||
+                            i.CategoriesDbM.Any(c => c.CategoryName.ToLower().Contains(filter))
+                            )).CountAsync(),
 
             PageItems = await addressQuery
 
             //Adding filter functionality
             .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
-                            i.AttractionDescription.ToLower().Contains(filter)))
+                            i.AttractionDescription.ToLower().Contains(filter)
+                            ||
+                            i.AttractionAddressesDbM.StreetAddress.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.CityPlace.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.Country.ToLower().Contains(filter) ||
+                            i.AttractionAddressesDbM.ZipCode.ToLower().Contains(filter) ||
+                            i.CategoriesDbM.Any(c => c.CategoryName.ToLower().Contains(filter))
+                            ))
 
             //Adding paging
             .Skip(pageNumber * pageSize)
@@ -139,15 +235,14 @@ public class AttractionsDbRepos
         else
         {
             query = _dbContext.Attractions.AsNoTracking()
-                .Include(i => i.AttractionAddressesDbM)
-                .Include(i => i.CategoriesDbM)
                 .Include(i => i.ReviewsDbM);
         }
 
         var reviewQuery = query
         .Where(i => (!seeded.HasValue || i.Seeded == seeded.Value) &&
                     (i.AttractionName.ToLower().Contains(filter) ||
-                    i.AttractionDescription.ToLower().Contains(filter)));
+                    i.AttractionDescription.ToLower().Contains(filter)
+                    ));
 
         if (noReview)
         {
@@ -164,14 +259,16 @@ public class AttractionsDbRepos
             //Adding filter functionality
             .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
-                            i.AttractionDescription.ToLower().Contains(filter))).CountAsync(),
+                            i.AttractionDescription.ToLower().Contains(filter)
+                            )).CountAsync(),
 
             PageItems = await reviewQuery
 
             //Adding filter functionality
             .Where(i => (seeded == null || i.Seeded == seeded) &&
                         (i.AttractionName.ToLower().Contains(filter) ||
-                            i.AttractionDescription.ToLower().Contains(filter)))
+                            i.AttractionDescription.ToLower().Contains(filter)
+                            ))
 
             //Adding paging
             .Skip(pageNumber * pageSize)
@@ -186,14 +283,14 @@ public class AttractionsDbRepos
     }
 
     public async Task<ResponseItemDto<IAttractions>> ReadAttractionAsync(Guid id, bool flat)
-{
-    if (!flat)
     {
-        var query = _dbContext.Attractions.AsNoTracking()
-            .Include(i => i.AttractionAddressesDbM)
-            .Include(i => i.ReviewsDbM)
-            .Include(i => i.CategoriesDbM)
-            .Where(i => i.AttractionId == id);
+        if (!flat)
+        {
+            var query = _dbContext.Attractions.AsNoTracking()
+                .Include(i => i.AttractionAddressesDbM)
+                .Include(i => i.ReviewsDbM)
+                .Include(i => i.CategoriesDbM)
+                .Where(i => i.AttractionId == id);
 
             var item = await query.FirstOrDefaultAsync<AttractionsDbM>();
             if (item == null)
@@ -212,21 +309,21 @@ public class AttractionsDbRepos
 #endif
                 Item = await query.FirstOrDefaultAsync<IAttractions>()
             };
-    }
-    else
-    {
-        var query = _dbContext.Attractions.AsNoTracking()
-            .Where(i => i.AttractionId == id);
-
-        return new ResponseItemDto<IAttractions>()
+        }
+        else
         {
+            var query = _dbContext.Attractions.AsNoTracking()
+                .Where(i => i.AttractionId == id);
+
+            return new ResponseItemDto<IAttractions>()
+            {
 #if DEBUG
-            ConnectionString = _dbContext.dbConnection,
+                ConnectionString = _dbContext.dbConnection,
 #endif
-            Item = await query.FirstOrDefaultAsync<IAttractions>()
-        };
+                Item = await query.FirstOrDefaultAsync<IAttractions>()
+            };
+        }
     }
-}
 
 
 
@@ -262,7 +359,7 @@ public class AttractionsDbRepos
         };
     }
 
-    public async Task<ResponseItemDto<IAttractions>> UpdateAttractionAsync(AttractionsCuDto itemDto)
+    public async Task<ResponseItemDto<IAttractions>> UpdateAttractionAsync(AttractionUpdateDto itemDto)
     {
         try
         {
@@ -289,8 +386,15 @@ public class AttractionsDbRepos
             }
 
             // Transfer changes
-            item.UpdateFromDTO(itemDto);
-            await navProp_AttractionsCUdto_to_AttractionsDbM(itemDto, item);
+            item.UpdateFromDTO(new AttractionsCuDto
+            {
+                AttractionId = itemDto.AttractionId,
+                AttractionName = itemDto.AttractionName,
+                AttractionDescription = itemDto.AttractionDescription,
+                AddressId = itemDto.AddressId,
+                CategoryId = itemDto.CategoryId,
+            });
+            await navProp_AttractionUpdateDto_to_AttractionsDbM(itemDto, item);
 
             _dbContext.Attractions.Update(item);
             await _dbContext.SaveChangesAsync();
@@ -467,6 +571,57 @@ public class AttractionsDbRepos
 
 
 
+    private async Task navProp_AttractionUpdateDto_to_AttractionsDbM(AttractionUpdateDto itemDtoSrc, AttractionsDbM itemDst)
+    {
+        List<ReviewsDbM> reviews = null;
+        // if (itemDtoSrc.ReviewId != null)
+        // {
+        //     reviews = new List<ReviewsDbM>();
+        //     foreach (var id in itemDtoSrc.ReviewId)
+        //     {
+        //         var f = await _dbContext.Reviews.FirstOrDefaultAsync(i => i.ReviewId == id);
+        //         if (f == null)
+        //             throw new ArgumentException($"Item id {id} not existing");
+
+        //         reviews.Add(f);
+        //     }
+        // }
+        itemDst.ReviewsDbM = reviews;
+
+
+        List<CategoriesDbM> categories = null;
+        if (itemDtoSrc.CategoryId != null)
+        {
+            categories = new List<CategoriesDbM>();
+            foreach (var id in itemDtoSrc.CategoryId)
+            {
+                var f = await _dbContext.Categories.FirstOrDefaultAsync(i => i.CategoryId == id);
+                if (f == null)
+                    throw new ArgumentException($"Item id {id} not existing");
+
+                categories.Add(f);
+            }
+        }
+        itemDst.CategoriesDbM = categories;
+
+
+        if (itemDtoSrc.AddressId.HasValue)
+        {
+            var attractionAddresses = await _dbContext.AttractionAddresses
+                .FirstOrDefaultAsync(a => a.AddressId == itemDtoSrc.AddressId.Value);
+
+            if (attractionAddresses == null)
+                throw new ArgumentException(
+                    $"Attraction id {itemDtoSrc.AddressId} does not exist");
+
+            itemDst.AttractionAddressesDbM = attractionAddresses;
+        }
+        else
+        {
+            itemDst.AttractionAddressesDbM = null;
+        }
+
+    }
 
     private async Task navProp_AttractionsCUdto_to_AttractionsDbM(AttractionCreateDto itemDtoSrc, AttractionsDbM itemDst)
     {
