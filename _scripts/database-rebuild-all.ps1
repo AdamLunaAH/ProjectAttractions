@@ -53,5 +53,5 @@ dotnet ef migrations add miInitial -c $DBContext -p ../DbContext -s ../DbContext
 dotnet ef database update -c $DBContext -p ../DbContext -s ../DbContext
 
 #to initialize the database you need to run the sql scripts
-#../DbContext/SqlScripts/<db_type>/initDatabase.sql
+../DbContext/SqlScripts/<db_type>/initDatabase.sql
 
