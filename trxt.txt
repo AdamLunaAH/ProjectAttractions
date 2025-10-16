@@ -1,0 +1,119 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+
+namespace Configuration;
+
+// Implements a custom in-memory logger following the Microsoft Logger pattern
+[ProviderAlias("InMemory")]
+public sealed class InMemoryLoggerProvider : ILoggerProvider
+{
+    private readonly object _locker = new object();
+    private readonly List<LogMessage> _messages = new List<LogMessage>();
+
+    public Task<List<LogMessage>> MessagesAsync => Task.Run(() =>
+    {
+        lock (_locker)
+        {
+            var list = (_messages != null)
+                ? _messages.Select(i => new LogMessage(i)).ToList()
+                : null;
+            return list;
+        }
+    });
+
+    public List<LogMessage> Messages => _messages.ToList();
+
+    void IDisposable.Dispose() { }
+
+    public ILogger CreateLogger(string categoryName) => new InMemoryLogger(this, categoryName);
+
+    private void Log<TState>(string categoryName, LogLevel logLevel, EventId eventId,
+        TState state, Exception exception, Func<TState, Exception, string> formatter)
+    {
+        var message = new LogMessage
+        {
+            Type = logLevel,
+            Timestamp = DateTimeOffset.UtcNow,
+            Message = formatter(state, exception) + (exception == null ? "" : "\r\n" + exception),
+            Category = categoryName,
+            EventId = eventId.Id,
+        };
+
+        lock (_locker)
+            _messages.Add(message);
+    }
+
+    private sealed class InMemoryLogger : ILogger
+    {
+        private readonly InMemoryLoggerProvider _provider;
+        private readonly string _categoryName;
+
+        public InMemoryLogger(InMemoryLoggerProvider provider, string categoryName)
+        {
+            _provider = provider;
+            _categoryName = categoryName;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId,
+            TState state, Exception exception, Func<TState, Exception, string> formatter)
+            => _provider.Log(_categoryName, logLevel, eventId, state, exception, formatter);
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public IDisposable BeginScope<TState>(TState state) => null;
+    }
+}
+
+
+/// <summary>
+/// The message structure to log, follows Microsoft guidelines
+/// </summary>
+public sealed class LogMessage
+{
+    public LogLevel Type { get; set; }
+
+    // Convert to Unix time stamp when JSON serialized
+    [JsonConverter(typeof(TimestampJsonConverter))]
+    public DateTimeOffset Timestamp { get; set; }
+
+    public string Message { get; set; }
+
+    public string Category { get; set; }
+
+    public int EventId { get; set; }
+
+    public override string ToString() => $"{Category}: {Message}";
+
+    #region constructors
+    public LogMessage() { }
+
+    public LogMessage(LogMessage org)
+    {
+        Type = org.Type;
+        Timestamp = org.Timestamp;
+        Message = org.Message;
+        Category = org.Category;
+        EventId = org.EventId;
+    }
+    #endregion
+}
+
+
+/// <summary>
+/// Converts DateTimeOffset to a Unix timestamp (milliseconds)
+/// </summary>
+public sealed class TimestampJsonConverter : JsonConverter<DateTimeOffset>
+{
+    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        long milliseconds = reader.GetInt64();
+        return DateTimeOffset.UnixEpoch.AddMilliseconds(milliseconds);
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
+    {
+        var delta = value - DateTimeOffset.UnixEpoch;
+        writer.WriteNumberValue((long)delta.TotalMilliseconds);
+    }
+}
